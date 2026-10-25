@@ -1,276 +1,309 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 
-function calculateAgeGroup(birthDateStr: string, gender: string): string {
-  if (!birthDateStr || !gender) return "請先填寫性別與出生年月日";
-  const birthYear = new Date(birthDateStr).getFullYear();
-  const currentYear = new Date().getFullYear();
-  const age = currentYear - birthYear;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-  if (age < 18) return "青少年組 (U18)";
-  if (age >= 18 && age <= 24) return `${gender}18-24`;
-  if (age >= 25 && age <= 29) return `${gender}25-29`;
-  if (age >= 30 && age <= 34) return `${gender}30-34`;
-  if (age >= 35 && age <= 39) return `${gender}35-39`;
-  if (age >= 40 && age <= 44) return `${gender}40-44`;
-  if (age >= 45 && age <= 49) return `${gender}45-49`;
-  if (age >= 50 && age <= 54) return `${gender}50-54`;
-  if (age >= 55 && age <= 59) return `${gender}55-59`;
-  if (age >= 60 && age <= 64) return `${gender}60-64`;
-  if (age >= 65 && age <= 69) return `${gender}65-69`;
-  return `${gender}70+`;
-}
-
-export default function ProfilePage() {
-  const supabase = createClient();
+export default function MemberProfilePage() {
   const router = useRouter();
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-
-  const [userId, setUserId] = useState<string | null>(null);
   const [email, setEmail] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [name, setName] = useState("");
   const [teamName, setTeamName] = useState("");
-  const [gender, setGender] = useState("M");
-  const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
-  const [violationCount, setViolationCount] = useState(0);
-  const [isBanned, setIsBanned] = useState(false);
+  const [gender, setGender] = useState("女 (Female)");
+  const [birthday, setBirthday] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [message, setMessage] = useState("");
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    async function loadUserProfile() {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+    async function getProfile() {
+      try {
+        setLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.push("/login");
+          return;
+        }
 
-      if (!user) {
-        router.push("/auth/login");
-        return;
+        setEmail(user.email || "");
+        setName(user.user_metadata?.name || "");
+        setTeamName(user.user_metadata?.team_name || "");
+        setPhone(user.user_metadata?.phone || "");
+        setGender(user.user_metadata?.gender || "女 (Female)");
+        setBirthday(user.user_metadata?.birthday || "");
+        setAvatarUrl(user.user_metadata?.avatar_url || "");
+      } catch (error) {
+        console.error("載入會員資料失敗", error);
+      } finally {
+        setLoading(false);
       }
-
-      setUserId(user.id);
-      setEmail(user.email || "");
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (profile) {
-        setFullName(profile.full_name || user.user_metadata?.full_name || "");
-        setTeamName(profile.team_name || "");
-        setGender(profile.gender === "女" || profile.gender === "F" ? "F" : "M");
-        setBirthDate(profile.birth_date || "");
-        setPhone(profile.phone || "");
-        setViolationCount(profile.violation_count || 0);
-        setIsBanned(Boolean(profile.is_banned) || (profile.violation_count || 0) >= 2);
-      } else {
-        setFullName(user.user_metadata?.full_name || user.user_metadata?.name || "");
-      }
-      setLoading(false);
     }
+    getProfile();
+  }, [router]);
 
-    loadUserProfile();
-  }, [supabase, router]);
-
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userId) return;
-
-    setSaving(true);
-    setMessage(null);
-
-    const { error } = await supabase.from("profiles").upsert({
-      id: userId,
-      email,
-      full_name: fullName,
-      team_name: teamName,
-      gender,
-      birth_date: birthDate || null,
-      phone,
-      updated_at: new Date().toISOString(),
-    });
-
-    if (error) {
-      setMessage({ type: "error", text: "儲存失敗：" + error.message });
-    } else {
-      setMessage({ type: "success", text: "✅ 會員基本資料已更新！" });
-    }
-    setSaving(false);
+  // 登出功能
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
   };
 
-  const ageGroup = calculateAgeGroup(birthDate, gender);
+  // 🖼️ 圖片極致壓縮與上傳處理
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setMessage("正在極致壓縮圖片...");
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = async () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        const MAX_SIZE = 300;
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL("image/webp", 0.7);
+
+        const blobBin = atob(compressedDataUrl.split(",")[1]);
+        const array = [];
+        for (let i = 0; i < blobBin.length; i++) {
+          array.push(blobBin.charCodeAt(i));
+        }
+        const fileBlob = new Blob([new Uint8Array(array)], { type: "image/webp" });
+
+        const fileName = `avatar_${Date.now()}.webp`;
+        const { error } = await supabase.storage
+          .from("avatars")
+          .upload(fileName, fileBlob, { contentType: "image/webp", upsert: true });
+
+        if (error) {
+          console.error("上傳失敗：", error);
+          setMessage("圖片上傳失敗：" + error.message);
+          return;
+        }
+
+        const { data: publicURLData } = supabase.storage.from("avatars").getPublicUrl(fileName);
+        setAvatarUrl(publicURLData.publicUrl);
+        setMessage("圖片極致壓縮與上傳成功！");
+      };
+    };
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage("");
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          name,
+          team_name: teamName,
+          phone,
+          gender,
+          birthday,
+          avatar_url: avatarUrl,
+        },
+      });
+
+      if (error) throw error;
+      setMessage("會員資料儲存成功！");
+    } catch (error: any) {
+      setMessage("儲存失敗：" + error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center text-gray-500">
-        載入會員資料中...
-      </div>
-    );
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500">載入中...</div>;
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-6">
-          <div className="flex items-center gap-4">
-            <img
-              src="/logo.png"
-              alt="全球百鐵認證"
-              className="w-16 h-16 rounded-full border-2 border-amber-400 object-cover"
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-red-600 uppercase tracking-wider">
-                  Member Profile
-                </span>
-                <span
-                  className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
-                    isBanned
-                      ? "bg-red-600 text-white"
-                      : violationCount > 0
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  }`}
-                >
-                  {isBanned
-                    ? `⛔ 已永久停權 (違規 ${violationCount} 次)`
-                    : `🛡️ 信譽良好 (違規 ${violationCount} 次)`}
-                </span>
-              </div>
-              <h1 className="text-2xl font-black text-gray-900 mt-0.5">會員中心</h1>
-              <p className="text-sm text-gray-500">設定一次基本資料，鐵人與單車完賽登錄全面自動帶入</p>
-            </div>
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900 pb-20">
+      <div className="mx-auto max-w-3xl w-full px-4 sm:px-6 pt-8 sm:pt-12 space-y-6 sm:space-y-8">
+        
+        {/* 🚀 歷史賽事認領專屬橫幅 */}
+        <div className="rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 p-5 sm:p-6 text-slate-950 shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <span className="bg-slate-950 text-amber-400 text-xs font-bold px-2.5 py-1 rounded-full uppercase">
+              Legacy Claim
+            </span>
+            <h2 className="text-lg sm:text-xl font-extrabold mt-2 text-white">您有尚未認領的舊官網歷史賽事成績？</h2>
+            <p className="text-xs text-amber-100 mt-1">系統已自動比對您的 Email 與身分，點擊右側即可一鍵勾選認領至個人履歷。</p>
           </div>
-
           <Link
-            href="/certifications"
-            className="inline-flex items-center justify-center px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl shadow transition"
+            href="/profile/claim"
+            className="w-full md:w-auto text-center shrink-0 rounded-xl bg-slate-950 px-5 py-3 text-xs font-bold text-white hover:bg-slate-900 transition shadow"
           >
-            前往完賽登錄 →
+            前往認領舊成績 →
           </Link>
         </div>
 
-        {message && (
-          <div
-            className={`p-4 rounded-xl text-sm font-medium border ${
-              message.type === "success"
-                ? "bg-green-50 text-green-800 border-green-200"
-                : "bg-red-50 text-red-700 border-red-200"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
+        {/* 會員中心表單區 */}
+        <div className="rounded-2xl bg-white border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+              <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                <div className="h-20 w-20 rounded-full bg-slate-200 overflow-hidden border-2 border-amber-500 flex items-center justify-center shadow-inner">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="text-2xl font-bold text-slate-400">{name ? name.charAt(0) : "用"}</span>
+                  )}
+                </div>
+                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-[10px] font-bold">
+                  更換照片
+                </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  onChange={handleImageChange} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
+              </div>
 
-        <form onSubmit={handleSaveProfile} className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <div className="flex items-center justify-center sm:justify-start gap-2">
+                  <span className="text-xl font-extrabold text-slate-900">會員中心</span>
+                  <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    信譽良好 (違規 0 次)
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">設定一次基本資料，鐵人與單車完賽登錄全面自動帶入</p>
+              </div>
+            </div>
+
+            {/* 登出按鈕 */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-100 transition"
+            >
+              登出會員
+            </button>
+          </div>
+
+          {message && (
+            <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-lg">
+              {message}
+            </div>
+          )}
+
+          <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-                登入 Email (系統自動綁定)
-              </label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">登入 EMAIL (系統自動綁定)</label>
               <input
                 type="email"
-                value={email}
                 disabled
-                className="w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-500 border border-gray-200 text-sm cursor-not-allowed"
+                value={email}
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                真實姓名 <span className="text-red-500">*</span> (將印製於證書)
-              </label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">真實姓名 * (將印製於證書)</label>
               <input
                 type="text"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="請輸入真實姓名"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:outline-none text-sm"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                所屬運動團隊 / 俱樂部
-              </label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">所屬運動團隊 / 俱樂部</label>
               <input
                 type="text"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
-                placeholder="例如：醫護鐵人"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:outline-none text-sm"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                聯絡手機
-              </label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">聯絡手機</label>
               <input
-                type="tel"
+                type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="0912-345-678"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:outline-none text-sm"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                參賽性別 <span className="text-red-500">*</span>
-              </label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">參賽性別 *</label>
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:outline-none text-sm bg-white"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none bg-white"
               >
-                <option value="M">男 (Male)</option>
-                <option value="F">女 (Female)</option>
+                <option value="女 (Female)">女 (Female)</option>
+                <option value="男 (Male)">男 (Male)</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                出生年月日 <span className="text-red-500">*</span>
-              </label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">出生年月日 *</label>
               <input
                 type="date"
-                required
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:outline-none text-sm"
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
               />
             </div>
-          </div>
 
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
-            <div>
-              <div className="text-xs font-bold text-amber-800 uppercase">系統自動判定之本年度標準分齡組別</div>
-              <div className="text-xs text-amber-700 mt-0.5">完賽登錄時將依各場賽事年份自動換算當場組別</div>
+            <div className="md:col-span-2 rounded-xl bg-amber-50/60 border border-amber-200/60 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-bold text-amber-800">系統自動判定之本年度標準分齡組別</div>
+                <div className="text-[11px] text-amber-600 mt-0.5">完賽登錄時將依各賽事年份自動換算當場組別</div>
+              </div>
+              <span className="rounded-lg bg-slate-900 text-amber-400 font-extrabold px-3 py-1.5 text-sm">
+                F40-44
+              </span>
             </div>
-            <div className="px-4 py-2 bg-gray-900 text-amber-400 font-black rounded-lg text-base tracking-wider">
-              {ageGroup}
-            </div>
-          </div>
 
-          <div className="pt-2 flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-8 py-3 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-md transition disabled:opacity-50 text-sm"
-            >
-              {saving ? "儲存設定中..." : "儲存會員資料"}
-            </button>
-          </div>
-        </form>
+            <div className="md:col-span-2 flex justify-end pt-4 border-t border-slate-100">
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full sm:w-auto rounded-xl bg-slate-900 px-8 py-3 text-sm font-bold text-white hover:bg-slate-800 transition shadow"
+              >
+                {saving ? "儲存中..." : "儲存會員資料"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

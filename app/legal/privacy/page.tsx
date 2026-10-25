@@ -1,53 +1,53 @@
-export default function PrivacyPolicyPage() {
+import React from "react";
+
+export default function LegalPage() {
   return (
-    <div className="max-w-4xl mx-auto my-12 p-6 md:p-10 bg-white rounded-xl shadow-sm border border-gray-200 text-gray-800 space-y-6 leading-relaxed text-sm md:text-base">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-900 border-b pb-4">
-        全球百鐵認證暨普悠瑪聯合服務平台｜個人資料蒐集、處理及利用告知聲明與隱私權政策
-      </h1>
+    <div className="min-h-screen bg-slate-950 text-slate-200 py-16 px-6">
+      <div className="mx-auto max-w-4xl space-y-10">
+        <div>
+          <h1 className="text-3xl font-extrabold text-white mb-2">
+            個人資料保護聲明與平台免責條款
+          </h1>
+          <p className="text-xs text-slate-400">最後更新日期：2026 年 10 月</p>
+        </div>
 
-      <p className="text-gray-600">
-        歡迎您使用「全球百鐵認證」暨「普悠瑪鐵人三項」聯合資訊平台（以下簡稱「本平台」）。本平台由<strong>全球醫鐵有限公司</strong>負責系統建置與資料庫維運。為遵循中華民國《個人資料保護法》之規定，保障您的權益，請於註冊會員或填寫個人賽務資料前，詳細閱讀以下告知事項：
-      </p>
-
-      <h2 className="text-xl font-bold text-gray-900 pt-2">一、 蒐集之目的</h2>
-      <p>本平台基於以下特定目的蒐集與利用您的個人資料：</p>
-      <ul className="list-disc pl-6 space-y-1">
-        <li><strong>○四○ 行銷</strong>（賽事與活動訊息推播）。</li>
-        <li><strong>○六九 契約、類似契約或其他法律關係事務</strong>（包含賽事報名預填、完賽百鐵認證核發、旅平險及公共意外責任險投保）。</li>
-        <li><strong>○九○ 消費者、客戶管理與服務</strong>（會員身分識別、歷屆賽事成績互通查詢、物資寄送與聯合商城購物服務）。</li>
-        <li><strong>一三五 資（通）訊服務與資料庫管理</strong>。</li>
-      </ul>
-
-      <h2 className="text-xl font-bold text-gray-900 pt-2">二、 蒐集之個人資料類別</h2>
-      <ul className="list-disc pl-6 space-y-1">
-        <li><strong>識別類</strong>：中英文姓名、E-mail、手機號碼、收件地址、身分證字號或護照號碼（僅供保險投保與實名認證）。</li>
-        <li><strong>特徵與描述類</strong>：出生年月日、法定生理性別（配合競賽分組與保險規範）、衣物尺寸、襪子尺寸。</li>
-        <li><strong>緊急聯絡人</strong>：姓名、關係及電話（賽事突發醫療事故聯繫用）。</li>
-        <li><strong>專業資格</strong>：醫事人員或 EMT 救護執照資訊（醫護鐵人志工審核用）。</li>
-      </ul>
-
-      <h2 className="text-xl font-bold text-gray-900 pt-2">三、 個人資料利用之期間、地區與對象（兩網合一授權說明）</h2>
-      <ol className="list-decimal pl-6 space-y-2">
-        <li><strong>期間</strong>：自您同意註冊之日起，至您申請刪除帳號或本平台停止營運之日止。</li>
-        <li><strong>地區</strong>：中華民國境內及本平台雲端主機所在地。</li>
-        <li>
-          <strong>利用對象與範圍</strong>：
-          <ul className="list-disc pl-6 mt-1 space-y-1 text-gray-700">
-            <li><strong>系統營運方</strong>：全球醫鐵有限公司（全球百鐵認證）。</li>
-            <li><strong>賽事主辦方</strong>：當您主動報名普悠瑪鐵人三項賽事時，您同意授權本平台將該場次必要之報名與投保資料轉交予該賽事主辦單位（<strong>台東城鄉生活運動協會</strong>）及承辦保險公司。</li>
+        <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-6 text-sm leading-relaxed text-slate-300">
+          <h2 className="text-lg font-bold text-amber-400">一、 個人資料蒐集、處理及利用告知事項</h2>
+          <p>
+            「全球百鐵認證平台」（以下簡稱本平台）為提供耐力運動完賽紀錄登錄、百鐵英雄榜統計及系列賽事榮譽認證服務，依據《個人資料保護法》第八條規定，向您告知下列事項：
+          </p>
+          <ul className="list-disc list-inside space-y-2 text-slate-400">
+            <li>
+              <strong>蒐集目的：</strong>運動賽事成績統計、英雄榜榮譽公開展示、會員身分識別、階段獎項審核及平台重要公告通知。
+            </li>
+            <li>
+              <strong>個人資料類別：</strong>姓名（或暱稱）、電子郵件信箱、出生年份、性別、個人上傳之代表頭像及運動完賽成績紀錄。
+            </li>
+            <li>
+              <strong>系列賽事資料勾稽說明：</strong>若您參加本平台結盟之「年度系列賽事」，合作主辦單位將於賽後提供完賽選手之姓名、成績與報名電子郵件予本平台建立「待認領紀錄」。本平台於您本人註冊登入並點擊「確認認領」前，絕不會對外公開未認領之電子郵件資訊。
+            </li>
+            <li>
+              <strong>當事人權利：</strong>您可隨時登入會員中心或聯繫官方客服，請求查詢、閱覽、補充、更正、停止處理利用或刪除您的個人資料與完賽紀錄。
+            </li>
           </ul>
-        </li>
-      </ol>
+        </section>
 
-      <h2 className="text-xl font-bold text-gray-900 pt-2">四、 當事人權利與帳號刪除機制</h2>
-      <p>
-        您可隨時至「會員中心」查詢、修改個資。若您欲申請完全刪除帳號與第三方登入綁定資料，可透過客服信箱提出，我們將於 15 個工作日內完成刪除。
-      </p>
+        <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-6 text-sm leading-relaxed text-slate-300">
+          <h2 className="text-lg font-bold text-amber-400">二、 完賽紀錄榮譽自律與審核條款</h2>
+          <p>
+            本平台提供之自主完賽登錄採「鐵人榮譽信任制」。會員應確保所填載之賽事名稱、完賽時間與成績均為本人真實完成，且不重複登錄無晶片計時或非合格標準之活動。若欲申請本平台之實體榮譽獎牌或參加年度百鐵授證儀式，本平台保留要求會員出示大會完賽證明以供人工複核之權利。
+          </p>
+        </section>
 
-      <div className="bg-gray-50 p-4 rounded-lg border text-xs text-gray-500 mt-8">
-        <p>系統維運單位：全球醫鐵有限公司</p>
-        <p>合作賽事主辦單位：台東城鄉生活運動協會（普悠瑪鐵人三項）</p>
-        <p>最後修訂日期：2026 年 10 月</p>
+        <section className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900/50 p-6 text-sm leading-relaxed text-slate-300">
+          <h2 className="text-lg font-bold text-amber-400">三、 異業結盟與商品服務免責聲明</h2>
+          <p>
+            本平台「榮耀商城」所展示之聯名商品（如客製化三鐵服）及賽事後勤支援服務（如單車託運、保母車租賃、旅宿安排等），部分係由本平台之異業結盟合作廠商直接提供。
+          </p>
+          <p className="text-slate-400">
+            本平台僅提供資訊揭露與外部連結導引，並非該第三方商品或租賃運輸服務之出賣人或契約當事人。關於第三方合作廠商之商品瑕疵擔保、運送安全、退換貨及履約爭議，均由各該合作廠商依法負完全責任，本平台不介入亦不承擔連帶賠償責任。
+          </p>
+        </section>
       </div>
     </div>
   );

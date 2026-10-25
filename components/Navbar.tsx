@@ -1,124 +1,87 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useState } from "react";
 
 export default function Navbar() {
-  const supabase = createClient();
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    async function getUserAndRole() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-        if (profile && profile.role === "admin") {
-          setIsAdmin(true);
-        }
-      }
-    }
-    getUserAndRole();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
-      const currentUser = session?.user || null;
-      setUser(currentUser);
-      if (currentUser) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", currentUser.id)
-          .single();
-        setIsAdmin(profile?.role === "admin");
-      } else {
-        setIsAdmin(false);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsAdmin(false);
-    router.push("/auth/login");
-    router.refresh();
-  };
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <img
-            src="/logo.png"
-            alt="全球百鐵認證"
-            className="w-12 h-12 rounded-full object-cover border-2 border-amber-400 shadow"
-          />
-          <div className="flex items-center gap-2">
-            <span className="font-black text-lg text-gray-900 tracking-tight">全球百鐵認證</span>
-            <span className="text-gray-300">|</span>
-            <Link
-              href="/association"
-              className="text-xs sm:text-sm font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-200 transition"
-            >
-              🏛️ 台東城鄉生活運動協會
-            </Link>
-          </div>
-        </Link>
-
-        <div className="flex items-center gap-4 sm:gap-6">
-          <Link href="/rankings" className="text-sm font-semibold text-gray-700 hover:text-red-600 transition">
-            成績查詢
-          </Link>
-          <Link href="/certifications" className="text-sm font-semibold text-gray-700 hover:text-red-600 transition">
-            完賽登錄
-          </Link>
-
-          {user ? (
-            <div className="flex items-center gap-3">
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="px-3 py-2 bg-orange-500 text-white text-xs font-bold rounded-xl shadow transition hover:bg-orange-600"
-                >
-                  👑 管理後台
-                </Link>
-              )}
-              <Link
-                href="/profile"
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold rounded-xl transition"
-              >
-                會員中心
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold rounded-xl transition border border-red-200"
-              >
-                登出
-              </button>
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          
+          {/* 左上角 Logo 與平台標題 */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-500 shadow-md bg-slate-900 flex items-center justify-center shrink-0">
+              {/* 若 public 夾中有 logo.png 即可顯示，否則顯示文字備用 */}
+              <Image src="/logo.png" alt="全球百鐵認證" width={48} height={48} className="object-cover" />
             </div>
-          ) : (
-            <Link
-              href="/auth/login"
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow transition"
-            >
+            <div className="flex flex-col">
+              <span className="font-black text-lg text-gray-900 tracking-tight group-hover:text-amber-600 transition">
+                全球百鐵認證
+              </span>
+              <span className="text-xs text-gray-500 font-medium">
+                Global 100 Triathlon
+              </span>
+            </div>
+          </Link>
+
+          {/* 桌面版導覽列選單 */}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
+            <Link href="/association" className="text-xs sm:text-sm font-bold text-orange-600 hover:text-orange-700 transition">
+              台東城鄉生活運動協會
+            </Link>
+            <Link href="/series" className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-amber-600 transition">
+              系列賽事
+            </Link>
+            <Link href="/certifications/query" className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-amber-600 transition">
+              成績查詢與英雄榜
+            </Link>
+            <Link href="/certifications" className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-amber-600 transition">
+              完賽登錄
+            </Link>
+            <Link href="/about" className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-amber-600 transition">
+              關於我們
+            </Link>
+            <Link href="/shop" className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-amber-600 transition">
+              榮耀商城
+            </Link>
+          </nav>
+
+          {/* 右側會員中心 */}
+          <div className="hidden md:flex items-center">
+            <Link href="/profile" className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-blue-700 transition">
               會員中心
             </Link>
-          )}
+          </div>
+
+          {/* 手機版漢堡選單按鈕 */}
+          <div className="flex md:hidden items-center">
+            <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 focus:outline-none" aria-label="切換選單">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {isOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* 手機版下拉選單 */}
+      {isOpen && (
+        <div className="md:hidden border-t border-gray-200 bg-white px-4 pt-3 pb-5 space-y-3 shadow-lg">
+          <Link href="/association" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-bold text-orange-600 hover:bg-orange-50">台東城鄉生活運動協會</Link>
+          <Link href="/series" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">系列賽事</Link>
+          <Link href="/certifications/query" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">成績查詢與英雄榜</Link>
+          <Link href="/certifications" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">完賽登錄</Link>
+          <Link href="/about" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">關於我們</Link>
+          <Link href="/shop" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">榮耀商城</Link>
+          <div className="pt-2 border-t border-gray-100">
+            <Link href="/profile" onClick={() => setIsOpen(false)} className="block w-full text-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow">會員中心</Link>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
