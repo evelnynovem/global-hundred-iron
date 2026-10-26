@@ -9,6 +9,14 @@ export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [myRecords, setMyRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // 編輯狀態控制
+  const [editingRecord, setEditingRecord] = useState<any>(null);
+  const [eventName, setEventName] = useState("");
+  const [category, setCategory] = useState("");
+  const [matchDate, setMatchDate] = useState("");
+  const [resultTime, setResultTime] = useState("");
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -21,7 +29,7 @@ export default function ProfilePage() {
         }
         setUser(session.user);
 
-        // 讀取該使用者自行登錄的所有完賽紀錄
+        // 讀取該使用者登錄的所有完賽紀錄
         const { data: records, error } = await supabase
           .from("user_records")
           .select("*")
@@ -41,7 +49,7 @@ export default function ProfilePage() {
     loadUserData();
   }, [supabase]);
 
-  // 刪除個人完賽紀錄功能
+  // 刪除個人完賽紀錄
   const handleDeleteRecord = async (id: string) => {
     if (!confirm("確定要刪除這筆完賽紀錄嗎？")) return;
 
@@ -57,6 +65,49 @@ export default function ProfilePage() {
       alert("✅ 紀錄已成功刪除");
     } catch (err: any) {
       alert("❌ 刪除失敗：" + err.message);
+    }
+  };
+
+  // 開啟編輯對話框
+  const handleOpenEdit = (record: any) => {
+    setEditingRecord(record);
+    setEventName(record.event_name || "");
+    setCategory(record.category || "");
+    setMatchDate(record.match_date || "");
+    setResultTime(record.result_time || "");
+  };
+
+  // 儲存編輯結果
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingRecord) return;
+
+    try {
+      const { error } = await supabase
+        .from("user_records")
+        .update({
+          event_name: eventName,
+          category: category,
+          match_date: matchDate,
+          result_time: resultTime,
+        })
+        .eq("id", editingRecord.id);
+
+      if (error) throw error;
+
+      // 更新前端狀態
+      setMyRecords(
+        myRecords.map((r) =>
+          r.id === editingRecord.id
+            ? { ...r, event_name: eventName, category, match_date: matchDate, result_time: resultTime }
+            : r
+        )
+      );
+
+      setEditingRecord(null);
+      alert("✅ 完賽紀錄更新成功！");
+    } catch (err: any) {
+      alert("❌ 更新失敗：" + err.message);
     }
   };
 
@@ -117,7 +168,7 @@ export default function ProfilePage() {
 
           {myRecords.length === 0 ? (
             <div className="text-center py-12 border border-dashed border-zinc-800 rounded-2xl space-y-3">
-              <p className="text-sm text-zinc-400">目前尚無手動登錄的完賽紀錄。</p>
+              <p className="text-sm text-zinc-400">目前尚無登錄的完賽紀錄。</p>
               <Link
                 href="/profile/new-record"
                 className="inline-block px-4 py-2 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold hover:bg-amber-500/20 transition"
@@ -150,7 +201,13 @@ export default function ProfilePage() {
                       <td className="py-4 px-4 text-zinc-300 font-mono text-xs">{record.match_date}</td>
                       <td className="py-4 px-4 text-zinc-400 text-xs">{record.category}</td>
                       <td className="py-4 px-4 text-emerald-400 font-mono font-bold">{record.result_time || "完賽"}</td>
-                      <td className="py-4 px-4 text-right">
+                      <td className="py-4 px-4 text-right space-x-2">
+                        <button
+                          onClick={() => handleOpenEdit(record)}
+                          className="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold transition cursor-pointer"
+                        >
+                          編輯
+                        </button>
                         <button
                           onClick={() => handleDeleteRecord(record.id)}
                           className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold transition cursor-pointer"
@@ -167,6 +224,85 @@ export default function ProfilePage() {
         </section>
 
       </div>
+
+      {/* 編輯互動視窗 (Modal) */}
+      {editingRecord && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 z-50">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+              <h3 className="text-lg font-black text-white">✏️ 編輯完賽紀錄</h3>
+              <button
+                onClick={() => setEditingRecord(null)}
+                className="text-zinc-400 hover:text-white font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-300">賽事名稱</label>
+                <input
+                  type="text"
+                  required
+                  value={eventName}
+                  onChange={(e) => setEventName(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-300">參賽組別</label>
+                <input
+                  type="text"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-300">參賽日期</label>
+                <input
+                  type="date"
+                  required
+                  value={matchDate}
+                  onChange={(e) => setMatchDate(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-300">完賽時間</label>
+                <input
+                  type="text"
+                  value={resultTime}
+                  onChange={(e) => setResultTime(e.target.value)}
+                  placeholder="例如：03:30:00"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-4 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingRecord(null)}
+                  className="px-4 py-2.5 rounded-xl bg-zinc-900 text-zinc-300 font-bold text-sm hover:bg-zinc-800 transition"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 text-black font-extrabold text-sm hover:bg-amber-400 transition shadow-lg shadow-amber-500/20"
+                >
+                  儲存變更
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
