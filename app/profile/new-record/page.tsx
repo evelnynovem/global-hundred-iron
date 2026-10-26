@@ -22,7 +22,6 @@ export default function CreateRecordPage() {
 
   const supabase = createClient();
 
-  // 初始化：預設參賽日期為今日，並自動帶入會員常用團隊
   useEffect(() => {
     async function initForm() {
       try {
@@ -30,7 +29,10 @@ export default function CreateRecordPage() {
         setRaceDate(todayStr);
 
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) return;
+        if (!session?.user) {
+          setErrorMsg("⚠️ 系統偵測您尚未登入，請先至會員中心登入後再進行登錄。");
+          return;
+        }
 
         const user = session.user;
         const metaTeam = user.user_metadata?.sport_team || user.user_metadata?.full_name || "";
@@ -53,7 +55,6 @@ export default function CreateRecordPage() {
     initForm();
   }, [supabase]);
 
-  // 智慧偵測：輸入賽事名稱時自動對應正確日期
   const handleEventNameChange = (val: string) => {
     setEventName(val);
     const nameLower = val.toLowerCase();
@@ -89,13 +90,28 @@ export default function CreateRecordPage() {
     setSuccessMsg("");
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("尚未登入，請先登入會員。");
+      // 1. 取得目前登入的使用者
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.user) {
+        throw new Error("找不到登入工作階段，請重新登入會員。");
+      }
 
+      const user = session.user;
       const finishTimeStr = `${hours}:${minutes}:${seconds}`;
 
-      // 🚀 直接寫入會員中心讀取的統一資料表 user_records
-      const { error } = await supabase.from("user_records").insert([
+      console.log("準備寫入 Supabase:", {
+        user_id: user.id,
+        event_name: eventName,
+        category,
+        match_date: raceDate,
+        result_time: finishTimeStr,
+        bib,
+        sport_team: sportTeam,
+        sport_type: sportType,
+      });
+
+      // 2. 寫入 user_records 表格
+      const { data, error } = await supabase.from("user_records").insert([
         {
           user_id: user.id,
           event_name: eventName,
@@ -106,22 +122,23 @@ export default function CreateRecordPage() {
           sport_team: sportTeam,
           sport_type: sportType,
         },
-      ]);
+      ]).select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase 寫入錯誤詳情:", error);
+        throw new Error(error.message || "資料庫寫入失敗");
+      }
 
-      setSuccessMsg("🎉 完賽成績登錄成功！已同步至您的個人專屬完賽履歷。");
-      setEventName("");
-      setBib("");
+      console.log("寫入成功回傳:", data);
+      setSuccessMsg("🎉 完賽成績登錄成功！即將返回會員中心...");
       
-      // 成功後延遲 1.5 秒自動跳轉回會員中心查看最新履歷
       setTimeout(() => {
         window.location.href = "/profile";
       }, 1500);
 
     } catch (err: any) {
-      console.error(err);
-      setErrorMsg("❌ 登錄失敗：" + (err.message || "未知錯誤"));
+      console.error("提交表單例外狀況:", err);
+      setErrorMsg("❌ 登錄失敗：" + (err.message || "未知錯誤，請檢查主控台 (F12)"));
     } finally {
       setIsLoading(false);
     }
@@ -152,7 +169,7 @@ export default function CreateRecordPage() {
         </div>
 
         {errorMsg && (
-          <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-red-400 text-sm font-semibold">
+          <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-red-400 text-sm font-semibold whitespace-pre-wrap">
             {errorMsg}
           </div>
         )}
@@ -219,21 +236,21 @@ export default function CreateRecordPage() {
                   type="text"
                   value={hours}
                   onChange={(e) => setHours(e.target.value)}
-                  placeholder="小時 (Hours)"
+                  placeholder="小時"
                   className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white text-center focus:border-amber-500 focus:outline-none"
                 />
                 <input
                   type="text"
                   value={minutes}
                   onChange={(e) => setMinutes(e.target.value)}
-                  placeholder="分鐘 (Minutes)"
+                  placeholder="分鐘"
                   className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white text-center focus:border-amber-500 focus:outline-none"
                 />
                 <input
                   type="text"
                   value={seconds}
                   onChange={(e) => setSeconds(e.target.value)}
-                  placeholder="秒鐘 (Seconds)"
+                  placeholder="秒鐘"
                   className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white text-center focus:border-amber-500 focus:outline-none"
                 />
               </div>
