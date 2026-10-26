@@ -8,7 +8,7 @@ export default function ClaimRecordsPage() {
   const [records, setRecords] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [isAllSelected, setIsAllSelected] = useState<boolean>(false); // 預設改為 false，不自動全選
+  const [isAllSelected, setIsAllSelected] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -19,7 +19,6 @@ export default function ClaimRecordsPage() {
     async function fetchClaimableData() {
       try {
         setIsLoading(true);
-        
         const { data: { session } } = await supabase.auth.getSession();
         const currentUser = session?.user;
 
@@ -39,19 +38,17 @@ export default function ClaimRecordsPage() {
 
         if (error) {
           console.error("查詢歷史成績發生錯誤:", error);
-          setErrorMessage("無法讀取歷史成績，請稍後再試。");
+          setErrorMessage("無法讀取歷史成績：" + error.message);
         } else if (data) {
-          // 預設 selected 為 false，讓使用者自行勾選
           const formatted = data.map((item: any) => ({
             ...item,
             selected: false,
           }));
           setRecords(formatted);
-          setIsAllSelected(false);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        setErrorMessage("系統發生未預期錯誤。");
+        setErrorMessage("系統發生未預期錯誤：" + err.message);
       } finally {
         setIsLoading(false);
       }
@@ -82,25 +79,31 @@ export default function ClaimRecordsPage() {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("尚未登入");
+      if (!user) throw new Error("尚未登入，請重新整理頁面。");
 
+      // 檢查 user_records 表格寫入
       const insertData = selectedRecords.map(r => ({
         user_id: user.id,
-        event_name: r.race_name,
-        category: r.participating_categories,
-        match_date: r.race_date,
-        result_time: r.finish_time,
-        bib_number: r.bib,
-        team_name: r.sport_team,
+        event_name: r.race_name || "",
+        category: r.participating_categories || "",
+        match_date: r.race_date || "",
+        result_time: r.finish_time || "",
+        bib_number: r.bib || "",
+        team_name: r.sport_team || "",
       }));
 
-      const { error: insertError } = await supabase.from("user_records").insert(insertData);
-      if (insertError) throw insertError;
+      console.log("準備寫入認領資料:", insertData);
 
-      setSuccessMessage(`成功認領 ${selectedRecords.length} 筆歷史完賽紀錄！已自動匯入您的個人百鐵履歷。`);
+      const { error: insertError } = await supabase.from("user_records").insert(insertData);
+      if (insertError) {
+        throw new Error("資料庫寫入失敗: " + insertError.message);
+      }
+
+      setSuccessMessage(`🎉 成功認領 ${selectedRecords.length} 筆歷史完賽紀錄！已自動匯入您的個人百鐵履歷。`);
     } catch (err: any) {
-      console.error(err);
+      console.error("認領異常:", err);
       setErrorMessage("認領失敗：" + (err.message || "未知錯誤"));
+      alert("認領失敗：" + (err.message || "未知錯誤"));
     } finally {
       setIsSubmitting(false);
     }
@@ -122,15 +125,14 @@ export default function ClaimRecordsPage() {
         </div>
 
         {errorMessage && (
-          <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-red-400 text-sm">
-            {errorMessage}
+          <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-red-400 text-sm font-semibold">
+            ⚠️ {errorMessage}
           </div>
         )}
 
         {successMessage ? (
           <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-8 text-center space-y-4">
-            <div className="text-emerald-400 font-bold text-lg">🎉 認領成功！</div>
-            <p className="text-sm text-slate-300">{successMessage}</p>
+            <div className="text-emerald-400 font-bold text-lg">{successMessage}</div>
             <Link
               href="/profile"
               className="inline-block rounded-lg bg-emerald-500 px-6 py-2.5 text-sm font-bold text-slate-950 hover:bg-emerald-400 transition"
