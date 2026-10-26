@@ -12,31 +12,40 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function loadProfileData() {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user;
-      if (!currentUser) {
-        window.location.href = "/login";
-        return;
-      }
-      setUser(currentUser);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user;
+        if (!currentUser) {
+          window.location.href = "/login";
+          return;
+        }
+        setUser(currentUser);
 
-      // 讀取該使用者在 user_records 裡所有已認領或自行登錄的紀錄
-      const { data, error } = await supabase
-        .from("user_records")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .order("match_date", { ascending: false });
+        // 讀取該使用者在 user_records 裡所有已認領或自行登錄的紀錄
+        const { data, error } = await supabase
+          .from("user_records")
+          .select("*")
+          .eq("user_id", currentUser.id)
+          .order("match_date", { ascending: false });
 
-      if (!error && data) {
-        setUserRecords(data);
+        if (!error && data) {
+          setUserRecords(data);
+        }
+      } catch (err) {
+        console.error("載入會員資料失敗", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadProfileData();
   }, [supabase]);
 
   if (loading) {
-    return <div className="min-h-screen bg-black text-white flex items-center justify-center">載入會員中心中...</div>;
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center font-bold">
+        正在載入個人會員中心...
+      </div>
+    );
   }
 
   return (
@@ -48,11 +57,16 @@ export default function ProfilePage() {
             <span className="px-3 py-1 bg-green-500/10 text-green-400 text-xs font-bold rounded-full uppercase">
               ✓ Google 快速登入成功
             </span>
-            <h1 className="text-3xl font-extrabold text-white">歡迎回來，{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</h1>
+            <h1 className="text-3xl font-extrabold text-white">
+              歡迎回來，{user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+            </h1>
             <p className="text-sm text-gray-400 font-mono">會員帳號：{user?.email}</p>
           </div>
           <button
-            onClick={async () => { await supabase.auth.signOut(); window.location.href = "/login"; }}
+            onClick={async () => { 
+              await supabase.auth.signOut(); 
+              window.location.href = "/login"; 
+            }}
             className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-gray-300 text-sm font-bold rounded-xl transition"
           >
             登出帳號
@@ -69,7 +83,7 @@ export default function ProfilePage() {
           <Link href="/profile/new-record" className="bg-zinc-900 border border-zinc-800 hover:border-yellow-500/50 rounded-2xl p-6 transition space-y-3 group">
             <div className="text-2xl">✍️</div>
             <h2 className="text-lg font-bold text-white group-hover:text-yellow-400 transition">登錄最新完賽成績</h2>
-            <p className="text-xs text-gray-400">上傳證書與賽事資訊，累積百鐵認證場次（含防呆機制）。</p>
+            <p className="text-xs text-gray-400">手動登錄賽事資訊與證書，累積百鐵認證場次（含防呆機制）。</p>
           </Link>
           <Link href="/rankings" className="bg-zinc-900 border border-zinc-800 hover:border-yellow-500/50 rounded-2xl p-6 transition space-y-3 group">
             <div className="text-2xl">📊</div>
@@ -83,7 +97,9 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
             <div>
               <h2 className="text-xl font-bold text-yellow-400">🏆 我的個人完賽履歷</h2>
-              <p className="text-xs text-gray-400 mt-1">累積總完賽場次：<span className="text-white font-bold">{userRecords.length} 場</span></p>
+              <p className="text-xs text-gray-400 mt-1">
+                累積總完賽場次：<span className="text-white font-bold text-base text-amber-400">{userRecords.length} 場</span>
+              </p>
             </div>
           </div>
 
@@ -101,7 +117,7 @@ export default function ProfilePage() {
               <tbody className="divide-y divide-zinc-800 text-gray-200">
                 {userRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-gray-500">
+                    <td colSpan={5} className="py-10 text-center text-gray-500">
                       目前尚無完賽紀錄，請點擊上方「認領歷史完賽紀錄」或「登錄最新完賽成績」！
                     </td>
                   </tr>
