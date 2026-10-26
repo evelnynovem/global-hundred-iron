@@ -29,7 +29,7 @@ export default function ProfilePage() {
         }
         setUser(session.user);
 
-        // 🚀 關鍵修正：統一直接從 user_records 讀取該使用者所有手動登錄與完賽紀錄
+        // 🚀 強制同步：直接讀取 user_records 資料表內該使用者的所有完賽紀錄
         const { data: records, error } = await supabase
           .from("user_records")
           .select("*")
