@@ -9,7 +9,9 @@ export default function CreateRecordPage() {
   const [eventName, setEventName] = useState("");
   const [category, setCategory] = useState("51.5km (標準標鐵)");
   const [raceDate, setRaceDate] = useState("");
-  const [finishTime, setFinishTime] = useState("");
+  const [hours, setHours] = useState("03");
+  const [minutes, setMinutes] = useState("30");
+  const [seconds, setSeconds] = useState("00");
   const [bib, setBib] = useState("");
   const [sportTeam, setSportTeam] = useState("");
   const [sportType, setSportType] = useState("triathlon");
@@ -20,6 +22,7 @@ export default function CreateRecordPage() {
 
   const supabase = createClient();
 
+  // 初始化：預設參賽日期為今日，並自動帶入會員常用團隊
   useEffect(() => {
     async function initForm() {
       try {
@@ -50,6 +53,7 @@ export default function CreateRecordPage() {
     initForm();
   }, [supabase]);
 
+  // 智慧偵測：輸入賽事名稱時自動對應正確日期
   const handleEventNameChange = (val: string) => {
     setEventName(val);
     const nameLower = val.toLowerCase();
@@ -88,13 +92,16 @@ export default function CreateRecordPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("尚未登入，請先登入會員。");
 
+      const finishTimeStr = `${hours}:${minutes}:${seconds}`;
+
+      // 🚀 直接寫入會員中心讀取的統一資料表 user_records
       const { error } = await supabase.from("user_records").insert([
         {
           user_id: user.id,
           event_name: eventName,
           category: category,
           match_date: raceDate,
-          result_time: finishTime,
+          result_time: finishTimeStr,
           bib: bib,
           sport_team: sportTeam,
           sport_type: sportType,
@@ -105,8 +112,13 @@ export default function CreateRecordPage() {
 
       setSuccessMsg("🎉 完賽成績登錄成功！已同步至您的個人專屬完賽履歷。");
       setEventName("");
-      setFinishTime("");
       setBib("");
+      
+      // 成功後延遲 1.5 秒自動跳轉回會員中心查看最新履歷
+      setTimeout(() => {
+        window.location.href = "/profile";
+      }, 1500);
+
     } catch (err: any) {
       console.error(err);
       setErrorMsg("❌ 登錄失敗：" + (err.message || "未知錯誤"));
@@ -128,7 +140,7 @@ export default function CreateRecordPage() {
               登錄最新完賽成績
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              手動填寫您的完賽資訊（支援賽事名稱關鍵字自動對應日期）。
+              手動填寫您的完賽資訊，送出後將即時同步至您的個人完賽履歷。
             </p>
           </div>
           <Link
@@ -184,12 +196,12 @@ export default function CreateRecordPage() {
                 type="text"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                placeholder="例如：113km / 90km+ 公路車"
+                placeholder="例如：51.5K 標準鐵人 / 113K"
                 className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none transition"
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <label className="text-xs font-bold text-zinc-300">參賽日期 * (自動對應或預設今日)</label>
               <input
                 type="date"
@@ -200,19 +212,35 @@ export default function CreateRecordPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-300">完賽時間</label>
-              <input
-                type="text"
-                value={finishTime}
-                onChange={(e) => setFinishTime(e.target.value)}
-                placeholder="例如：05:32:15"
-                className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none transition"
-              />
+            <div className="space-y-2 sm:col-span-2">
+              <label className="text-xs font-bold text-zinc-300">完賽總時間 (時 / 分 / 秒)</label>
+              <div className="grid grid-cols-3 gap-3">
+                <input
+                  type="text"
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  placeholder="小時 (Hours)"
+                  className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white text-center focus:border-amber-500 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={minutes}
+                  onChange={(e) => setMinutes(e.target.value)}
+                  placeholder="分鐘 (Minutes)"
+                  className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white text-center focus:border-amber-500 focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={seconds}
+                  onChange={(e) => setSeconds(e.target.value)}
+                  placeholder="秒鐘 (Seconds)"
+                  className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white text-center focus:border-amber-500 focus:outline-none"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-300">號碼布</label>
+              <label className="text-xs font-bold text-zinc-300">參賽號碼布 (選填)</label>
               <input
                 type="text"
                 value={bib}
@@ -238,9 +266,9 @@ export default function CreateRecordPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-amber-500 hover:bg-amber-400 py-3.5 text-black font-extrabold text-sm transition shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
+              className="w-full rounded-xl bg-red-600 hover:bg-red-500 py-4 text-white font-extrabold text-sm transition shadow-lg shadow-red-600/20 disabled:opacity-50 cursor-pointer"
             >
-              {isLoading ? "正在登錄成績..." : "確認送出並登錄成績"}
+              {isLoading ? "正在登錄成績..." : "確認送出鐵人完賽登錄"}
             </button>
           </div>
 
