@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 完整對應您的官方賽事清單，優先載入專案內海報，並配置符合各賽事地理特色的戶外實景圖
+  // 完整對應官方賽事清單與戶外賽事主題實景海報
   const slides = [
     {
       badge: "單車百鐵認證",
@@ -107,10 +107,10 @@ export default function HomePage() {
         <section className="relative rounded-3xl bg-gradient-to-br from-zinc-950 via-[#0d090a] to-[#1a0a0d] border border-zinc-800/80 p-6 md:p-8 shadow-2xl overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* 左側標語與快速按鈕 */}
+            {/* 左側標語與漸層色保留 */}
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-block px-3.5 py-1 rounded-full bg-red-950/60 border border-red-800/50 text-red-400 text-xs font-bold tracking-widest uppercase">
-                GLOBAL 100 TRIATHLON
+                GLOBAL 100 TRIATHLON CERTIFICATION
               </div>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
@@ -213,7 +213,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 第一屏下半部：最新協會與賽事公告 */}
+        {/* 第一屏下半部：最新協會與賽事公告 (拉近至首頁第一屏) */}
         <section className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 p-5 shadow-xl">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-2.5">
             <div className="flex items-center gap-2.5">
