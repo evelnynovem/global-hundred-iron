@@ -32,7 +32,6 @@ export default function ClaimRecordsPage() {
         const email = currentUser.email;
         setUserEmail(email);
 
-        // 根據目前的分頁選擇查詢 triathlon 或 cycling 資料表
         const tableName = tab === "triathlon" ? "race_details_full" : "cycling_details_full";
         const { data, error } = await supabase
           .from(tableName)
@@ -93,20 +92,21 @@ export default function ClaimRecordsPage() {
         category: r.participating_categories || "",
         match_date: r.race_date || "",
         result_time: r.finish_time || "",
-        sport_type: tab, // 標記是 triathlon 還是 cycling
+        sport_type: tab,
       }));
 
-      // 防呆檢查：確認同日是否有重複
+      // 🛡️ 防呆：只檢查「同一個運動類型」下是否有重複認領相同賽事與日期
       for (const item of insertData) {
         const { data: dup } = await supabase
           .from("user_records")
           .select("id")
           .eq("user_id", user.id)
+          .eq("sport_type", tab) // 確保只在同一分類（三鐵或公路車）內檢查防呆
           .eq("match_date", item.match_date)
           .eq("event_name", item.event_name);
         
         if (dup && dup.length > 0) {
-          throw new Error(`防呆攔截：賽事「${item.event_name}」於 ${item.match_date} 已在您的履歷中，無法重複認領！`);
+          throw new Error(`防呆攔截：${tab === 'triathlon' ? '鐵人三項' : '公路車'}分類中，賽事「${item.event_name}」於 ${item.match_date} 已在您的履歷中，無法重複認領！`);
         }
       }
 
@@ -115,7 +115,7 @@ export default function ClaimRecordsPage() {
         throw new Error("資料庫寫入失敗: " + insertError.message);
       }
 
-      const msg = `🎉 成功認領 ${selectedRecords.length} 筆${tab === 'triathlon' ? '鐵人三項' : '公路車'}歷史完賽紀錄！`;
+      const msg = `🎉 成功認領 ${selectedRecords.length} 筆${tab === 'triathlon' ? '鐵人三項' : '公路單車（百鐵馬）'}歷史完賽紀錄！`;
       setSuccessMessage(msg);
       alert(msg);
     } catch (err: any) {
