@@ -70,8 +70,6 @@ export default function ClaimRecordsPage() {
   const handleSubmitClaim = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const selectedRecords = records.filter(r => r.selected);
-    
-    console.log("已點擊送出認領，選取的紀錄數：", selectedRecords.length);
 
     if (selectedRecords.length === 0) {
       alert("⚠️ 請至少勾選一筆要認領的完賽紀錄！");
@@ -85,14 +83,13 @@ export default function ClaimRecordsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("尚未登入，請重新登入會員。");
 
+      // 安全寫入核心欄位
       const insertData = selectedRecords.map(r => ({
         user_id: user.id,
         event_name: r.race_name || "",
         category: r.participating_categories || "",
         match_date: r.race_date || "",
         result_time: r.finish_time || "",
-        bib_number: r.bib || "",
-        team_name: r.sport_team || "",
       }));
 
       const { error: insertError } = await supabase.from("user_records").insert(insertData);
