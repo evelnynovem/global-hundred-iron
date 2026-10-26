@@ -1,203 +1,296 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import HomeAnnouncements from "@/components/home-announcements";
-
-const FEATURED_BANNERS = [
-  {
-    id: "puyuma",
-    title: "台東普悠瑪鐵人三項",
-    subtitle: "PUYUMA TRIATHLON TAITUNG",
-    description: "馳騁東海岸最美賽道，累積屬於你的百鐵榮耀里程碑。",
-    image: "/puyuma.jpg",
-    link: "/puyuma",
-    tag: "熱門賽事專區",
-  },
-  {
-    id: "love197",
-    title: "戀戀197自行車挑戰賽",
-    subtitle: "LOVE 197 CYCLING CHALLENGE",
-    description: "挑戰台灣最美縱谷縣道，極致耐力與風景的完美結合。",
-    image: "/love197.jpg",
-    link: "/certifications/cycling",
-    tag: "單車百鐵認證",
-  },
-  {
-    id: "bakelang",
-    title: "巴歌浪鐵人三項",
-    subtitle: "BAKELANG TRIATHLON",
-    description: "山海之間最純粹的鐵人試煉，每一場完賽都值得被永久記錄。",
-    image: "/puyuma.jpg",
-    link: "/certifications/triathlon",
-    tag: "經典認證賽事",
-  },
-];
+import Footer from "@/components/Footer";
 
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  // 每一場賽事獨立設定專屬海報路徑 (優先讀取本地海報，若無則顯示對應運動主題海報，不再用 Logo 蓋過)
+  const slides = [
+    {
+      badge: "單車百鐵認證",
+      badgeColor: "bg-red-600 text-white",
+      title: "戀戀197自行車挑戰賽",
+      desc: "挑戰台灣最美縱谷縣道，極致耐力與風景的完美結合。",
+      link: "/series",
+      poster: "/posters/lianlian197.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1000&q=80"
+    },
+    {
+      badge: "鐵人三項認證",
+      badgeColor: "bg-amber-500 text-black",
+      title: "台東普悠瑪鐵人三項",
+      desc: "活水湖經典賽道，匯聚全台鐵人好手的年度指標盛事。",
+      link: "/taitung-assoc",
+      poster: "/posters/puyuma.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=1000&q=80"
+    },
+    {
+      badge: "鐵人三項認證",
+      badgeColor: "bg-red-600 text-white",
+      title: "台東巴歌浪鐵人三項",
+      desc: "馳騁東海岸壯闊山海，體驗純粹而熱血的鐵人意志。",
+      link: "/series",
+      poster: "/posters/pakelang.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1000&q=80"
+    },
+    {
+      badge: "單車百鐵認證",
+      badgeColor: "bg-amber-500 text-black",
+      title: "高雄百K 自行車挑戰賽",
+      desc: "南台灣經典百K騎行，累積百鐵馬榮耀的最佳起點。",
+      link: "/series",
+      poster: "/posters/kaohsiung100k.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=1000&q=80"
+    }
+  ];
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % FEATURED_BANNERS.length);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
+
+  const announcements = [
+    {
+      id: 1,
+      isPinned: true,
+      category: "系統公告",
+      title: "【重要公告】全球百鐵認證官網全新改版上線，開放歷史完賽紀錄認領與查詢！",
+      date: "2026-10-25",
+      href: "/profile/claim"
+    },
+    {
+      id: 2,
+      isPinned: true,
+      category: "賽事快訊",
+      title: "【賽事專區】台東普悠瑪鐵人三項 & 巴歌浪鐵人三項完賽成績已同步匯入百鐵認證系統",
+      date: "2026-10-20",
+      href: "/certifications/query"
+    },
+    {
+      id: 3,
+      isPinned: false,
+      category: "協會公告",
+      title: "【協會動態】台東城鄉生活運動協會年度賽事行事曆與志工招募資訊",
+      date: "2026-10-15",
+      href: "/taitung-assoc"
+    }
+  ];
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      {/* 頂部主視覺英雄區 (Hero Section) */}
-      <section className="relative overflow-hidden py-16 sm:py-24 px-4 sm:px-6 lg:px-8 border-b border-zinc-800 bg-gradient-to-br from-zinc-950 via-black to-red-950/40">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          {/* 左側文字宣言 */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-950/80 border border-red-700/50 text-red-400 text-xs sm:text-sm font-semibold tracking-widest uppercase">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              GLOBAL HUNDRED IRON
-            </div>
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+      <main className="max-w-6xl mx-auto w-full px-6 pt-6 pb-16 space-y-6">
+        
+        {/* 第一屏上半部：主視覺與賽事海報輪播 (縮減上下間距以容納下方公告) */}
+        <section className="relative rounded-3xl bg-gradient-to-br from-zinc-950 via-[#0d090a] to-[#1a0a0d] border border-zinc-800/80 p-6 md:p-8 shadow-2xl overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* 左側標語與快速按鈕 */}
+            <div className="lg:col-span-7 space-y-5">
+              <div className="inline-block px-3.5 py-1 rounded-full bg-red-950/60 border border-red-800/50 text-red-400 text-xs font-bold tracking-widest uppercase">
+                GLOBAL HUNDRED IRON
+              </div>
+              
+              <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
+                每一場挑戰，<br />
+                <span className="text-amber-500">都值得被記錄</span>
+                <span className="text-red-500">。</span>
+              </h1>
+              
+              <p className="text-sm sm:text-base text-zinc-400 max-w-xl leading-relaxed">
+                全球百鐵認證，為鐵人三項與單車選手保存每一次出發、完賽與突破。從初鐵到百鐵，累積屬於你的榮耀里程碑。
+              </p>
 
-            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight">
-              每一場挑戰，
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-300 to-red-500">
-                都值得被記錄。
-              </span>
-            </h1>
-
-            <p className="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              全球百鐵認證，為鐵人三項與單車選手保存每一次出發、完賽與突破。
-              從初鐵到百鐵，累積屬於你的榮耀里程碑。
-            </p>
-
-            {/* 核心行動按鈕 (RWD 彈性排列) */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
-              <Link
-                href="/rankings"
-                className="px-6 py-3.5 rounded-xl bg-red-700 hover:bg-red-600 text-white font-bold text-sm sm:text-base shadow-lg shadow-red-900/30 transition"
-              >
-                🏆 百鐵英雄榜查詢
-              </Link>
-              <Link
-                href="/certifications/query"
-                className="px-6 py-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-yellow-400 border border-yellow-500/40 font-bold text-sm sm:text-base transition"
-              >
-                🔍 歷年完賽成績查詢
-              </Link>
-              <Link
-                href="/certifications"
-                className="px-6 py-3.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-sm sm:text-base transition"
-              >
-                ✍️ 完賽登錄 / 認領紀錄
-              </Link>
-            </div>
-          </div>
-
-          {/* 右側賽事海報輪播卡片 */}
-          <div className="lg:col-span-5">
-            <div className="relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl aspect-[4/3]">
-              <img
-                src={FEATURED_BANNERS[currentSlide].image}
-                alt={FEATURED_BANNERS[currentSlide].title}
-                className="w-full h-full object-cover opacity-75 transition-all duration-700"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/logo.png";
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-6 flex flex-col justify-end">
-                <span className="inline-block w-fit px-2.5 py-1 rounded bg-red-600 text-white text-xs font-bold mb-2">
-                  {FEATURED_BANNERS[currentSlide].tag}
-                </span>
-                <h3 className="text-xl sm:text-2xl font-bold text-white">
-                  {FEATURED_BANNERS[currentSlide].title}
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-300 mt-1 line-clamp-2">
-                  {FEATURED_BANNERS[currentSlide].description}
-                </p>
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/10">
-                  <Link
-                    href={FEATURED_BANNERS[currentSlide].link}
-                    className="text-xs sm:text-sm font-bold text-yellow-400 hover:underline"
-                  >
-                    進入專區查看詳情 →
-                  </Link>
-                  <div className="flex gap-1.5">
-                    {FEATURED_BANNERS.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setCurrentSlide(idx)}
-                        className={`w-2 h-2 rounded-full transition ${
-                          idx === currentSlide ? "bg-yellow-400 w-5" : "bg-gray-500"
-                        }`}
-                        aria-label={`切換至第 ${idx + 1} 張海報`}
-                      />
-                    ))}
-                  </div>
-                </div>
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <Link
+                  href="/rankings"
+                  className="px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition shadow-lg shadow-red-600/20 flex items-center gap-2"
+                >
+                  🏆 百鐵英雄榜查詢
+                </Link>
+                <Link
+                  href="/certifications/query"
+                  className="px-5 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-sm transition flex items-center gap-2"
+                >
+                  🔍 歷年完賽成績查詢
+                </Link>
+                <Link
+                  href="/profile/claim"
+                  className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition shadow-lg shadow-amber-500/20 flex items-center gap-2"
+                >
+                  ✍️ 完賽登錄 / 認領紀錄
+                </Link>
               </div>
             </div>
+
+            {/* 右側：對應各場賽事的專屬海報輪播卡 */}
+            <div className="lg:col-span-5">
+              <div className="relative h-64 sm:h-72 w-full rounded-2xl overflow-hidden border border-zinc-700/80 shadow-2xl group bg-zinc-900">
+                {slides.map((slide, index) => (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                      index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                    }`}
+                  >
+                    {/* 海報圖片：若本地路徑尚未放圖，自動平滑切換為該賽事對應的高解析主題海報，絕不用 Logo 蓋過 */}
+                    <img
+                      src={slide.poster}
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (target.src !== slide.fallbackPoster) {
+                          target.src = slide.fallbackPoster;
+                        }
+                      }}
+                      alt={slide.title}
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                    />
+                    {/* 漸層遮罩確保文字清晰，同時完整透出後方賽事海報 */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+                    <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                      <div className="space-y-2">
+                        <span className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-extrabold ${slide.badgeColor}`}>
+                          {slide.badge}
+                        </span>
+                        <h3 className="text-xl sm:text-2xl font-black text-white drop-shadow-md">
+                          {slide.title}
+                        </h3>
+                        <p className="text-xs text-zinc-200 line-clamp-2 drop-shadow">
+                          {slide.desc}
+                        </p>
+                        <div className="pt-2 flex items-center justify-between">
+                          <Link
+                            href={slide.link}
+                            className="text-xs font-bold text-amber-400 hover:text-amber-300 transition flex items-center gap-1"
+                          >
+                            進入專區查看詳情 →
+                          </Link>
+
+                          {/* 輪播指示點 */}
+                          <div className="flex items-center gap-1.5">
+                            {slides.map((_, dotIdx) => (
+                              <button
+                                key={dotIdx}
+                                type="button"
+                                onClick={() => setCurrentSlide(dotIdx)}
+                                className={`h-1.5 rounded-full transition-all ${
+                                  dotIdx === currentSlide ? "w-5 bg-amber-400" : "w-1.5 bg-zinc-500 hover:bg-zinc-400"
+                                }`}
+                                aria-label={`切換至第 ${dotIdx + 1} 張海報`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 插入最新協會與賽事公告區塊 */}
-      <HomeAnnouncements />
+        {/* 第一屏下半部：最新協會與賽事公告 (往上拉緊，確保開啟網頁第一頁即可直接看到) */}
+        <section className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 p-5 sm:p-6 shadow-xl">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-3">
+            <div className="flex items-center gap-2.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
+              <h2 className="text-base sm:text-lg font-extrabold text-white tracking-wide">
+                最新協會與賽事公告
+              </h2>
+            </div>
+            <Link
+              href="/taitung-assoc"
+              className="text-xs font-bold text-amber-400 hover:text-amber-300 transition"
+            >
+              查看全部公告 →
+            </Link>
+          </div>
 
-      {/* 四大核心功能快速導覽區 */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="divide-y divide-zinc-800/60">
+            {announcements.map((item) => (
+              <Link
+                key={item.id}
+                href={item.href}
+                className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-zinc-800/40 px-2 rounded-lg transition group"
+              >
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  {item.isPinned && (
+                    <span className="px-2 py-0.5 rounded bg-red-950/80 border border-red-800/60 text-red-400 text-[11px] font-bold">
+                      置頂
+                    </span>
+                  )}
+                  <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[11px] font-semibold">
+                    {item.category}
+                  </span>
+                  <span className="text-xs sm:text-sm text-zinc-200 group-hover:text-amber-400 transition font-medium">
+                    {item.title}
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-zinc-500 shrink-0">
+                  {item.date}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* 四大功能導覽卡片 */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
           <Link
             href="/rankings"
-            className="p-6 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-yellow-500/60 transition group"
+            className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-500/50 p-6 transition space-y-2 group"
           >
-            <div className="text-yellow-400 text-2xl font-extrabold mb-2 group-hover:translate-x-1 transition">
-              01 / 百鐵排名
-            </div>
-            <h3 className="text-lg font-bold text-white mb-1">鐵人三項英雄榜</h3>
-            <p className="text-xs sm:text-sm text-gray-400">
+            <div className="text-xs font-black text-amber-400 tracking-wider">01 / 百鐵排名</div>
+            <h3 className="text-lg font-extrabold text-white group-hover:text-amber-400 transition">鐵人三項英雄榜</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
               免登入公開查詢總排名、初鐵、10鐵至百鐵各階段榮耀選手名單。
             </p>
           </Link>
 
           <Link
             href="/certifications/query"
-            className="p-6 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-yellow-500/60 transition group"
+            className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-red-500/50 p-6 transition space-y-2 group"
           >
-            <div className="text-red-500 text-2xl font-extrabold mb-2 group-hover:translate-x-1 transition">
-              02 / 成績查詢
-            </div>
-            <h3 className="text-lg font-bold text-white mb-1">賽事登錄資料查詢</h3>
-            <p className="text-xs sm:text-sm text-gray-400">
+            <div className="text-xs font-black text-red-400 tracking-wider">02 / 成績查詢</div>
+            <h3 className="text-lg font-extrabold text-white group-hover:text-red-400 transition">賽事登錄資料查詢</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
               輸入選手姓名或賽事名稱，快速檢索歷年上萬筆完賽成績與分段紀錄。
             </p>
           </Link>
 
           <Link
-            href="/association"
-            className="p-6 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-yellow-500/60 transition group"
+            href="/taitung-assoc"
+            className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-500/50 p-6 transition space-y-2 group"
           >
-            <div className="text-amber-400 text-2xl font-extrabold mb-2 group-hover:translate-x-1 transition">
-              03 / 普悠瑪專區
-            </div>
-            <h3 className="text-lg font-bold text-white mb-1">台東城鄉生活運動協會</h3>
-            <p className="text-xs sm:text-sm text-gray-400">
+            <div className="text-xs font-black text-amber-400 tracking-wider">03 / 普悠瑪專區</div>
+            <h3 className="text-lg font-extrabold text-white group-hover:text-amber-400 transition">台東城鄉生活運動協會</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
               最新協會公告、普悠瑪鐵人三項、巴歌浪與戀戀197官方賽事成績連動。
             </p>
           </Link>
 
           <Link
             href="/profile"
-            className="p-6 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-yellow-500/60 transition group"
+            className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-blue-500/50 p-6 transition space-y-2 group"
           >
-            <div className="text-blue-400 text-2xl font-extrabold mb-2 group-hover:translate-x-1 transition">
-              04 / 會員中心
-            </div>
-            <h3 className="text-lg font-bold text-white mb-1">認領與完賽登錄</h3>
-            <p className="text-xs sm:text-sm text-gray-400">
+            <div className="text-xs font-black text-blue-400 tracking-wider">04 / 會員中心</div>
+            <h3 className="text-lg font-extrabold text-white group-hover:text-blue-400 transition">認領與完賽登錄</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
               登入後即可認領歷史完賽數據、登錄最新賽事證書並申請百鐵認證獎章。
             </p>
           </Link>
-        </div>
-      </section>
-    </main>
+        </section>
+
+      </main>
+
+      <Footer />
+    </div>
   );
 }
