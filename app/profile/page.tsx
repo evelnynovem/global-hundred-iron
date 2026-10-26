@@ -41,7 +41,7 @@ export default function ProfilePage() {
   }, [supabase]);
 
   const filteredRecords = records.filter(r => {
-    if (activeTab === "triathlon") return r.sport_type === "triathlon" || !r.sport_type; // 預設舊資料歸類為三鐵
+    if (activeTab === "triathlon") return r.sport_type === "triathlon" || !r.sport_type;
     if (activeTab === "cycling") return r.sport_type === "cycling";
     return true;
   });
@@ -138,8 +138,12 @@ export default function ProfilePage() {
               <tbody className="divide-y divide-zinc-800 text-gray-200">
                 {filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-10 text-center text-gray-500">
-                      目前在此分類尚無完賽紀錄，請前往「認領歷史完賽紀錄」進行綁定！
+                    <td colSpan={5} className="py-12 text-center text-gray-400 text-sm">
+                      目前在此分類尚無完賽紀錄，請前往{" "}
+                      <Link href="/profile/claim" className="text-yellow-400 font-bold underline hover:text-yellow-300 transition">
+                        「認領歷史完賽紀錄」
+                      </Link>{" "}
+                      進行綁定！
                     </td>
                   </tr>
                 ) : (
