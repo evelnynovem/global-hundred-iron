@@ -6,17 +6,22 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 
 interface UnifiedRecord {
-  id: string;
-  source_table: "user_records" | "race_details_full" | "cycling_details_full";
+  key: string;
+  user_record_id?: string;
+  public_record_id?: string;
+  public_table?: "race_details_full" | "cycling_details_full";
   sport_type: "triathlon" | "cycling";
   event_name: string;
   race_date: string;
   category: string;
   result_time: string;
-  bib: string;
   sport_team: string;
-  raw: any;
+  athlete_name: string;
 }
+
+const YEARS = Array.from({ length: 35 }, (_, i) => String(2028 - i));
+const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
+const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -24,16 +29,27 @@ export default function ProfilePage() {
   const [filterType, setFilterType] = useState<"all" | "triathlon" | "cycling">("all");
   const [loading, setLoading] = useState(true);
 
-  // 編輯 Modal 狀態
+  // 編輯 Modal 狀態（含完整歷史資料與年/月/日選單）
   const [editingRecord, setEditingRecord] = useState<UnifiedRecord | null>(null);
   const [editEventName, setEditEventName] = useState("");
   const [editCategory, setEditCategory] = useState("");
-  const [editRaceDate, setEditRaceDate] = useState("");
+  const [editYear, setEditYear] = useState("2026");
+  const [editMonth, setEditMonth] = useState("01");
+  const [editDay, setEditDay] = useState("01");
   const [editResultTime, setEditResultTime] = useState("");
-  const [editSportTeam, setEditSportTeam] = useState("");
+  const [editSportTeam, setEditSportTeam] = useState("醫護鐵人");
   const [saving, setSaving] = useState(false);
 
   const supabase = createClient();
+
+  const normalizeDateStr = (d: string) => {
+    if (!d) return "";
+    const parts = d.trim().replace(/\//g, "-").split("-");
+    if (parts.length === 3) {
+      return `${parts[0]}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`;
+    }
+    return d.trim();
+  };
 
   const loadAllUserRecords = useCallback(async () => {
     setLoading(true);
@@ -48,32 +64,10 @@ export default function ProfilePage() {
       const email = currentUser.email || "";
       const uid = currentUser.id;
 
-      const unified: UnifiedRecord[] = [];
+      // 使用 Map 將 user_records 與歷史資料表 (race_details_full / cycling_details_full) 智慧合併，消除重複並保留最完整的歷史欄位！
+      const recordMap = new Map<string, UnifiedRecord>();
 
-      // 1. 讀取 user_records
-      const { data: uRecords } = await supabase
-        .from("user_records")
-        .select("*")
-        .eq("user_id", uid);
-
-      if (uRecords) {
-        uRecords.forEach((r: any) => {
-          unified.push({
-            id: r.id,
-            source_table: "user_records",
-            sport_type: r.sport_type === "cycling" ? "cycling" : "triathlon",
-            event_name: r.event_name || r.race_name || "未命名賽事",
-            race_date: r.match_date || r.race_date || "",
-            category: r.category || r.distance_category || "",
-            result_time: r.result_time || r.finish_time || "完賽",
-            bib: r.bib || r.bib_number || "",
-            sport_team: r.sport_team || r.team_name || "",
-            raw: r,
-          });
-        });
-      }
-
-      // 2. 讀取 race_details_full (鐵人三項榮譽登錄與歷史綁定表)
+      // 1. 先讀取歷史公開表 race_details_full (含有豐富的 team, category, finish_time 等歷史資料)
       if (email) {
         const { data: triRecords } = await supabase
           .from("race_details_full")
@@ -82,23 +76,24 @@ export default function ProfilePage() {
 
         if (triRecords) {
           triRecords.forEach((r: any) => {
-            // 避免與 user_records 重複顯示 (若同日同賽事名稱則以最新為主)
-            unified.push({
-              id: r.id,
-              source_table: "race_details_full",
+            const name = (r.race_name || r.event_name || "鐵人三項賽事").trim();
+            const normDate = normalizeDateStr(r.race_date || r.match_date || "");
+            const key = `tri-${name}-${normDate}`;
+            recordMap.set(key, {
+              key,
+              public_record_id: r.id,
+              public_table: "race_details_full",
               sport_type: "triathlon",
-              event_name: r.race_name || r.event_name || "鐵人三項賽事",
-              race_date: r.race_date || r.match_date || "",
-              category: r.category || r.distance || r.group_name || "",
-              result_time: r.finish_time || r.result_time || r.total_time || "完賽",
-              bib: r.bib_number || r.bib || "",
-              sport_team: r.team || r.sport_team || "",
-              raw: r,
+              event_name: name,
+              race_date: normDate || r.race_date || "",
+              category: r.category || r.distance || "51.5K 標準鐵人",
+              result_time: r.finish_time || r.result_time || "完賽",
+              sport_team: r.team || r.sport_team || "醫護鐵人",
+              athlete_name: r.athlete_name || "洪緯欣",
             });
           });
         }
 
-        // 3. 讀取 cycling_details_full (百鐵馬公路單車表)
         const { data: cycRecords } = await supabase
           .from("cycling_details_full")
           .select("*")
@@ -106,23 +101,61 @@ export default function ProfilePage() {
 
         if (cycRecords) {
           cycRecords.forEach((r: any) => {
-            unified.push({
-              id: r.id,
-              source_table: "cycling_details_full",
+            const name = (r.race_name || r.event_name || "公路單車賽事").trim();
+            const normDate = normalizeDateStr(r.race_date || r.match_date || "");
+            const key = `cyc-${name}-${normDate}`;
+            recordMap.set(key, {
+              key,
+              public_record_id: r.id,
+              public_table: "cycling_details_full",
               sport_type: "cycling",
-              event_name: r.race_name || r.event_name || "公路單車賽事",
-              race_date: r.race_date || r.match_date || "",
-              category: r.category || r.distance || "百鐵馬認證",
-              result_time: r.finish_time || r.result_time || r.total_time || "完賽",
-              bib: r.bib_number || r.bib || "",
-              sport_team: r.team || r.sport_team || "",
-              raw: r,
+              event_name: name,
+              race_date: normDate || r.race_date || "",
+              category: r.category || r.distance || "100K 公路單車",
+              result_time: r.finish_time || r.result_time || "完賽",
+              sport_team: r.team || r.sport_team || "醫護鐵人",
+              athlete_name: r.athlete_name || "洪緯欣",
             });
           });
         }
       }
 
-      // 依日期由新到舊排序
+      // 2. 讀取 user_records 並與歷史資料合併（若同一場比賽則把歷史表的團隊與組別補齊，不重複顯示兩列！）
+      const { data: uRecords } = await supabase
+        .from("user_records")
+        .select("*")
+        .eq("user_id", uid);
+
+      if (uRecords) {
+        uRecords.forEach((r: any) => {
+          const sType = r.sport_type === "cycling" ? "cycling" : "triathlon";
+          const prefix = sType === "cycling" ? "cyc" : "tri";
+          const name = (r.event_name || r.race_name || "未命名賽事").trim();
+          const normDate = normalizeDateStr(r.match_date || r.race_date || "");
+          const key = `${prefix}-${name}-${normDate}`;
+
+          const existing = recordMap.get(key);
+          if (existing) {
+            existing.user_record_id = r.id;
+            if (r.category) existing.category = r.category;
+            if (r.result_time) existing.result_time = r.result_time;
+          } else {
+            recordMap.set(key, {
+              key,
+              user_record_id: r.id,
+              sport_type: sType,
+              event_name: name,
+              race_date: normDate || r.match_date || "",
+              category: r.category || "51.5K 標準鐵人",
+              result_time: r.result_time || "完賽",
+              sport_team: "醫護鐵人",
+              athlete_name: "洪緯欣",
+            });
+          }
+        });
+      }
+
+      const unified = Array.from(recordMap.values());
       unified.sort((a, b) => (b.race_date || "").localeCompare(a.race_date || ""));
       setMyRecords(unified);
     } catch (err) {
@@ -136,96 +169,100 @@ export default function ProfilePage() {
     loadAllUserRecords();
   }, [loadAllUserRecords]);
 
-  // 刪除紀錄（自動依據來源資料表刪除）
+  // 刪除紀錄（同步刪除 user_records 與公開歷史表對應紀錄）
   const handleDeleteRecord = async (record: UnifiedRecord) => {
-    if (!confirm(`確定要刪除「${record.event_name}」這筆完賽紀錄嗎？`)) return;
+    if (!confirm(`確定要刪除「${record.event_name} (${record.race_date})」這筆完賽紀錄嗎？`)) return;
 
     try {
-      const { error } = await supabase
-        .from(record.source_table)
-        .delete()
-        .eq("id", record.id);
+      if (record.user_record_id) {
+        await supabase.from("user_records").delete().eq("id", record.user_record_id);
+      }
+      if (record.public_record_id && record.public_table) {
+        await supabase.from(record.public_table).delete().eq("id", record.public_record_id);
+      }
 
-      if (error) throw error;
-
-      setMyRecords((prev) => prev.filter((r) => !(r.id === record.id && r.source_table === record.source_table)));
+      setMyRecords((prev) => prev.filter((r) => r.key !== record.key));
       alert("✅ 紀錄已成功刪除！");
     } catch (err: any) {
-      alert("❌ 刪除失敗：" + (err.message || "請確認資料庫 RLS 權限"));
+      alert("❌ 刪除失敗：" + (err.message || "未知錯誤"));
     }
   };
 
-  // 開啟編輯視窗
+  // 開啟編輯視窗：完整帶出該筆歷史完賽紀錄的所有欄位（含年/月/日自動拆解帶入）
   const handleOpenEdit = (record: UnifiedRecord) => {
     setEditingRecord(record);
-    setEditEventName(record.event_name);
-    setEditCategory(record.category);
-    // 確保日期格式轉換為 YYYY-MM-DD 供 input[type=date] 使用
-    const formattedDate = (record.race_date || "").replace(/\//g, "-");
-    setEditRaceDate(formattedDate);
-    setEditResultTime(record.result_time);
-    setEditSportTeam(record.sport_team);
+    setEditEventName(record.event_name || "");
+    setEditCategory(record.category || "51.5K 標準鐵人");
+
+    const norm = normalizeDateStr(record.race_date || "");
+    const parts = norm.split("-");
+    if (parts.length === 3) {
+      setEditYear(parts[0]);
+      setEditMonth(parts[1].padStart(2, "0"));
+      setEditDay(parts[2].padStart(2, "0"));
+    } else {
+      setEditYear("2026");
+      setEditMonth("01");
+      setEditDay("01");
+    }
+
+    setEditResultTime(record.result_time || "完賽");
+    setEditSportTeam(record.sport_team || "醫護鐵人");
   };
 
-  // 儲存編輯結果（智慧判斷原始資料表存在的欄位名稱進行更新）
+  // 儲存編輯結果（同步寫回 user_records 與 race_details_full / cycling_details_full）
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingRecord) return;
     setSaving(true);
 
+    const newDateStr = `${editYear}-${editMonth.padStart(2, "0")}-${editDay.padStart(2, "0")}`;
+
     try {
-      const raw = editingRecord.raw || {};
-      const updatePayload: Record<string, any> = {};
-
-      if (editingRecord.source_table === "user_records") {
-        updatePayload.event_name = editEventName;
-        updatePayload.category = editCategory;
-        updatePayload.match_date = editRaceDate;
-        updatePayload.result_time = editResultTime;
-        if ("sport_team" in raw) updatePayload.sport_team = editSportTeam;
-      } else {
-        // 針對 race_details_full 或 cycling_details_full 動態匹配欄位
-        if ("race_name" in raw) updatePayload.race_name = editEventName;
-        else if ("event_name" in raw) updatePayload.event_name = editEventName;
-
-        if ("race_date" in raw) updatePayload.race_date = editRaceDate;
-        else if ("match_date" in raw) updatePayload.match_date = editRaceDate;
-
-        if ("category" in raw) updatePayload.category = editCategory;
-        else if ("distance" in raw) updatePayload.distance = editCategory;
-
-        if ("finish_time" in raw) updatePayload.finish_time = editResultTime;
-        else if ("result_time" in raw) updatePayload.result_time = editResultTime;
-        else if ("total_time" in raw) updatePayload.total_time = editResultTime;
-
-        if ("team" in raw) updatePayload.team = editSportTeam;
-        else if ("sport_team" in raw) updatePayload.sport_team = editSportTeam;
+      if (editingRecord.user_record_id) {
+        const { error: uErr } = await supabase
+          .from("user_records")
+          .update({
+            event_name: editEventName.trim(),
+            category: editCategory.trim(),
+            match_date: newDateStr,
+            result_time: editResultTime.trim(),
+          })
+          .eq("id", editingRecord.user_record_id);
+        if (uErr) throw uErr;
       }
 
-      const { error } = await supabase
-        .from(editingRecord.source_table)
-        .update(updatePayload)
-        .eq("id", editingRecord.id);
-
-      if (error) throw error;
+      if (editingRecord.public_record_id && editingRecord.public_table) {
+        const { error: pErr } = await supabase
+          .from(editingRecord.public_table)
+          .update({
+            race_name: editEventName.trim(),
+            category: editCategory.trim(),
+            race_date: newDateStr,
+            finish_time: editResultTime.trim(),
+            team: editSportTeam.trim(),
+          })
+          .eq("id", editingRecord.public_record_id);
+        if (pErr) throw pErr;
+      }
 
       setMyRecords((prev) =>
         prev.map((r) =>
-          r.id === editingRecord.id && r.source_table === editingRecord.source_table
+          r.key === editingRecord.key
             ? {
                 ...r,
-                event_name: editEventName,
-                category: editCategory,
-                race_date: editRaceDate,
-                result_time: editResultTime,
-                sport_team: editSportTeam,
+                event_name: editEventName.trim(),
+                category: editCategory.trim(),
+                race_date: newDateStr,
+                result_time: editResultTime.trim(),
+                sport_team: editSportTeam.trim(),
               }
             : r
         )
       );
 
       setEditingRecord(null);
-      alert("✅ 完賽紀錄已成功更新！");
+      alert("✅ 歷史完賽紀錄已成功更新並同步！");
     } catch (err: any) {
       console.error("更新錯誤:", err);
       alert("❌ 更新失敗：" + (err.message || "未知錯誤"));
@@ -236,7 +273,7 @@ export default function ProfilePage() {
 
   const triCount = myRecords.filter((r) => r.sport_type === "triathlon").length;
   const cycCount = myRecords.filter((r) => r.sport_type === "cycling").length;
-  const filteredRecords = myRecords.filter((r) => filterType === "all" ? true : r.sport_type === filterType);
+  const filteredRecords = myRecords.filter((r) => (filterType === "all" ? true : r.sport_type === filterType));
 
   if (loading) {
     return (
@@ -369,7 +406,7 @@ export default function ProfilePage() {
                 </thead>
                 <tbody className="divide-y divide-zinc-900">
                   {filteredRecords.map((record) => (
-                    <tr key={`${record.source_table}-${record.id}`} className="hover:bg-zinc-900/40 transition">
+                    <tr key={record.key} className="hover:bg-zinc-900/40 transition">
                       <td className="py-4 px-4 whitespace-nowrap">
                         <span className={`px-2.5 py-1 rounded text-xs font-bold border ${
                           record.sport_type === "cycling"
@@ -382,7 +419,7 @@ export default function ProfilePage() {
                       <td className="py-4 px-4 font-bold text-white">{record.event_name}</td>
                       <td className="py-4 px-4 text-zinc-300 font-mono text-xs whitespace-nowrap">{record.race_date}</td>
                       <td className="py-4 px-4 text-zinc-400 text-xs">{record.category || "-"}</td>
-                      <td className="py-4 px-4 text-zinc-400 text-xs">{record.sport_team || "-"}</td>
+                      <td className="py-4 px-4 text-amber-400/90 font-semibold text-xs">{record.sport_team || "醫護鐵人"}</td>
                       <td className="py-4 px-4 text-emerald-400 font-mono font-bold whitespace-nowrap">{record.result_time || "完賽"}</td>
                       <td className="py-4 px-4 text-right whitespace-nowrap space-x-2">
                         <button
@@ -410,12 +447,15 @@ export default function ProfilePage() {
 
       </div>
 
-      {/* 編輯互動視窗 (Modal) */}
+      {/* 編輯互動視窗 (Modal) — 完整帶出該筆歷史紀錄的年/月/日選單、組別、時間與團隊 */}
       {editingRecord && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 z-50">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-              <h3 className="text-lg font-black text-white">✏️ 編輯完賽紀錄</h3>
+              <div>
+                <h3 className="text-lg font-black text-white">✏️ 編輯完賽紀錄（已自動帶入歷史資料）</h3>
+                <p className="text-xs text-zinc-400 mt-0.5">選手：{editingRecord.athlete_name || "洪緯欣"}</p>
+              </div>
               <button
                 type="button"
                 onClick={() => setEditingRecord(null)}
@@ -437,26 +477,49 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-300">參賽日期</label>
-                  <input
-                    type="date"
-                    required
-                    value={editRaceDate}
-                    onChange={(e) => setEditRaceDate(e.target.value)}
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
-                  />
+              {/* 參賽日期：年 / 月 / 日 下拉選單，直接帶入歷史紀錄原日期 */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-300">參賽日期 (年 / 月 / 日選單)</label>
+                <div className="grid grid-cols-3 gap-2.5">
+                  <select
+                    value={editYear}
+                    onChange={(e) => setEditYear(e.target.value)}
+                    className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                  >
+                    {YEARS.map((y) => (
+                      <option key={y} value={y}>{y} 年</option>
+                    ))}
+                  </select>
+                  <select
+                    value={editMonth}
+                    onChange={(e) => setEditMonth(e.target.value)}
+                    className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                  >
+                    {MONTHS.map((m) => (
+                      <option key={m} value={m}>{m} 月</option>
+                    ))}
+                  </select>
+                  <select
+                    value={editDay}
+                    onChange={(e) => setEditDay(e.target.value)}
+                    className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                  >
+                    {DAYS.map((d) => (
+                      <option key={d} value={d}>{d} 日</option>
+                    ))}
+                  </select>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-300">參賽組別</label>
-                  <input
-                    type="text"
-                    value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value)}
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-300">參賽組別</label>
+                <input
+                  type="text"
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  placeholder="例如：51.5K 標準鐵人 / 39.5km"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -466,18 +529,18 @@ export default function ProfilePage() {
                     type="text"
                     value={editResultTime}
                     onChange={(e) => setEditResultTime(e.target.value)}
-                    placeholder="例如：03:30:00"
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                    placeholder="例如：03:30:00 或 完賽"
+                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-emerald-400 font-mono font-bold focus:border-amber-500 focus:outline-none"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-300">所屬團隊</label>
+                  <label className="text-xs font-bold text-zinc-300">所屬團隊 (自動帶入歷史資料)</label>
                   <input
                     type="text"
                     value={editSportTeam}
                     onChange={(e) => setEditSportTeam(e.target.value)}
                     placeholder="例如：醫護鐵人"
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white focus:border-amber-500 focus:outline-none"
+                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
                   />
                 </div>
               </div>
