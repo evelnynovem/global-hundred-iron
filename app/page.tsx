@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 完整對應官方賽事清單與戶外賽事主題實景海報
+  // 精準對應您放在 public/images/ 底下的真實官方賽事海報
   const slides = [
     {
       badge: "單車百鐵認證",
@@ -15,7 +15,7 @@ export default function HomePage() {
       title: "戀戀197自行車挑戰賽",
       desc: "2026/12/06 & 2027/12/05｜挑戰台灣最美縱谷縣道，極致耐力與風景的完美結合。",
       link: "/series",
-      poster: "/posters/197.jpg",
+      poster: "/images/love197.jpg",
       fallbackPoster: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1200&q=85"
     },
     {
@@ -24,17 +24,17 @@ export default function HomePage() {
       title: "台東巴歌浪鐵人三項",
       desc: "2026/10/17-18 & 2027/10/16-17｜馳騁東海岸壯闊山海，體驗純粹而熱血的鐵人意志。",
       link: "/series",
-      poster: "/posters/pakelang.jpg",
+      poster: "/images/pakelang.jpg",
       fallbackPoster: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=85"
     },
     {
-      badge: "單車百鐵認證",
+      badge: "鐵人三項認證",
       badgeColor: "bg-amber-500 text-black",
-      title: "高雄百K 自行車挑戰賽",
-      desc: "2026/11/29 & 2027/11/28｜南台灣經典百K高速巡航，累積百鐵馬榮耀的最佳起點。",
-      link: "/series",
-      poster: "/posters/kaohsiung.jpg",
-      fallbackPoster: "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=1200&q=85"
+      title: "台東普悠瑪鐵人三項",
+      desc: "活水湖經典賽道，匯聚全台鐵人好手的年度指標盛事。",
+      link: "/taitung-assoc",
+      poster: "/images/puyuma.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=1200&q=85"
     },
     {
       badge: "單車百鐵認證",
@@ -42,26 +42,8 @@ export default function HomePage() {
       title: "輪躍台南單車嘉年華",
       desc: "2026/12/06 & 2027/12/12｜穿梭古都山海美景，年度最熱鬧的單車盛會。",
       link: "/series",
-      poster: "/posters/tainan.jpg",
+      poster: "/images/tainan.png",
       fallbackPoster: "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?auto=format&fit=crop&w=1200&q=85"
-    },
-    {
-      badge: "單車百鐵認證",
-      badgeColor: "bg-amber-500 text-black",
-      title: "2027 梅山36彎自行車挑戰賽",
-      desc: "2027/02/21 (日)｜挑戰嘉義經典36道髮夾彎爬坡聖地，征服雲端之巔。",
-      link: "/series",
-      poster: "/posters/meishan.jpg",
-      fallbackPoster: "https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?auto=format&fit=crop&w=1200&q=85"
-    },
-    {
-      badge: "單車百鐵認證",
-      badgeColor: "bg-red-600 text-white",
-      title: "蘭陽百K & 石門羅馬挑戰賽",
-      desc: "2027/09/20 蘭陽百K ＆ 2027/12/19 石門羅馬公路｜北台灣經典山海長途試煉。",
-      link: "/series",
-      poster: "/posters/lanyang.jpg",
-      fallbackPoster: "https://images.unsplash.com/photo-1517649281203-dad836b4abe5?auto=format&fit=crop&w=1200&q=85"
     }
   ];
 
@@ -147,7 +129,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 右側：賽事海報輪播卡 */}
+            {/* 右側：真實賽事海報輪播卡 */}
             <div className="lg:col-span-5">
               <div className="relative h-64 sm:h-72 w-full rounded-2xl overflow-hidden border border-zinc-700/80 shadow-2xl group bg-zinc-900">
                 {slides.map((slide, index) => (
@@ -213,7 +195,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 第一屏下半部：最新協會與賽事公告 (拉近至首頁第一屏) */}
+        {/* 第一屏下半部：最新協會與賽事公告 */}
         <section className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 p-5 shadow-xl">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-2.5">
             <div className="flex items-center gap-2.5">
