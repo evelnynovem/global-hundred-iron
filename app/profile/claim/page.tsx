@@ -67,10 +67,14 @@ export default function ClaimRecordsPage() {
     setRecords(records.map(r => r.id === id ? { ...r, selected: !r.selected } : r));
   };
 
-  const handleSubmitClaim = async () => {
+  const handleSubmitClaim = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     const selectedRecords = records.filter(r => r.selected);
+    
+    console.log("已點擊送出認領，選取的紀錄數：", selectedRecords.length);
+
     if (selectedRecords.length === 0) {
-      alert("請至少選擇一筆要認領的紀錄！");
+      alert("⚠️ 請至少勾選一筆要認領的完賽紀錄！");
       return;
     }
 
@@ -79,9 +83,8 @@ export default function ClaimRecordsPage() {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("尚未登入，請重新整理頁面。");
+      if (!user) throw new Error("尚未登入，請重新登入會員。");
 
-      // 檢查 user_records 表格寫入
       const insertData = selectedRecords.map(r => ({
         user_id: user.id,
         event_name: r.race_name || "",
@@ -92,18 +95,18 @@ export default function ClaimRecordsPage() {
         team_name: r.sport_team || "",
       }));
 
-      console.log("準備寫入認領資料:", insertData);
-
       const { error: insertError } = await supabase.from("user_records").insert(insertData);
       if (insertError) {
         throw new Error("資料庫寫入失敗: " + insertError.message);
       }
 
-      setSuccessMessage(`🎉 成功認領 ${selectedRecords.length} 筆歷史完賽紀錄！已自動匯入您的個人百鐵履歷。`);
+      const msg = `🎉 成功認領 ${selectedRecords.length} 筆歷史完賽紀錄！已自動匯入您的個人百鐵履歷。`;
+      setSuccessMessage(msg);
+      alert(msg);
     } catch (err: any) {
       console.error("認領異常:", err);
       setErrorMessage("認領失敗：" + (err.message || "未知錯誤"));
-      alert("認領失敗：" + (err.message || "未知錯誤"));
+      alert("❌ 認領失敗：" + (err.message || "未知錯誤"));
     } finally {
       setIsSubmitting(false);
     }
@@ -132,13 +135,15 @@ export default function ClaimRecordsPage() {
 
         {successMessage ? (
           <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-8 text-center space-y-4">
-            <div className="text-emerald-400 font-bold text-lg">{successMessage}</div>
-            <Link
-              href="/profile"
-              className="inline-block rounded-lg bg-emerald-500 px-6 py-2.5 text-sm font-bold text-slate-950 hover:bg-emerald-400 transition"
-            >
-              返回會員個人中心
-            </Link>
+            <div className="text-emerald-400 font-bold text-xl">{successMessage}</div>
+            <div className="pt-4 flex justify-center gap-4">
+              <Link
+                href="/profile"
+                className="rounded-lg bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 transition"
+              >
+                返回會員個人中心查看履歷
+              </Link>
+            </div>
           </div>
         ) : isLoading ? (
           <div className="text-center py-20 text-slate-400">正在讀取您的專屬完賽資料庫，請稍候...</div>
@@ -218,7 +223,7 @@ export default function ClaimRecordsPage() {
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleSubmitClaim}
-                className="rounded-lg bg-amber-500 px-8 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400 transition disabled:opacity-50"
+                className="rounded-lg bg-amber-500 px-8 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400 transition disabled:opacity-50 cursor-pointer shadow-lg hover:bg-amber-400"
               >
                 {isSubmitting ? "認領處理中..." : "確認送出勾選認領"}
               </button>
