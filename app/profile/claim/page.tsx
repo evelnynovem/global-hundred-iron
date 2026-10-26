@@ -8,7 +8,7 @@ export default function ClaimRecordsPage() {
   const [records, setRecords] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>("");
-  const [isAllSelected, setIsAllSelected] = useState<boolean>(true);
+  const [isAllSelected, setIsAllSelected] = useState<boolean>(false); // 預設改為 false，不自動全選
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -20,7 +20,6 @@ export default function ClaimRecordsPage() {
       try {
         setIsLoading(true);
         
-        // 抓取目前登入的使用者 Session
         const { data: { session } } = await supabase.auth.getSession();
         const currentUser = session?.user;
 
@@ -33,7 +32,6 @@ export default function ClaimRecordsPage() {
         const email = currentUser.email;
         setUserEmail(email);
 
-        // 直接用登入信箱在 race_details_full 撈取對應紀錄
         const { data, error } = await supabase
           .from("race_details_full")
           .select("*")
@@ -43,12 +41,13 @@ export default function ClaimRecordsPage() {
           console.error("查詢歷史成績發生錯誤:", error);
           setErrorMessage("無法讀取歷史成績，請稍後再試。");
         } else if (data) {
+          // 預設 selected 為 false，讓使用者自行勾選
           const formatted = data.map((item: any) => ({
             ...item,
-            selected: true,
+            selected: false,
           }));
           setRecords(formatted);
-          setIsAllSelected(true);
+          setIsAllSelected(false);
         }
       } catch (err) {
         console.error(err);
@@ -118,7 +117,7 @@ export default function ClaimRecordsPage() {
             舊官網歷史成績智慧認領
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            目前登入帳號：<span className="text-amber-400 font-mono">{userEmail || "載入中..."}</span>。系統已透過您的 Email 自動對應到過去的完賽紀錄。
+            目前登入帳號：<span className="text-amber-400 font-mono">{userEmail || "載入中..."}</span>。請自由勾選您想認領的特定完賽紀錄。
           </p>
         </div>
 
@@ -140,7 +139,7 @@ export default function ClaimRecordsPage() {
             </Link>
           </div>
         ) : isLoading ? (
-          <div className="text-center py-20 text-slate-400">正在智慧比對您的舊成績資料庫，請稍候...</div>
+          <div className="text-center py-20 text-slate-400">正在讀取您的專屬完賽資料庫，請稍候...</div>
         ) : records.length === 0 ? (
           <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-12 text-center space-y-4">
             <p className="text-slate-300">目前沒有找到與您的登入信箱 ({userEmail}) 相符的歷史完賽紀錄。</p>
@@ -155,7 +154,7 @@ export default function ClaimRecordsPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4">
               <div className="text-sm text-slate-300">
-                成功找到 <span className="font-bold text-amber-400">{records.length}</span> 筆符合您信箱的歷史完賽資料
+                總共找到 <span className="font-bold text-amber-400">{records.length}</span> 筆完賽資料，已勾選 <span className="font-bold text-emerald-400">{records.filter(r => r.selected).length}</span> 筆
               </div>
               <button
                 type="button"
@@ -198,7 +197,7 @@ export default function ClaimRecordsPage() {
                       <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
                         record.selected ? "bg-amber-500/20 text-amber-400" : "bg-slate-800 text-slate-400"
                       }`}>
-                        {record.selected ? "將會認領" : "不認領"}
+                        {record.selected ? "將會認領" : "略過"}
                       </span>
                     </div>
                   </div>
@@ -211,7 +210,7 @@ export default function ClaimRecordsPage() {
                 href="/profile"
                 className="rounded-lg border border-slate-700 bg-slate-800 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-700 transition"
               >
-                暫不認領，返回
+                返回個人中心
               </Link>
               <button
                 type="button"
