@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
 export default function SeriesPage() {
   const seriesList = [
@@ -95,8 +96,8 @@ export default function SeriesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-6">
-      <div className="mx-auto max-w-5xl space-y-10">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+      <div className="mx-auto max-w-5xl w-full py-12 px-6 space-y-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
           <div>
             <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
@@ -151,6 +152,7 @@ export default function SeriesPage() {
           ))}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
