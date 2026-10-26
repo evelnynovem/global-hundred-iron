@@ -7,43 +7,61 @@ import Footer from "@/components/Footer";
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 每一場賽事獨立設定專屬海報路徑 (優先讀取本地海報，若無則顯示對應運動主題海報，不再用 Logo 蓋過)
+  // 完整對應您的官方賽事清單，優先載入專案內海報，並配置符合各賽事地理特色的戶外實景圖
   const slides = [
     {
       badge: "單車百鐵認證",
       badgeColor: "bg-red-600 text-white",
       title: "戀戀197自行車挑戰賽",
-      desc: "挑戰台灣最美縱谷縣道，極致耐力與風景的完美結合。",
+      desc: "2026/12/06 & 2027/12/05｜挑戰台灣最美縱谷縣道，極致耐力與風景的完美結合。",
       link: "/series",
-      poster: "/posters/lianlian197.jpg",
-      fallbackPoster: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1000&q=80"
+      poster: "/posters/197.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1200&q=85"
     },
     {
       badge: "鐵人三項認證",
       badgeColor: "bg-amber-500 text-black",
-      title: "台東普悠瑪鐵人三項",
-      desc: "活水湖經典賽道，匯聚全台鐵人好手的年度指標盛事。",
-      link: "/taitung-assoc",
-      poster: "/posters/puyuma.jpg",
-      fallbackPoster: "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=1000&q=80"
-    },
-    {
-      badge: "鐵人三項認證",
-      badgeColor: "bg-red-600 text-white",
       title: "台東巴歌浪鐵人三項",
-      desc: "馳騁東海岸壯闊山海，體驗純粹而熱血的鐵人意志。",
+      desc: "2026/10/17-18 & 2027/10/16-17｜馳騁東海岸壯闊山海，體驗純粹而熱血的鐵人意志。",
       link: "/series",
       poster: "/posters/pakelang.jpg",
-      fallbackPoster: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1000&q=80"
+      fallbackPoster: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=85"
     },
     {
       badge: "單車百鐵認證",
       badgeColor: "bg-amber-500 text-black",
       title: "高雄百K 自行車挑戰賽",
-      desc: "南台灣經典百K騎行，累積百鐵馬榮耀的最佳起點。",
+      desc: "2026/11/29 & 2027/11/28｜南台灣經典百K高速巡航，累積百鐵馬榮耀的最佳起點。",
       link: "/series",
-      poster: "/posters/kaohsiung100k.jpg",
-      fallbackPoster: "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=1000&q=80"
+      poster: "/posters/kaohsiung.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?auto=format&fit=crop&w=1200&q=85"
+    },
+    {
+      badge: "單車百鐵認證",
+      badgeColor: "bg-red-600 text-white",
+      title: "輪躍台南單車嘉年華",
+      desc: "2026/12/06 & 2027/12/12｜穿梭古都山海美景，年度最熱鬧的單車盛會。",
+      link: "/series",
+      poster: "/posters/tainan.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?auto=format&fit=crop&w=1200&q=85"
+    },
+    {
+      badge: "單車百鐵認證",
+      badgeColor: "bg-amber-500 text-black",
+      title: "2027 梅山36彎自行車挑戰賽",
+      desc: "2027/02/21 (日)｜挑戰嘉義經典36道髮夾彎爬坡聖地，征服雲端之巔。",
+      link: "/series",
+      poster: "/posters/meishan.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?auto=format&fit=crop&w=1200&q=85"
+    },
+    {
+      badge: "單車百鐵認證",
+      badgeColor: "bg-red-600 text-white",
+      title: "蘭陽百K & 石門羅馬挑戰賽",
+      desc: "2027/09/20 蘭陽百K ＆ 2027/12/19 石門羅馬公路｜北台灣經典山海長途試煉。",
+      link: "/series",
+      poster: "/posters/lanyang.jpg",
+      fallbackPoster: "https://images.unsplash.com/photo-1517649281203-dad836b4abe5?auto=format&fit=crop&w=1200&q=85"
     }
   ];
 
@@ -67,7 +85,7 @@ export default function HomePage() {
       id: 2,
       isPinned: true,
       category: "賽事快訊",
-      title: "【賽事專區】台東普悠瑪鐵人三項 & 巴歌浪鐵人三項完賽成績已同步匯入百鐵認證系統",
+      title: "【賽事專區】台東巴歌浪鐵人三項、高雄百K、戀戀197與輪躍台南完賽成績連動開放",
       date: "2026-10-20",
       href: "/certifications/query"
     },
@@ -75,30 +93,32 @@ export default function HomePage() {
       id: 3,
       isPinned: false,
       category: "協會公告",
-      title: "【協會動態】台東城鄉生活運動協會年度賽事行事曆與志工招募資訊",
+      title: "【協會動態】台東城鄉生活運動協會 2026-2027 年度結盟賽事行事曆正式公布",
       date: "2026-10-15",
-      href: "/taitung-assoc"
+      href: "/series"
     }
   ];
 
   return (
     <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
-      <main className="max-w-6xl mx-auto w-full px-6 pt-6 pb-16 space-y-6">
+      <main className="max-w-6xl mx-auto w-full px-6 pt-5 pb-14 space-y-5">
         
-        {/* 第一屏上半部：主視覺與賽事海報輪播 (縮減上下間距以容納下方公告) */}
+        {/* 第一屏上半部：主視覺與賽事海報輪播 */}
         <section className="relative rounded-3xl bg-gradient-to-br from-zinc-950 via-[#0d090a] to-[#1a0a0d] border border-zinc-800/80 p-6 md:p-8 shadow-2xl overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             {/* 左側標語與快速按鈕 */}
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-block px-3.5 py-1 rounded-full bg-red-950/60 border border-red-800/50 text-red-400 text-xs font-bold tracking-widest uppercase">
-                GLOBAL HUNDRED IRON
+                GLOBAL 100 TRIATHLON
               </div>
               
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
-                每一場挑戰，<br />
-                <span className="text-amber-500">都值得被記錄</span>
-                <span className="text-red-500">。</span>
+                <span className="text-white">每一場挑戰，</span>
+                <br />
+                <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-red-500 bg-clip-text text-transparent">
+                  都值得被記錄。
+                </span>
               </h1>
               
               <p className="text-sm sm:text-base text-zinc-400 max-w-xl leading-relaxed">
@@ -127,7 +147,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 右側：對應各場賽事的專屬海報輪播卡 */}
+            {/* 右側：賽事海報輪播卡 */}
             <div className="lg:col-span-5">
               <div className="relative h-64 sm:h-72 w-full rounded-2xl overflow-hidden border border-zinc-700/80 shadow-2xl group bg-zinc-900">
                 {slides.map((slide, index) => (
@@ -137,7 +157,6 @@ export default function HomePage() {
                       index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                     }`}
                   >
-                    {/* 海報圖片：若本地路徑尚未放圖，自動平滑切換為該賽事對應的高解析主題海報，絕不用 Logo 蓋過 */}
                     <img
                       src={slide.poster}
                       onError={(e) => {
@@ -149,7 +168,6 @@ export default function HomePage() {
                       alt={slide.title}
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                     />
-                    {/* 漸層遮罩確保文字清晰，同時完整透出後方賽事海報 */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
                     <div className="absolute inset-0 p-6 flex flex-col justify-end">
@@ -171,7 +189,6 @@ export default function HomePage() {
                             進入專區查看詳情 →
                           </Link>
 
-                          {/* 輪播指示點 */}
                           <div className="flex items-center gap-1.5">
                             {slides.map((_, dotIdx) => (
                               <button
@@ -196,9 +213,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 第一屏下半部：最新協會與賽事公告 (往上拉緊，確保開啟網頁第一頁即可直接看到) */}
-        <section className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 p-5 sm:p-6 shadow-xl">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-3">
+        {/* 第一屏下半部：最新協會與賽事公告 */}
+        <section className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 p-5 shadow-xl">
+          <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-2.5">
             <div className="flex items-center gap-2.5">
               <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse" />
               <h2 className="text-base sm:text-lg font-extrabold text-white tracking-wide">
@@ -218,7 +235,7 @@ export default function HomePage() {
               <Link
                 key={item.id}
                 href={item.href}
-                className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-zinc-800/40 px-2 rounded-lg transition group"
+                className="py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-zinc-800/40 px-2 rounded-lg transition group"
               >
                 <div className="flex items-center gap-2.5 flex-wrap">
                   {item.isPinned && (
@@ -242,7 +259,7 @@ export default function HomePage() {
         </section>
 
         {/* 四大功能導覽卡片 */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
           <Link
             href="/rankings"
             className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-500/50 p-6 transition space-y-2 group"
@@ -269,10 +286,10 @@ export default function HomePage() {
             href="/taitung-assoc"
             className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-500/50 p-6 transition space-y-2 group"
           >
-            <div className="text-xs font-black text-amber-400 tracking-wider">03 / 普悠瑪專區</div>
+            <div className="text-xs font-black text-amber-400 tracking-wider">03 / 協會專區</div>
             <h3 className="text-lg font-extrabold text-white group-hover:text-amber-400 transition">台東城鄉生活運動協會</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              最新協會公告、普悠瑪鐵人三項、巴歌浪與戀戀197官方賽事成績連動。
+              最新協會公告、巴歌浪鐵人三項與戀戀197官方賽事成績連動。
             </p>
           </Link>
 

@@ -40,14 +40,14 @@ export default async function RootLayout({
           <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-8 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.2em]">
-                Global Hundred Iron & Puyuma
+                Global 100 Triathlon & TRUAA
               </p>
               <p className="mt-2 text-xs text-zinc-400">
-                全球百鐵認證暨台東普悠瑪鐵人三項聯合服務平台
+                全球百鐵認證暨台東城鄉生活運動協會聯合服務平台
               </p>
             </div>
             <p className="text-xs text-zinc-500">
-              © {new Date().getFullYear()} Global Hundred Iron. All rights reserved.
+              © {new Date().getFullYear()} Global 100 Triathlon. All rights reserved.
             </p>
           </div>
         </footer>
