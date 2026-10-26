@@ -3,25 +3,32 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-interface RaceDetail {
-  name: string;
-  date: string;
-  race: string;
-  category: string;
-  finish_time: string;
-  team: string;
+interface RaceRecord {
+  Name: string;
+  "Race date": string;
+  "Race name": string;
+  "Race contury": string;
+  "Race city": string;
+  "Participating categories": string;
+  Ranking: string;
+  "Finish time": string;
+  "Sport team": string;
+  bib: string;
+  gender: string;
+  "三鐵完賽數": number;
+  "Ranking level": string;
 }
 
 export default function CertificationQueryPage() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<RaceDetail[]>([]);
-  const [allData, setAllData] = useState<RaceDetail[]>([]);
+  const [results, setResults] = useState<RaceRecord[]>([]);
+  const [allData, setAllData] = useState<RaceRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await fetch("/data/race_details.json");
+        const res = await fetch("/data/full_race_records.json");
         if (res.ok) {
           const data = await res.json();
           setAllData(data);
@@ -45,23 +52,24 @@ export default function CertificationQueryPage() {
     const q = query.toLowerCase();
     const filtered = allData.filter(
       (item) =>
-        item.name.toLowerCase().includes(q) ||
-        item.race.toLowerCase().includes(q) ||
-        item.team.toLowerCase().includes(q)
+        item.Name.toLowerCase().includes(q) ||
+        item["Race name"].toLowerCase().includes(q) ||
+        item["Sport team"].toLowerCase().includes(q) ||
+        item["Race city"].toLowerCase().includes(q)
     );
     setResults(filtered.slice(0, 100));
   };
 
   return (
     <div className="min-h-screen bg-black text-white py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-yellow-400">
               賽事登錄資料與完賽紀錄查詢
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 mt-1">
-              輸入選手姓名、賽事名稱或所屬團隊，即時檢索歷年完賽明細。
+              精確顯示 13 項完整賽事欄位，輸入選手姓名、賽事名稱或團隊即可檢索。
             </p>
           </div>
           <Link
@@ -77,7 +85,7 @@ export default function CertificationQueryPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="請輸入選手姓名 (例如: 陳彥良)、賽事名稱 (例如: 普悠瑪) 或團隊..."
+            placeholder="請輸入選手姓名、賽事名稱、城市或團隊..."
             className="flex-1 bg-zinc-900 border border-zinc-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-yellow-500 text-sm sm:text-base"
           />
           <button
@@ -89,50 +97,51 @@ export default function CertificationQueryPage() {
         </form>
 
         <div className="overflow-x-auto rounded-xl border border-zinc-800 shadow-2xl">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
-              <tr className="bg-zinc-950 text-gray-300 border-b border-zinc-800 text-xs sm:text-sm">
-                <th className="py-3.5 px-4 font-semibold">選手姓名</th>
-                <th className="py-3.5 px-4 font-semibold">所屬團隊</th>
-                <th className="py-3.5 px-4 font-semibold">賽事日期</th>
-                <th className="py-3.5 px-4 font-semibold">賽事名稱</th>
-                <th className="py-3.5 px-4 font-semibold">參賽組別</th>
-                <th className="py-3.5 px-4 font-semibold">完賽成績</th>
+              <tr className="bg-zinc-950 text-gray-300 border-b border-zinc-800 whitespace-nowrap">
+                <th className="py-3 px-3 font-semibold">姓名 (Name)</th>
+                <th className="py-3 px-3 font-semibold">日期 (Date)</th>
+                <th className="py-3 px-3 font-semibold">賽事名稱 (Race Name)</th>
+                <th className="py-3 px-3 font-semibold">國家/城市</th>
+                <th className="py-3 px-3 font-semibold">參賽組別</th>
+                <th className="py-3 px-3 font-semibold">名次</th>
+                <th className="py-3 px-3 font-semibold">完賽時間</th>
+                <th className="py-3 px-3 font-semibold">所屬團隊</th>
+                <th className="py-3 px-3 font-semibold">背號</th>
+                <th className="py-3 px-3 font-semibold">性別</th>
+                <th className="py-3 px-3 font-semibold">總完賽數</th>
+                <th className="py-3 px-3 font-semibold">等級</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-800 text-sm text-gray-200">
+            <tbody className="divide-y divide-zinc-800 text-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-500">
-                    正在載入上萬筆完賽資料庫...
+                  <td colSpan={12} className="py-8 text-center text-gray-500">
+                    正在載入完整完賽資料庫...
                   </td>
                 </tr>
               ) : results.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-500">
+                  <td colSpan={12} className="py-8 text-center text-gray-500">
                     查無符合「{query}」的完賽紀錄
                   </td>
                 </tr>
               ) : (
                 results.map((item, idx) => (
-                  <tr
-                    key={idx}
-                    className="bg-zinc-900/60 hover:bg-zinc-800/80 transition"
-                  >
-                    <td className="py-3 px-4 font-medium text-yellow-400">
-                      {item.name}
-                    </td>
-                    <td className="py-3 px-4 text-gray-300">{item.team || "-"}</td>
-                    <td className="py-3 px-4 text-gray-400 font-mono text-xs">
-                      {item.date}
-                    </td>
-                    <td className="py-3 px-4 font-semibold text-white">
-                      {item.race}
-                    </td>
-                    <td className="py-3 px-4 text-gray-300">{item.category}</td>
-                    <td className="py-3 px-4 font-mono text-green-400">
-                      {item.finish_time || "完賽"}
-                    </td>
+                  <tr key={idx} className="bg-zinc-900/60 hover:bg-zinc-800/80 transition whitespace-nowrap">
+                    <td className="py-3 px-3 font-bold text-yellow-400">{item.Name}</td>
+                    <td className="py-3 px-3 font-mono text-gray-400">{item["Race date"]}</td>
+                    <td className="py-3 px-3 font-semibold text-white">{item["Race name"]}</td>
+                    <td className="py-3 px-3 text-gray-300">{item["Race contury"]} {item["Race city"]}</td>
+                    <td className="py-3 px-3 text-gray-300">{item["Participating categories"]}</td>
+                    <td className="py-3 px-3 text-gray-300">{item.Ranking}</td>
+                    <td className="py-3 px-3 font-mono text-green-400">{item["Finish time"] || "完賽"}</td>
+                    <td className="py-3 px-3 text-gray-300">{item["Sport team"] || "-"}</td>
+                    <td className="py-3 px-3 text-gray-400">{item.bib || "-"}</td>
+                    <td className="py-3 px-3 text-gray-400">{item.gender || "-"}</td>
+                    <td className="py-3 px-3 font-bold text-amber-400 text-center">{item["三鐵完賽數"]}</td>
+                    <td className="py-3 px-3 text-gray-300">{item["Ranking level"]}</td>
                   </tr>
                 ))
               )}
