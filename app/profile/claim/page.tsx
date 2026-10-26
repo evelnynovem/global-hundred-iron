@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 
 export default function ClaimRecordsPage() {
+  const [tab, setTab] = useState<"triathlon" | "cycling">("triathlon");
   const [records, setRecords] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -31,8 +32,10 @@ export default function ClaimRecordsPage() {
         const email = currentUser.email;
         setUserEmail(email);
 
+        // 根據目前的分頁選擇查詢 triathlon 或 cycling 資料表
+        const tableName = tab === "triathlon" ? "race_details_full" : "cycling_details_full";
         const { data, error } = await supabase
-          .from("race_details_full")
+          .from(tableName)
           .select("*")
           .eq("login_email", email);
 
@@ -45,6 +48,7 @@ export default function ClaimRecordsPage() {
             selected: false,
           }));
           setRecords(formatted);
+          setIsAllSelected(false);
         }
       } catch (err: any) {
         console.error(err);
@@ -55,7 +59,7 @@ export default function ClaimRecordsPage() {
     }
 
     fetchClaimableData();
-  }, [supabase]);
+  }, [tab, supabase]);
 
   const handleToggleSelectAll = () => {
     const nextState = !isAllSelected;
@@ -83,21 +87,35 @@ export default function ClaimRecordsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("尚未登入，請重新登入會員。");
 
-      // 安全寫入核心欄位
       const insertData = selectedRecords.map(r => ({
         user_id: user.id,
         event_name: r.race_name || "",
         category: r.participating_categories || "",
         match_date: r.race_date || "",
         result_time: r.finish_time || "",
+        sport_type: tab, // 標記是 triathlon 還是 cycling
       }));
+
+      // 防呆檢查：確認同日是否有重複
+      for (const item of insertData) {
+        const { data: dup } = await supabase
+          .from("user_records")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("match_date", item.match_date)
+          .eq("event_name", item.event_name);
+        
+        if (dup && dup.length > 0) {
+          throw new Error(`防呆攔截：賽事「${item.event_name}」於 ${item.match_date} 已在您的履歷中，無法重複認領！`);
+        }
+      }
 
       const { error: insertError } = await supabase.from("user_records").insert(insertData);
       if (insertError) {
         throw new Error("資料庫寫入失敗: " + insertError.message);
       }
 
-      const msg = `🎉 成功認領 ${selectedRecords.length} 筆歷史完賽紀錄！已自動匯入您的個人百鐵履歷。`;
+      const msg = `🎉 成功認領 ${selectedRecords.length} 筆${tab === 'triathlon' ? '鐵人三項' : '公路車'}歷史完賽紀錄！`;
       setSuccessMessage(msg);
       alert(msg);
     } catch (err: any) {
@@ -112,16 +130,38 @@ export default function ClaimRecordsPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-6">
       <div className="mx-auto max-w-4xl space-y-8">
-        <div className="border-b border-slate-800 pb-6">
-          <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
-            Legacy Records Claim
-          </span>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2">
-            舊官網歷史成績智慧認領
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            目前登入帳號：<span className="text-amber-400 font-mono">{userEmail || "載入中..."}</span>。請自由勾選您想認領的特定完賽紀錄。
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+          <div>
+            <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
+              Legacy Records Claim
+            </span>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white mt-2">
+              歷史成績智慧認領
+            </h1>
+          </div>
+          <Link href="/profile" className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm rounded-xl transition">
+            ← 返回會員中心
+          </Link>
+        </div>
+
+        {/* 切換三鐵 / 公路車分頁 */}
+        <div className="flex border-b border-slate-800">
+          <button
+            onClick={() => setTab("triathlon")}
+            className={`flex-1 py-3 text-center font-bold text-sm transition border-b-2 ${
+              tab === "triathlon" ? "border-amber-400 text-amber-400 bg-amber-500/5" : "border-transparent text-slate-400 hover:text-white"
+            }`}
+          >
+            🏊‍♂️ 鐵人三項歷史成績認領
+          </button>
+          <button
+            onClick={() => setTab("cycling")}
+            className={`flex-1 py-3 text-center font-bold text-sm transition border-b-2 ${
+              tab === "cycling" ? "border-amber-400 text-amber-400 bg-amber-500/5" : "border-transparent text-slate-400 hover:text-white"
+            }`}
+          >
+            🚴‍♂️ 公路單車(百鐵馬)歷史成績認領
+          </button>
         </div>
 
         {errorMessage && (
@@ -133,39 +173,31 @@ export default function ClaimRecordsPage() {
         {successMessage ? (
           <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-8 text-center space-y-4">
             <div className="text-emerald-400 font-bold text-xl">{successMessage}</div>
-            <div className="pt-4 flex justify-center gap-4">
-              <Link
-                href="/profile"
-                className="rounded-lg bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 transition"
-              >
-                返回會員個人中心查看履歷
-              </Link>
-            </div>
+            <Link
+              href="/profile"
+              className="inline-block rounded-lg bg-emerald-500 px-6 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 transition"
+            >
+              返回會員個人中心查看履歷
+            </Link>
           </div>
         ) : isLoading ? (
           <div className="text-center py-20 text-slate-400">正在讀取您的專屬完賽資料庫，請稍候...</div>
         ) : records.length === 0 ? (
           <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-12 text-center space-y-4">
-            <p className="text-slate-300">目前沒有找到與您的登入信箱 ({userEmail}) 相符的歷史完賽紀錄。</p>
-            <Link
-              href="/profile"
-              className="inline-block rounded-lg bg-slate-800 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition"
-            >
-              返回個人中心
-            </Link>
+            <p className="text-slate-300">目前沒有找到與您的登入信箱 ({userEmail}) 相符的{tab === 'triathlon' ? '鐵人三項' : '公路車'}歷史完賽紀錄。</p>
           </div>
         ) : (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4">
               <div className="text-sm text-slate-300">
-                總共找到 <span className="font-bold text-amber-400">{records.length}</span> 筆完賽資料，已勾選 <span className="font-bold text-emerald-400">{records.filter(r => r.selected).length}</span> 筆
+                找到 <span className="font-bold text-amber-400">{records.length}</span> 筆紀錄，已勾選 <span className="font-bold text-emerald-400">{records.filter(r => r.selected).length}</span> 筆
               </div>
               <button
                 type="button"
                 onClick={handleToggleSelectAll}
                 className="rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700 transition"
               >
-                {isAllSelected ? "取消全選" : "一鍵全選所有紀錄"}
+                {isAllSelected ? "取消全選" : "一鍵全選"}
               </button>
             </div>
 
@@ -173,7 +205,7 @@ export default function ClaimRecordsPage() {
               <div className="divide-y divide-slate-800/80">
                 {records.map((record) => (
                   <div
-                    key={record.id || record.race_name + record.race_date}
+                    key={record.id}
                     onClick={() => handleToggleOne(record.id)}
                     className={`flex items-center justify-between p-4 sm:p-6 cursor-pointer transition ${
                       record.selected ? "bg-amber-500/5" : "hover:bg-slate-900/80"
@@ -192,8 +224,7 @@ export default function ClaimRecordsPage() {
                           <span>組別：{record.participating_categories}</span>
                           <span>日期：{record.race_date}</span>
                           <span>時間：{record.finish_time || "完賽"}</span>
-                          {record.bib && <span className="text-amber-400/90">號碼布：{record.bib}</span>}
-                          {record.sport_team && <span className="text-amber-400/90">運動團體：{record.sport_team}</span>}
+                          {record.sport_team && <span className="text-amber-400/90">團隊：{record.sport_team}</span>}
                         </div>
                       </div>
                     </div>
@@ -210,17 +241,11 @@ export default function ClaimRecordsPage() {
             </div>
 
             <div className="flex justify-end gap-4 pt-4">
-              <Link
-                href="/profile"
-                className="rounded-lg border border-slate-700 bg-slate-800 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-700 transition"
-              >
-                返回個人中心
-              </Link>
               <button
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleSubmitClaim}
-                className="rounded-lg bg-amber-500 px-8 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400 transition disabled:opacity-50 cursor-pointer shadow-lg hover:bg-amber-400"
+                className="rounded-lg bg-amber-500 px-8 py-3 text-sm font-bold text-slate-950 hover:bg-amber-400 transition disabled:opacity-50 cursor-pointer shadow-lg"
               >
                 {isSubmitting ? "認領處理中..." : "確認送出勾選認領"}
               </button>
