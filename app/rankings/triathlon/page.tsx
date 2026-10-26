@@ -1,275 +1,252 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import Footer from "@/components/Footer";
 
-type RankingRow = {
-  rank: number;
-  name: string;
-  team: string;
-  identifier: string;
-  count: number;
-};
-
-type RpcRankingRow = {
-  identifier: string;
-  ranking_name: string;
-  ranking_team: string;
-  finish_count: number;
-};
-
-// 若是 Email 則進行遮罩；若是純姓名則保留或部分遮罩
-function formatIdentifier(id: string) {
-  if (!id) return "選手***";
-  if (id.includes("@")) {
-    const [localPart, domain] = id.split("@");
-    if (!domain) return id;
-    if (localPart.length <= 2) {
-      return `${localPart[0] ?? "*"}***@${domain}`;
-    }
-    return `${localPart.slice(0, 2)}***@${domain}`;
-  }
-  // 如果是純姓名識別，可以適度保護隱私或直接顯示
-  return id.length > 1 ? `${id[0]}*${id.slice(2)}` : id;
-}
-
-// 根據你的需求精確定義各個鐵數區間 (min ~ max，max 為 null 代表以上)
-const MILESTONES = [
-  { label: "總排名", min: 1, max: null },
-  { label: "初鐵", min: 1, max: 2 },
-  { label: "3鐵", min: 3, max: 4 },
-  { label: "5鐵", min: 5, max: 9 },
-  { label: "10鐵", min: 10, max: 19 },
-  { label: "20鐵", min: 20, max: 29 },
-  { label: "30鐵", min: 30, max: 39 },
-  { label: "40鐵", min: 40, max: 49 },
-  { label: "50鐵", min: 50, max: 59 },
-  { label: "60鐵", min: 60, max: 69 },
-  { label: "70鐵", min: 70, max: 79 },
-  { label: "80鐵", min: 80, max: 89 },
-  { label: "90鐵", min: 90, max: 99 },
-  { label: "百鐵", min: 100, max: null },
-];
-
-export default function TriathlonRankingsPage() {
-  const [rankings, setRankings] = useState<RankingRow[]>([]);
+export default function RankingsAndQueryPage() {
+  const [activeSport, setActiveSport] = useState<"triathlon" | "cycling">("triathlon");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [heroList, setHeroList] = useState<any[]>([]);
+  const [raceRecords, setRaceRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [selectedMilestone, setSelectedMilestone] = useState(MILESTONES[0]); // 預設總排名 (>= 1)
-  const [searchTerm, setSearchTerm] = useState("");
-  const [entriesPerPage, setEntriesPerPage] = useState(25);
-  const [currentPage, setCurrentPage] = useState(1);
+
+  const supabase = createClient();
 
   useEffect(() => {
     async function fetchData() {
-      const supabase = createClient();
-      const { data, error } = await supabase.rpc("get_triathlon_rankings");
+      setLoading(true);
+      try {
+        if (activeSport === "triathlon") {
+          // 1. 讀取鐵人英雄榜
+          const { data: heroes } = await supabase
+            .from("hero_rankings")
+            .select("*")
+            .order("total_races", { ascending: false })
+            .limit(100);
+          setHeroList(heroes || []);
 
-      if (error) {
-        setError(true);
+          // 2. 讀取鐵人完賽紀錄明細
+          let query = supabase.from("race_details_full").select("*").order("race_date", { ascending: false }).limit(100);
+          if (searchQuery.trim()) {
+            query = supabase
+              .from("race_details_full")
+              .select("*")
+              .or(`athlete_name.ilike.%${searchQuery.trim()}%,race_name.ilike.%${searchQuery.trim()}%,team.ilike.%${searchQuery.trim()}%`)
+              .limit(100);
+          }
+          const { data: details } = await query;
+          setRaceRecords(details || []);
+        } else {
+          // 公路單車百鐵馬：從 cycling_details_full 統計排行榜與明細
+          let query = supabase.from("cycling_details_full").select("*").order("race_date", { ascending: false }).limit(200);
+          if (searchQuery.trim()) {
+            query = supabase
+              .from("cycling_details_full")
+              .select("*")
+              .or(`athlete_name.ilike.%${searchQuery.trim()}%,race_name.ilike.%${searchQuery.trim()}%`)
+              .limit(200);
+          }
+          const { data: cycDetails } = await query;
+          const validDetails = (cycDetails || []).filter((r: any) => r.athlete_name && r.athlete_name !== "EMPTY");
+          setRaceRecords(validDetails);
+
+          // 動態聚合百鐵馬英雄榜
+          const countMap: Record<string, { athlete_name: string; total_races: number; latest_race: string }> = {};
+          validDetails.forEach((r: any) => {
+            const name = r.athlete_name.trim();
+            if (!countMap[name]) {
+              countMap[name] = { athlete_name: name, total_races: 0, latest_race: r.race_name || "" };
+            }
+            countMap[name].total_races += 1;
+          });
+          const aggregatedHeroes = Object.values(countMap).sort((a, b) => b.total_races - a.total_races);
+          setHeroList(aggregatedHeroes);
+        }
+      } catch (err) {
+        console.error("載入英雄榜與查詢資料錯誤:", err);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      const rawRows = (data ?? []) as RpcRankingRow[];
-      const mapped: RankingRow[] = rawRows.map((row, index) => ({
-        rank: index + 1,
-        name: row.ranking_name || "選手",
-        team: row.ranking_team || "",
-        identifier: formatIdentifier(row.identifier),
-        count: Number(row.finish_count),
-      }));
-
-      setRankings(mapped);
-      setLoading(false);
     }
-
     fetchData();
-  }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedMilestone, searchTerm, entriesPerPage]);
-
-  // 根據選擇的鐵數區間與搜尋關鍵字進行篩選
-  const filteredRankings = rankings.filter((row) => {
-    const matchesMin = row.count >= selectedMilestone.min;
-    const matchesMax = selectedMilestone.max === null ? true : row.count <= selectedMilestone.max;
-    const matchesMilestone = matchesMin && matchesMax;
-
-    const term = searchTerm.toLowerCase();
-    const nameStr = (row.name || "").toLowerCase();
-    const teamStr = (row.team || "").toLowerCase();
-    const idStr = (row.identifier || "").toLowerCase();
-
-    const matchesSearch = nameStr.includes(term) || teamStr.includes(term) || idStr.includes(term);
-    return matchesMilestone && matchesSearch;
-  });
-
-  const totalPages = Math.ceil(filteredRankings.length / entriesPerPage) || 1;
-  const startIndex = (currentPage - 1) * entriesPerPage;
-  const displayedRankings = filteredRankings.slice(startIndex, startIndex + entriesPerPage);
-
-  const startEntry = filteredRankings.length > 0 ? startIndex + 1 : 0;
-  const endEntry = Math.min(startIndex + entriesPerPage, filteredRankings.length);
+  }, [activeSport, searchQuery, supabase]);
 
   return (
-    <main className="min-h-screen bg-black text-white px-3 py-6 sm:px-8">
-      <div className="mx-auto max-w-6xl">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+      <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-10">
         
-        {/* 頁面標題與提示說明 */}
-        <div className="text-center mt-4">
-          <h1 className="text-2xl sm:text-3xl font-black text-yellow-400 tracking-wider">
-            鐵人三項百鐵排名
-          </h1>
-          <p className="text-xs sm:text-sm text-zinc-300 mt-2">
-            『百鐵認證』完整納入所有完賽紀錄，並嚴格依據鐵數區間分類，提供最佳瀏覽體驗。
-          </p>
+        {/* 頁面標題與雙軌切換 */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-800 pb-6">
+          <div>
+            <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
+              Global 100 Leaderboard & Records
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-black text-white mt-3">
+              成績查詢與百鐵英雄榜
+            </h1>
+            <p className="text-sm text-zinc-400 mt-1">
+              同一頁面即時切換「鐵人三項」與「百鐵馬（公路單車）」英雄榜排名及歷年完賽紀錄明細。
+            </p>
+          </div>
+
+          {/* 鐵人三項 vs 百鐵馬 大切換按鈕 */}
+          <div className="flex items-center gap-3 bg-zinc-900 p-1.5 rounded-2xl border border-zinc-800">
+            <button
+              type="button"
+              onClick={() => setActiveSport("triathlon")}
+              className={`px-5 py-2.5 rounded-xl text-sm font-extrabold transition cursor-pointer ${
+                activeSport === "triathlon"
+                  ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              🏊‍♂️ 鐵人三項英雄榜
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveSport("cycling")}
+              className={`px-5 py-2.5 rounded-xl text-sm font-extrabold transition cursor-pointer ${
+                activeSport === "cycling"
+                  ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              🚴‍♂️ 百鐵馬（自行車）英雄榜
+            </button>
+          </div>
         </div>
 
-        {/* 功能分頁按鈕列 (支援手機橫向捲動) */}
-        <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-zinc-700">
+        {/* 全域搜尋列 */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={`輸入選手姓名、賽事名稱（如：普悠瑪、戀戀197）或團隊（如：醫護鐵人）即時檢索...`}
+            className="flex-1 rounded-2xl bg-zinc-900 border border-amber-500/50 px-5 py-3.5 text-sm text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
+          />
           <Link
             href="/certifications/query"
-            className="px-3 py-2 bg-red-800 text-white text-xs sm:text-sm font-bold rounded whitespace-nowrap hover:bg-red-700 transition"
+            className="px-6 py-3.5 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-extrabold text-sm transition flex items-center justify-center shrink-0"
           >
-            賽事登錄資料查詢
+            🔍 展開 13 欄完整賽事明細查詢 →
           </Link>
-          
-          {MILESTONES.map((m) => {
-            const isActive = selectedMilestone.label === m.label;
-            return (
-              <button
-                key={m.label}
-                onClick={() => setSelectedMilestone(m)}
-                className={`px-3 py-2 text-xs sm:text-sm font-bold rounded whitespace-nowrap transition ${
-                  isActive
-                    ? "bg-amber-600 text-white shadow-lg scale-105"
-                    : "bg-red-900 text-zinc-200 hover:bg-red-800"
-                }`}
-              >
-                {m.label}
-              </button>
-            );
-          })}
         </div>
 
-        {/* 表格上方控制列 (Show entries & Search) */}
-        <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-zinc-300">
-          <div className="flex items-center gap-2">
-            <span>Show</span>
-            <select
-              value={entriesPerPage}
-              onChange={(e) => setEntriesPerPage(Number(e.target.value))}
-              className="bg-black border border-zinc-700 rounded px-2 py-1 text-white text-xs sm:text-sm"
-            >
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-            <span>entries</span>
+        {/* 上半部：百鐵 / 百鐵馬 英雄榜總排名 */}
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-black text-white">
+              {activeSport === "triathlon" ? "🏆 鐵人三項百鐵英雄榜" : "🚴‍♂️ 公路單車百鐵馬英雄榜"}
+            </h2>
+            <span className="text-xs text-zinc-400">
+              共收錄 {heroList.length} 位榮耀選手
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="whitespace-nowrap">Search:</span>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜尋姓名、團隊或帳號..."
-              className="bg-black border border-zinc-700 rounded px-3 py-1 text-white text-xs sm:text-sm w-full sm:w-64 focus:outline-none focus:border-zinc-500"
-            />
-          </div>
-        </div>
+          {loading ? (
+            <p className="text-sm text-zinc-400 py-8 text-center animate-pulse">載入排行榜資料中...</p>
+          ) : (
+            <div className="overflow-x-auto max-h-[420px]">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-zinc-800 text-zinc-400 text-xs uppercase sticky top-0 bg-zinc-950">
+                  <tr>
+                    <th className="py-3 px-4">排名</th>
+                    <th className="py-3 px-4">選手姓名</th>
+                    <th className="py-3 px-4">累積完賽數</th>
+                    <th className="py-3 px-4">認證等級 / 代表賽事</th>
+                    <th className="py-3 px-4 text-right">明細檢索</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-900">
+                  {heroList
+                    .filter((h) => !searchQuery.trim() || (h.athlete_name || h.name || "").includes(searchQuery.trim()))
+                    .map((hero, idx) => {
+                      const name = hero.athlete_name || hero.name || "選手";
+                      const count = hero.total_races || hero.race_count || hero.count || 1;
+                      return (
+                        <tr key={idx} className="hover:bg-zinc-900/50 transition">
+                          <td className="py-3.5 px-4 font-mono font-bold text-zinc-400">#{idx + 1}</td>
+                          <td className="py-3.5 px-4 font-extrabold text-amber-400">{name}</td>
+                          <td className="py-3.5 px-4 font-mono font-black text-white">{count} 場</td>
+                          <td className="py-3.5 px-4 text-xs text-zinc-300">
+                            {hero.tier || hero.level || hero.latest_race || (count >= 100 ? "百鐵殿堂" : "榮耀鐵人")}
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery(name)}
+                              className="px-3 py-1 rounded-lg bg-zinc-800 hover:bg-amber-500 hover:text-black text-xs font-bold transition cursor-pointer"
+                            >
+                              查看完賽紀錄
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
 
-        {/* 排行榜表格 */}
-        <div className="mt-4 overflow-x-auto border border-zinc-800 rounded bg-black">
-          <table className="w-full text-left border-collapse min-w-[600px]">
-            <thead>
-              <tr className="border-b border-zinc-800 text-zinc-300 text-xs sm:text-sm">
-                <th className="py-3 px-4 sm:px-6 w-20">排名</th>
-                <th className="py-3 px-4 sm:px-6">姓名</th>
-                <th className="py-3 px-4 sm:px-6">團隊</th>
-                <th className="py-3 px-4 sm:px-6">認證身分 / 帳號</th>
-                <th className="py-3 px-4 sm:px-6 text-right">總完賽次數</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+        {/* 下半部：同頁直接顯示「賽事登錄資料與完賽紀錄查詢」 */}
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-black text-amber-400">
+                📋 {activeSport === "triathlon" ? "鐵人三項" : "百鐵馬（自行車）"}完賽紀錄明細
+              </h2>
+              <p className="text-xs text-zinc-400 mt-1">
+                點選上方選手或輸入關鍵字，下方即刻同步列出歷年完賽紀錄。
+              </p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-zinc-800 text-zinc-400 text-xs uppercase">
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-zinc-400">
-                    載入排行榜中...
-                  </td>
+                  <th className="py-3 px-4">姓名 (Name)</th>
+                  <th className="py-3 px-4">日期 (Date)</th>
+                  <th className="py-3 px-4">賽事名稱 (Race Name)</th>
+                  <th className="py-3 px-4">參賽組別</th>
+                  <th className="py-3 px-4">完賽時間</th>
+                  <th className="py-3 px-4">所屬團隊</th>
                 </tr>
-              ) : error ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-red-500">
-                    目前無法讀取排行榜資料，請稍後再試。
-                  </td>
-                </tr>
-              ) : displayedRankings.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-12 text-center text-zinc-500">
-                    目前沒有符合條件的完賽紀錄。
-                  </td>
-                </tr>
-              ) : (
-                displayedRankings.map((row) => (
-                  <tr key={`${row.identifier}-${row.rank}`} className="border-b border-zinc-900 hover:bg-zinc-950/50 transition">
-                    <td className="py-3 sm:py-4 px-4 sm:px-6 text-xs sm:text-sm font-bold text-zinc-400">
-                      {String(row.rank).padStart(2, "0")}
+              </thead>
+              <tbody className="divide-y divide-zinc-900">
+                {raceRecords.map((rec, i) => (
+                  <tr key={rec.id || i} className="hover:bg-zinc-900/40 transition">
+                    <td className="py-3.5 px-4 font-bold text-amber-400 whitespace-nowrap">
+                      {rec.athlete_name || "選手"}
                     </td>
-                    <td className="py-3 sm:py-4 px-4 sm:px-6 text-xs sm:text-base font-bold text-white">
-                      {row.name || "選手"}
+                    <td className="py-3.5 px-4 font-mono text-xs text-zinc-300 whitespace-nowrap">
+                      {rec.race_date || "-"}
                     </td>
-                    <td className="py-3 sm:py-4 px-4 sm:px-6 text-xs sm:text-base text-zinc-300">
-                      {row.team || "-"}
+                    <td className="py-3.5 px-4 font-bold text-white">
+                      {rec.race_name || rec.event_name || "-"}
                     </td>
-                    <td className="py-3 sm:py-4 px-4 sm:px-6 text-xs sm:text-sm text-zinc-400 font-mono">
-                      {row.identifier}
+                    <td className="py-3.5 px-4 text-xs text-zinc-300">
+                      {rec.category || rec.distance || "-"}
                     </td>
-                    <td className="py-3 sm:py-4 px-4 sm:px-6 text-base sm:text-xl font-black text-right text-yellow-400">
-                      {row.count}
+                    <td className="py-3.5 px-4 font-mono text-xs font-bold text-emerald-400 whitespace-nowrap">
+                      {rec.finish_time || rec.result_time || "完賽"}
+                    </td>
+                    <td className="py-3.5 px-4 text-xs text-zinc-400">
+                      {rec.team || rec.sport_team || "-"}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* 底部分頁控制列 */}
-        <div className="mt-4 flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm text-zinc-400 gap-4">
-          <div>
-            Showing {startEntry} to {endEntry} of {filteredRankings.length} entries
+                ))}
+              </tbody>
+            </table>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 bg-zinc-900 border border-zinc-800 rounded hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
-            >
-              Previous
-            </button>
-            
-            <span className="px-3 py-1 bg-red-900 text-white rounded font-bold">
-              {currentPage} / {totalPages}
-            </span>
-
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages || totalPages === 0}
-              className="px-3 py-1 bg-zinc-900 border border-zinc-800 rounded hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        </section>
 
       </div>
-    </main>
+      <Footer />
+    </div>
   );
 }

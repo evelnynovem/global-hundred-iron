@@ -1,430 +1,489 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect, useCallback } from "react";
+import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
-function calculateEventAgeGroup(birthDateStr: string, gender: string, eventDateStr: string): string {
-  if (!birthDateStr || !gender) return "請先至會員中心設定生日與性別";
-  
-  const birthYear = new Date(birthDateStr).getFullYear();
-  const targetYear = eventDateStr ? new Date(eventDateStr).getFullYear() : new Date().getFullYear();
-  const age = targetYear - birthYear;
+export default function UnifiedRecordSubmissionPage() {
+  const [sportType, setSportType] = useState<"triathlon" | "cycling">("triathlon");
+  const [athleteName, setAthleteName] = useState("");
+  const [sportTeam, setSportTeam] = useState("醫護鐵人");
+  const [eventName, setEventName] = useState("");
+  const [category, setCategory] = useState("51.5K 標準鐵人");
+  const [raceDate, setRaceDate] = useState("");
+  const [hours, setHours] = useState("03");
+  const [minutes, setMinutes] = useState("30");
+  const [seconds, setSeconds] = useState("00");
+  const [isEstimated, setIsEstimated] = useState(false);
+  const [bib, setBib] = useState("");
+  const [proofUrl, setProofUrl] = useState("");
 
-  if (age < 18) return "青少年組 (U18)";
-  if (age >= 18 && age <= 24) return `${gender}18-24`;
-  if (age >= 25 && age <= 29) return `${gender}25-29`;
-  if (age >= 30 && age <= 34) return `${gender}30-34`;
-  if (age >= 35 && age <= 39) return `${gender}35-39`;
-  if (age >= 40 && age <= 44) return `${gender}40-44`;
-  if (age >= 45 && age <= 49) return `${gender}45-49`;
-  if (age >= 50 && age <= 54) return `${gender}50-54`;
-  if (age >= 55 && age <= 59) return `${gender}55-59`;
-  if (age >= 60 && age <= 64) return `${gender}60-64`;
-  if (age >= 65 && age <= 69) return `${gender}65-69`;
-  return `${gender}70+`;
-}
+  const [userEmail, setUserEmail] = useState("");
+  const [recentRecords, setRecentRecords] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
-const TRIATHLON_DATABASE = [
-  { name: "2026 台東之美鐵人三項國際賽", date: "2026-10-18", distance: "113K 半程超鐵" },
-  { name: "2026 台東普悠瑪鐵人三項賽 226K/113K", date: "2026-03-22", distance: "113K 半程超鐵" },
-  { name: "2026 Challenge Taiwan 國際鐵人三項競賽", date: "2026-04-26", distance: "226K 全程超鐵" },
-  { name: "2026 LAVA Taiwan 台東馬到成功鐵人賽", date: "2026-05-10", distance: "51.5K 標準鐵人" },
-  { name: "2025 台東之美鐵人三項國際賽", date: "2025-10-18", distance: "51.5K 標準鐵人" },
-  { name: "2025 梅花湖全國鐵人三項錦標賽", date: "2025-09-14", distance: "51.5K 標準鐵人" },
-  { name: "2025 Challenge Taiwan 國際鐵人三項競賽", date: "2025-04-27", distance: "113K 半程超鐵" },
-  { name: "2025 台東普悠瑪鐵人三項賽", date: "2025-03-30", distance: "113K 半程超鐵" },
-  { name: "2024 台東普悠瑪鐵人三項賽", date: "2024-03-24", distance: "226K 全程超鐵" },
-  { name: "2024 Challenge Taiwan 國際鐵人三項", date: "2024-04-28", distance: "113K 半程超鐵" },
-  { name: "2023 台東普悠瑪鐵人三項賽", date: "2023-03-26", distance: "113K 半程超鐵" },
-  { name: "2023 LAVA Taiwan 墾丁站鐵人三項", date: "2023-10-04", distance: "51.5K 標準鐵人" },
-];
-
-interface CertRecord {
-  id: string;
-  distance_type: string;
-  event_name: string;
-  event_date: string;
-  finish_time: string;
-  age_group: string;
-  team_name: string;
-  is_estimated_time?: boolean;
-  report_count?: number;
-}
-
-export default function TriathlonCertificationPage() {
   const supabase = createClient();
 
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const fetchUserAllRecords = useCallback(async (uid: string, email: string) => {
+    const list: any[] = [];
+    const { data: uRecs } = await supabase
+      .from("user_records")
+      .select("*")
+      .eq("user_id", uid)
+      .order("match_date", { ascending: false });
 
-  const [fullName, setFullName] = useState("");
-  const [teamName, setTeamName] = useState("");
-  const [gender, setGender] = useState("M");
-  const [birthDate, setBirthDate] = useState("");
-  const [ageGroup, setAgeGroup] = useState("");
-  const [violationCount, setViolationCount] = useState(0);
-  const [isBanned, setIsBanned] = useState(false);
-
-  const [eventName, setEventName] = useState("");
-  const [eventDate, setEventDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [distanceType, setDistanceType] = useState("51.5K 標準鐵人");
-  
-  const [hour, setHour] = useState("03");
-  const [minute, setMinute] = useState("30");
-  const [second, setSecond] = useState("00");
-  const [isEstimatedTime, setIsEstimatedTime] = useState(false);
-
-  const [bibNumber, setBibNumber] = useState("");
-  const [certificateUrl, setCertificateUrl] = useState("");
-  const [records, setRecords] = useState<CertRecord[]>([]);
-
-  const [filteredEvents, setFilteredEvents] = useState<typeof TRIATHLON_DATABASE>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        setUserId(user.id);
-        setEmail(user.email || "");
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-
-        if (profile) {
-          setFullName(profile.full_name || user.user_metadata?.full_name || "");
-          setTeamName(profile.team_name || "");
-          setGender(profile.gender || "M");
-          setBirthDate(profile.birth_date || "");
-          setViolationCount(profile.violation_count || 0);
-          setIsBanned(Boolean(profile.is_banned) || (profile.violation_count || 0) >= 2);
-        } else {
-          setFullName(user.user_metadata?.full_name || user.user_metadata?.name || "");
-        }
-
-        const { data: certList } = await supabase
-          .from("certifications")
-          .select("*")
-          .eq("user_id", user.id)
-          .eq("sport_category", "triathlon")
-          .order("event_date", { ascending: false });
-
-        if (certList) setRecords(certList);
-      }
-      setLoading(false);
+    if (uRecs) {
+      uRecs.forEach((r: any) => {
+        list.push({
+          id: `u-${r.id}`,
+          name: r.event_name,
+          date: r.match_date,
+          cat: r.category,
+          time: r.result_time,
+          type: r.sport_type,
+        });
+      });
     }
-    loadData();
+
+    if (email) {
+      const { data: tRecs } = await supabase
+        .from("race_details_full")
+        .select("*")
+        .eq("login_email", email)
+        .order("race_date", { ascending: false });
+
+      if (tRecs) {
+        tRecs.forEach((r: any) => {
+          list.push({
+            id: `t-${r.id}`,
+            name: r.race_name || r.event_name,
+            date: r.race_date,
+            cat: r.category || r.distance,
+            time: r.finish_time || r.result_time,
+            type: "triathlon",
+          });
+        });
+      }
+    }
+    setRecentRecords(list);
   }, [supabase]);
 
   useEffect(() => {
-    const calculated = calculateEventAgeGroup(birthDate, gender, eventDate);
-    setAgeGroup(calculated);
-  }, [birthDate, gender, eventDate]);
+    async function initForm() {
+      const todayStr = new Date().toISOString().split("T")[0];
+      setRaceDate(todayStr);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      const user = session.user;
+      const email = user.email || "";
+      setUserEmail(email);
+
+      // 自動帶入選手姓名與常用團隊
+      const metaName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+      if (metaName) setAthleteName(metaName);
+
+      if (email) {
+        const { data: existTri } = await supabase
+          .from("race_details_full")
+          .select("athlete_name, team")
+          .eq("login_email", email)
+          .limit(1);
+
+        if (existTri && existTri.length > 0) {
+          if (existTri[0].athlete_name) setAthleteName(existTri[0].athlete_name);
+          if (existTri[0].team) setSportTeam(existTri[0].team);
+        }
+      }
+
+      fetchUserAllRecords(user.id, email);
+    }
+    initForm();
+  }, [supabase, fetchUserAllRecords]);
+
+  // 關鍵字自動對應賽事日期與分類
   const handleEventNameChange = (val: string) => {
     setEventName(val);
-    if (val.trim() === "") {
-      setFilteredEvents([]);
-      setShowSuggestions(false);
-    } else {
-      const matches = TRIATHLON_DATABASE.filter((item) =>
-        item.name.toLowerCase().includes(val.toLowerCase())
-      );
-      setFilteredEvents(matches);
-      setShowSuggestions(true);
+    const lower = val.toLowerCase();
+    if (lower.includes("巴歌浪")) {
+      setRaceDate("2026-10-17");
+      setSportType("triathlon");
+    } else if (lower.includes("高雄百k")) {
+      setRaceDate("2026-11-29");
+      setSportType("cycling");
+      setCategory("100K 公路單車");
+    } else if (lower.includes("戀戀197")) {
+      setRaceDate("2026-12-06");
+      setSportType("cycling");
+      setCategory("100K+ 公路單車");
+    } else if (lower.includes("輪躍台南")) {
+      setRaceDate("2026-12-06");
+      setSportType("cycling");
+      setCategory("100K 公路單車");
+    } else if (lower.includes("梅山36彎")) {
+      setRaceDate("2027-02-21");
+      setSportType("cycling");
+    } else if (lower.includes("蘭陽百k")) {
+      setRaceDate("2027-09-20");
+      setSportType("cycling");
+    } else if (lower.includes("普悠瑪")) {
+      setRaceDate("2026-03-28");
+      setSportType("triathlon");
+    } else if (lower.includes("石門羅馬")) {
+      setRaceDate("2027-12-19");
+      setSportType("cycling");
     }
-  };
-
-  const handleSelectSuggestion = (item: typeof TRIATHLON_DATABASE[0]) => {
-    setEventName(item.name);
-    setEventDate(item.date);
-    setDistanceType(item.distance);
-    setShowSuggestions(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId) return;
-
-    if (isBanned) {
-      setMessage({
-        type: "error",
-        text: "⛔ 您的帳號因累計嚴重違規造假紀錄，已被系統永久拒絕登錄。",
-      });
+    if (!eventName || !raceDate) {
+      setErrorMsg("⚠️ 請填寫賽事名稱與參賽日期。");
       return;
     }
 
-    setSubmitting(true);
-    setMessage(null);
-    const finishTimeStr = isEstimatedTime
-      ? `${hour}:${minute}:${second} (印象估算)`
-      : `${hour}:${minute}:${second}`;
+    setIsLoading(true);
+    setErrorMsg("");
+    setSuccessMsg("");
 
-    const newRecord = {
-      user_id: userId,
-      email: email,
-      full_name: fullName,
-      team_name: teamName,
-      age_group: ageGroup,
-      sport_category: "triathlon",
-      distance_type: distanceType,
-      event_name: eventName,
-      event_date: eventDate,
-      bib_number: bibNumber || null,
-      finish_time: finishTimeStr,
-      certificate_url: certificateUrl || null,
-      is_estimated_time: isEstimatedTime,
-      status: "active",
-    };
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("尚未登入，請先登入會員後再登錄成績。");
 
-    const { data, error } = await supabase.from("certifications").insert([newRecord]).select().single();
+      const user = session.user;
+      const finishTimeStr = `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:${seconds.padStart(2, "0")}${isEstimated ? " (印象估算)" : ""}`;
 
-    if (error) {
-      setMessage({ type: "error", text: "登錄失敗：" + error.message });
-    } else {
-      setMessage({
-        type: "success",
-        text: `🎉 榮譽登錄成功！「${eventName}」已即時公開於百鐵查詢系統與個人紀錄中。`,
-      });
-      if (data) setRecords([data, ...records]);
+      // 1. 寫入 user_records (供會員中心管理)
+      const { error: userRecError } = await supabase.from("user_records").insert([
+        {
+          user_id: user.id,
+          event_name: eventName,
+          category: category,
+          match_date: raceDate,
+          result_time: finishTimeStr,
+          bib: bib,
+          sport_team: sportTeam,
+          sport_type: sportType,
+        },
+      ]);
+
+      if (userRecError) throw userRecError;
+
+      // 2. 同步寫入公開查詢資料表 (race_details_full 或 cycling_details_full)
+      const targetPublicTable = sportType === "cycling" ? "cycling_details_full" : "race_details_full";
+      await supabase.from(targetPublicTable).insert([
+        {
+          login_email: user.email,
+          athlete_name: athleteName || user.email?.split("@")[0] || "認證選手",
+          race_name: eventName,
+          race_date: raceDate,
+          category: category,
+          finish_time: finishTimeStr,
+          team: sportTeam,
+        },
+      ]);
+
+      // 若參加 113K 或 226K 超鐵，自動跨界連動百鐵馬 (cycling_details_full)
+      if (sportType === "triathlon" && (category.includes("113") || category.includes("226"))) {
+        await supabase.from("cycling_details_full").insert([
+          {
+            login_email: user.email,
+            athlete_name: athleteName || user.email?.split("@")[0] || "認證選手",
+            race_name: `${eventName} (超鐵單車90K+同步認證)`,
+            race_date: raceDate,
+            category: "90K+ 超鐵單車段",
+            finish_time: finishTimeStr,
+            team: sportTeam,
+          },
+        ]);
+      }
+
+      setSuccessMsg(`🎉 榮譽登錄成功！「${eventName}」已同步更新至會員中心與公開查詢系統！`);
       setEventName("");
-      setBibNumber("");
-      setCertificateUrl("");
-      setIsEstimatedTime(false);
+      setBib("");
+      setProofUrl("");
+      fetchUserAllRecords(user.id, user.email || "");
+    } catch (err: any) {
+      setErrorMsg("❌ 登錄失敗：" + (err.message || "未知錯誤"));
+    } finally {
+      setIsLoading(false);
     }
-    setSubmitting(false);
   };
 
-  if (loading) return <div className="min-h-[70vh] flex items-center justify-center text-gray-500">載入中...</div>;
-
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10 space-y-8">
-      {/* 頂部選手資訊與信譽狀態看板 */}
-      <div className="bg-gradient-to-r from-gray-900 to-black text-white rounded-2xl p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">
-              Triathlon Honor System
-            </span>
-            <span
-              className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold ${
-                violationCount === 0
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                  : "bg-red-500/30 text-red-300 border border-red-500/50"
-              }`}
-            >
-              違規紀錄：{violationCount} 次
-            </span>
-          </div>
-          <h1 className="text-2xl font-black mt-1">鐵人三項完賽榮譽登錄</h1>
-          <p className="text-xs text-gray-300 mt-1">
-            選手：{fullName || "未設定"} ｜ 團隊：{teamName || "個人"} ｜ 當場分組：{ageGroup}
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <Link href="/rankings" className="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-black text-xs font-bold rounded-xl transition">
-            查看成績查詢 →
-          </Link>
-          <Link href="/certifications" className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition">
-            ← 返回
-          </Link>
-        </div>
-      </div>
-
-      {/* 嚴重違規停權警告 */}
-      {isBanned && (
-        <div className="p-5 rounded-2xl bg-red-950 text-red-200 border border-red-700 text-sm font-medium">
-          ⛔ <strong>永久拒絕登錄通知：</strong>您的帳號因累計查證屬實之不實造假紀錄達 {violationCount} 次，已違反百鐵榮譽公約，系統已永久鎖定您的登錄權限。
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 space-y-6">
-          <div className="border-b border-gray-100 pb-4">
-            <h2 className="text-xl font-black text-gray-900">填寫鐵人三項完賽成績</h2>
-            <p className="text-xs text-gray-500 mt-1">
-              採榮譽自律制，送出後即刻生效公開，無須等待官方審核。
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+      <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-8">
+        
+        {/* 頂部橫幅 */}
+        <div className="rounded-3xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-zinc-800 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xl">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-amber-400 tracking-wider uppercase">
+                GLOBAL 100 HONOR SYSTEM
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                榮譽自律制・即刻同步
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white mt-2">
+              鐵人三項 ＆ 百鐵馬完賽榮譽登錄
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+              選手：<span className="text-white font-bold">{athleteName || userEmail || "請先登入"}</span> ｜ 常用團隊：<span className="text-amber-400 font-bold">{sportTeam || "未設定"}</span>
             </p>
           </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/rankings"
+              className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black text-xs sm:text-sm font-extrabold rounded-xl transition"
+            >
+              查看英雄榜與成績查詢 →
+            </Link>
+            <Link
+              href="/profile"
+              className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs sm:text-sm font-bold rounded-xl transition"
+            >
+              ← 返回會員中心
+            </Link>
+          </div>
+        </div>
 
-          {message && (
-            <div className={`p-4 rounded-xl text-sm font-medium border ${message.type === "success" ? "bg-green-50 text-green-800 border-green-200" : "bg-red-50 text-red-700 border-red-200"}`}>
-              {message.text}
+        {errorMsg && (
+          <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-red-400 text-sm font-semibold">
+            {errorMsg}
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/30 p-4 text-emerald-400 text-sm font-semibold">
+            {successMsg}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* 左側：登錄表單 */}
+          <form onSubmit={handleSubmit} className="lg:col-span-7 rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
+            
+            {/* 運動類別切換 */}
+            <div className="grid grid-cols-2 gap-3 p-1.5 bg-zinc-900 rounded-2xl border border-zinc-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setSportType("triathlon");
+                  setCategory("51.5K 標準鐵人");
+                }}
+                className={`py-2.5 rounded-xl text-sm font-extrabold transition cursor-pointer ${
+                  sportType === "triathlon"
+                    ? "bg-amber-500 text-black shadow-lg"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                🏊‍♂️ 鐵人三項登錄
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSportType("cycling");
+                  setCategory("100K 公路單車");
+                }}
+                className={`py-2.5 rounded-xl text-sm font-extrabold transition cursor-pointer ${
+                  sportType === "cycling"
+                    ? "bg-red-600 text-white shadow-lg"
+                    : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                🚴‍♂️ 百鐵馬（自行車）登錄
+              </button>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-6 relative">
-            <div className="relative">
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                賽事名稱 (輸入「普悠瑪」、「台東」或「Lava」自動推薦歷年賽事) <span className="text-red-500">*</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-300">選手姓名 (自動帶入)</label>
+                <input
+                  type="text"
+                  value={athleteName}
+                  onChange={(e) => setAthleteName(e.target.value)}
+                  placeholder="請輸入真實姓名"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-300">所屬團隊 (自動帶入)</label>
+                <input
+                  type="text"
+                  value={sportTeam}
+                  onChange={(e) => setSportTeam(e.target.value)}
+                  placeholder="例如：醫護鐵人"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-300">
+                賽事名稱 * (輸入「巴歌浪」、「普悠瑪」、「戀戀197」、「高雄百K」自動帶入日期)
               </label>
               <input
                 type="text"
                 required
-                disabled={isBanned}
                 value={eventName}
                 onChange={(e) => handleEventNameChange(e.target.value)}
                 placeholder="請輸入關鍵字或完整賽事名稱"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-bold focus:ring-2 focus:ring-red-500 focus:outline-none disabled:bg-gray-100"
+                className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none transition"
               />
-
-              {showSuggestions && filteredEvents.length > 0 && (
-                <div className="absolute z-50 left-0 right-0 mt-1 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-60 overflow-y-auto">
-                  {filteredEvents.map((item, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => handleSelectSuggestion(item)}
-                      className="px-4 py-3 hover:bg-red-50 cursor-pointer border-b border-gray-100 text-xs flex justify-between items-center"
-                    >
-                      <span className="font-bold text-gray-800">{item.name}</span>
-                      <span className="text-gray-400 font-mono">📅 {item.date} ({item.distance})</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">賽事日期 (預設今日) *</label>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-300">賽事日期 (預設今日或自動對應) *</label>
                 <input
                   type="date"
                   required
-                  disabled={isBanned}
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+                  value={raceDate}
+                  onChange={(e) => setRaceDate(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-amber-400 font-semibold focus:border-amber-500 focus:outline-none transition"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">距離組別 *</label>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-300">距離組別 *</label>
                 <select
-                  disabled={isBanned}
-                  value={distanceType}
-                  onChange={(e) => setDistanceType(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:ring-2 focus:ring-red-500 focus:outline-none"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white focus:border-amber-500 focus:outline-none transition"
                 >
-                  <option value="51.5K 標準鐵人">51.5K 標準鐵人</option>
-                  <option value="113K 半程超鐵">113K 半程超鐵</option>
-                  <option value="226K 全程超鐵">226K 全程超鐵</option>
+                  {sportType === "triathlon" ? (
+                    <>
+                      <option value="51.5K 標準鐵人">51.5K 標準鐵人</option>
+                      <option value="113K 半程超鐵">113K 半程超鐵 (同步認證百鐵馬)</option>
+                      <option value="226K 全程超鐵">226K 全程超鐵 (同步認證百鐵馬)</option>
+                      <option value="越野三項 / 其他">越野三項 / 其他距離</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="100K 公路單車">100K 公路單車</option>
+                      <option value="90K+ 公路單車">90K+ 公路單車挑戰</option>
+                      <option value="160K+ 長距離單車">160K+ 長距離單車</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <label className="block text-xs font-bold text-gray-700 uppercase">
-                  完賽總時間 (時 / 分 / 秒) *
-                </label>
-                <label className="inline-flex items-center gap-2 text-xs text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 cursor-pointer">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-zinc-300">完賽總時間 (時 / 分 / 秒) *</label>
+                <label className="flex items-center gap-1.5 text-xs text-amber-400 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={isEstimatedTime}
-                    onChange={(e) => setIsEstimatedTime(e.target.checked)}
-                    className="rounded text-red-600 focus:ring-red-500"
+                    checked={isEstimated}
+                    onChange={(e) => setIsEstimated(e.target.checked)}
+                    className="rounded border-zinc-700 bg-zinc-900"
                   />
-                  <span>早期賽事已遺忘確切秒數（填寫印象約略時間）</span>
+                  早期賽事已遺忘確切秒數（填寫印象約略時間）
                 </label>
               </div>
-
               <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <span className="text-[10px] text-gray-400 block mb-1">小時 (Hours)</span>
-                  <input type="number" min="0" max="23" disabled={isBanned} value={hour} onChange={(e) => setHour(e.target.value.padStart(2, "0"))} className="w-full px-4 py-3 rounded-xl border text-center font-mono font-bold" />
-                </div>
-                <div>
-                  <span className="text-[10px] text-gray-400 block mb-1">分鐘 (Minutes)</span>
-                  <input type="number" min="0" max="59" disabled={isBanned} value={minute} onChange={(e) => setMinute(e.target.value.padStart(2, "0"))} className="w-full px-4 py-3 rounded-xl border text-center font-mono font-bold" />
-                </div>
-                <div>
-                  <span className="text-[10px] text-gray-400 block mb-1">秒鐘 (Seconds)</span>
-                  <input type="number" min="0" max="59" disabled={isBanned} value={second} onChange={(e) => setSecond(e.target.value.padStart(2, "0"))} className="w-full px-4 py-3 rounded-xl border text-center font-mono font-bold" />
-                </div>
+                <input
+                  type="text"
+                  value={hours}
+                  onChange={(e) => setHours(e.target.value)}
+                  placeholder="時 (HH)"
+                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white text-center font-bold focus:border-amber-500"
+                />
+                <input
+                  type="text"
+                  value={minutes}
+                  onChange={(e) => setMinutes(e.target.value)}
+                  placeholder="分 (MM)"
+                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white text-center font-bold focus:border-amber-500"
+                />
+                <input
+                  type="text"
+                  value={seconds}
+                  onChange={(e) => setSeconds(e.target.value)}
+                  placeholder="秒 (SS)"
+                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white text-center font-bold focus:border-amber-500"
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">參賽號碼布 (選填)</label>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-300">參賽號碼布 (選填)</label>
                 <input
                   type="text"
-                  disabled={isBanned}
-                  value={bibNumber}
-                  onChange={(e) => setBibNumber(e.target.value)}
+                  value={bib}
+                  onChange={(e) => setBib(e.target.value)}
                   placeholder="早期賽事若遺忘可免填"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white focus:border-amber-500"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase mb-1">成績證明或相片連結 (選填)</label>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-300">成績證明或相片連結 (選填)</label>
                 <input
-                  type="url"
-                  disabled={isBanned}
-                  value={certificateUrl}
-                  onChange={(e) => setCertificateUrl(e.target.value)}
+                  type="text"
+                  value={proofUrl}
+                  onChange={(e) => setProofUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white focus:border-amber-500"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              disabled={submitting || isBanned}
-              className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl shadow-lg transition disabled:opacity-50"
+              disabled={isLoading}
+              className="w-full rounded-xl bg-red-600 hover:bg-red-500 py-4 text-white font-extrabold text-sm transition shadow-lg shadow-red-600/20 disabled:opacity-50 cursor-pointer"
             >
-              {isBanned ? "帳號已停權禁止登錄" : submitting ? "送出中..." : "確認送出鐵人完賽登錄"}
+              {isLoading ? "正在同步寫入完賽履歷..." : `確認送出${sportType === "cycling" ? "百鐵馬" : "鐵人"}完賽登錄`}
             </button>
           </form>
-        </div>
 
-        {/* 右側：榮譽自律規範與個人紀錄 */}
-        <div className="space-y-6">
-          <div className="bg-zinc-950 text-white rounded-2xl p-6 space-y-3 shadow-lg border border-zinc-800">
-            <h3 className="text-xs font-black uppercase tracking-widest text-amber-400">
-              🛡️ 榮譽認證與檢舉規範
-            </h3>
-            <ul className="text-xs space-y-2.5 text-zinc-300 leading-relaxed">
-              <li>
-                <strong className="text-white">1. 免事前審查：</strong>本平台採榮譽自律制，登錄後即刻生效，不設官方事前審核。
-              </li>
-              <li>
-                <strong className="text-white">2. 歷史成績彈性：</strong>早期賽事若已遺失證書或忘記確切時間，可勾選「印象約略時間」完成登錄。
-              </li>
-              <li>
-                <strong className="text-white">3. 公開檢舉與永久停權：</strong>開放全體選手檢舉「未參賽造假」或「未完賽(DNF/DNS)」。查證屬實除刪除紀錄並累計違規次數外，嚴重或累犯者將<span className="text-red-400 font-bold">永久拒絕登錄</span>。
-              </li>
-            </ul>
-          </div>
+          {/* 右側：規範與即時完賽清單 */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 shadow-2xl space-y-3 text-xs text-zinc-300 leading-relaxed">
+              <h3 className="text-sm font-extrabold text-amber-400">🛡️ 榮譽認證與雙軌同步規範</h3>
+              <p><strong>1. 免事前審查：</strong>採榮譽自律制，送出後即刻同步至「會員中心個人履歷」與「公開成績查詢系統」。</p>
+              <p><strong>2. 跨界雙軌連動：</strong>登錄 113K 或 226K 超鐵賽事，系統將自動為您同步新增一筆 90K+ 百鐵馬（自行車）認證紀錄。</p>
+              <p><strong>3. 完整管理權限：</strong>所有登錄紀錄皆可隨時返回「會員中心」進行編輯修改或刪除。</p>
+            </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 space-y-4">
-            <h3 className="text-base font-black text-gray-900">我的鐵人完賽紀錄 ({records.length})</h3>
-            {records.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4 text-center">尚無紀錄</p>
-            ) : (
-              <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
-                {records.map((r) => (
-                  <div key={r.id} className="p-3 rounded-xl bg-gray-50 border text-xs space-y-1">
-                    <div className="font-bold text-gray-900">{r.event_name}</div>
-                    <div className="text-gray-500 flex justify-between items-center">
-                      <span>{r.event_date} ｜ {r.distance_type}</span>
-                      <span className="font-mono font-bold text-red-600">{r.finish_time}</span>
+            <div className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-extrabold text-white">
+                  我的完賽紀錄 ({recentRecords.length})
+                </h3>
+                <Link href="/profile" className="text-xs font-bold text-amber-400 hover:underline">
+                  前往編輯 / 刪除 →
+                </Link>
+              </div>
+              
+              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                {recentRecords.map((r) => (
+                  <div key={r.id} className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 flex items-center justify-between gap-2">
+                    <div className="space-y-1">
+                      <div className="text-sm font-bold text-white">{r.name}</div>
+                      <div className="text-xs text-zinc-400 font-mono">
+                        {r.date} ｜ {r.cat}
+                      </div>
+                    </div>
+                    <div className="text-xs font-mono font-bold text-amber-400 shrink-0">
+                      {r.time}
                     </div>
                   </div>
                 ))}
               </div>
-            )}
+            </div>
           </div>
         </div>
+
       </div>
+      <Footer />
     </div>
   );
 }
