@@ -107,10 +107,9 @@ export default function UnifiedRecordSubmissionPage() {
   const [eventName, setEventName] = useState("");
   const [category, setCategory] = useState("51.5K 標準鐵人");
 
-  const now = new Date();
-  const [selYear, setSelYear] = useState(String(now.getFullYear()));
-  const [selMonth, setSelMonth] = useState(String(now.getMonth() + 1).padStart(2, "0"));
-  const [selDay, setSelDay] = useState(String(now.getDate()).padStart(2, "0"));
+  const [selYear, setSelYear] = useState("2026");
+  const [selMonth, setSelMonth] = useState("10");
+  const [selDay, setSelDay] = useState("27");
 
   const [hours, setHours] = useState("03");
   const [minutes, setMinutes] = useState("30");
