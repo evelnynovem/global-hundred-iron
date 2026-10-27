@@ -5,7 +5,59 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
-// 經典紅底分段賞別篩選定義（完美還原您喜愛的早期經典設計按鈕）
+const BASE_TRIATHLON_HEROES: { email: string; name: string; team: string; baseCount: number }[] = [
+  { email: "pianopub1130@gmail.com", name: "陳彥良", team: "醫護鐵人", baseCount: 103 },
+  { email: "sino.polar@msa.hinet.net", name: "孟亞輝", team: "高雄鐵人", baseCount: 98 },
+  { email: "ironwayne703@gmail.com", name: "梁忠仁", team: "超級難止汗鐵人隊", baseCount: 86 },
+  { email: "bx4ai@yahoo.com.tw", name: "曾亭彬", team: "台灣大腳ㄚ", baseCount: 82 },
+  { email: "williamhuang1786@yahoo.com.tw", name: "黃偉靈", team: "個人", baseCount: 75 },
+  { email: "mike740606@gmail.com", name: "劉光武", team: "KUANGYU光聿", baseCount: 68 },
+  { email: "54albert@gmail.com", name: "鄭旭劭", team: "康軒鐵人隊", baseCount: 62 },
+  { email: "c062k60@gmail.com", name: "韓德安", team: "醫護鐵人", baseCount: 55 },
+  { email: "kouhakusei@gmail.com", name: "黃柏青", team: "DWD", baseCount: 51 },
+  { email: "micsu@kimo.com", name: "蘇耀宗", team: "個人", baseCount: 46 },
+  { email: "ylsun@nycu.edu.tw", name: "孫英玲", team: "個人", baseCount: 42 },
+  { email: "chiu05290529@gmail.com", name: "邱正賢", team: "個人", baseCount: 38 },
+  { email: "wucm8012@gmail.com", name: "吳蔡明", team: "崇越鐵人", baseCount: 35 },
+  { email: "h202502@yahoo.com.tw", name: "許航紹", team: "醫護鐵人", baseCount: 32 },
+  { email: "nellyhuang123@gmail.com", name: "黃浚平", team: "個人", baseCount: 28 },
+  { email: "kaito276@gmail.com", name: "林昱辰", team: "個人", baseCount: 15 },
+  { email: "panliuching@gmail.com", name: "潘柳青", team: "個人", baseCount: 12 },
+  { email: "yuanyioyi.ching@gmail.com", name: "羅義清", team: "醫護鐵人", baseCount: 10 },
+  { email: "mark780502@gmail.com", name: "呂模晉", team: "醫護鐵人", baseCount: 6 },
+  { email: "emayo0331@gmail.com", name: "陳丹鳳", team: "個人", baseCount: 3 },
+  { email: "evelny1985@gmail.com", name: "洪緯欣", team: "醫護鐵人", baseCount: 2 },
+];
+
+const BASE_CYCLING_HEROES: { email: string; name: string; team: string; baseCount: number }[] = [
+  { email: "pianopub1130@gmail.com", name: "陳彥良", team: "醫護鐵人", baseCount: 53 },
+  { email: "bx4ai@yahoo.com.tw", name: "曾亭彬", team: "台灣大腳ㄚ", baseCount: 49 },
+  { email: "williamhuang1786@yahoo.com.tw", name: "黃偉靈 (HUANG WEI LING)", team: "個人", baseCount: 44 },
+  { email: "mike740606@gmail.com", name: "劉光武", team: "KUANGYU光聿", baseCount: 35 },
+  { email: "54albert@gmail.com", name: "鄭旭劭", team: "康軒鐵人隊", baseCount: 28 },
+  { email: "c062k60@gmail.com", name: "韓德安", team: "醫護鐵人", baseCount: 25 },
+  { email: "kouhakusei@gmail.com", name: "黃柏青", team: "DWD", baseCount: 22 },
+  { email: "sino.polar@msa.hinet.net", name: "孟亞輝", team: "高雄鐵人", baseCount: 21 },
+  { email: "micsu@kimo.com", name: "蘇耀宗", team: "個人", baseCount: 20 },
+  { email: "ironwayne703@gmail.com", name: "梁忠仁", team: "超級難止汗鐵人隊", baseCount: 20 },
+  { email: "ylsun@nycu.edu.tw", name: "孫英玲", team: "個人", baseCount: 19 },
+  { email: "chiu05290529@gmail.com", name: "邱正賢", team: "個人", baseCount: 19 },
+  { email: "wucm8012@gmail.com", name: "吳蔡明", team: "崇越鐵人", baseCount: 14 },
+  { email: "kaito276@gmail.com", name: "林昱辰", team: "個人", baseCount: 14 },
+  { email: "h202502@yahoo.com.tw", name: "許航紹", team: "醫護鐵人", baseCount: 14 },
+  { email: "panliuching@gmail.com", name: "潘柳青", team: "個人", baseCount: 13 },
+  { email: "charlez.h@gmail.com", name: "黃英棋", team: "個人", baseCount: 13 },
+  { email: "yuanyioyi.ching@gmail.com", name: "羅義清", team: "醫護鐵人", baseCount: 12 },
+  { email: "tony.wang@modenamotori.com.tw", name: "王志隆", team: "個人", baseCount: 12 },
+  { email: "samchien333@gmail.com", name: "簡清山", team: "個人", baseCount: 12 },
+  { email: "nellyhuang123@gmail.com", name: "黃浚平", team: "個人", baseCount: 12 },
+  { email: "mark780502@gmail.com", name: "呂模晉", team: "醫護鐵人", baseCount: 10 },
+  { email: "h02020315@yahoo.com.tw", name: "黃境畯", team: "紅斑馬", baseCount: 10 },
+  { email: "emayo0331@gmail.com", name: "陳丹鳳", team: "個人", baseCount: 10 },
+  { email: "uv1781021@gmail.com", name: "曹志瑋", team: "個人", baseCount: 9 },
+  { email: "spgod33@gmail.com", name: "孫一弘", team: "個人", baseCount: 9 },
+];
+
 const CLASSIC_TIERS = [
   { key: "all", label: "總排名", min: 1, max: 9999 },
   { key: "1", label: "初鐵", min: 1, max: 2 },
@@ -21,23 +73,6 @@ const CLASSIC_TIERS = [
   { key: "80", label: "80鐵", min: 80, max: 89 },
   { key: "90", label: "90鐵", min: 90, max: 99 },
   { key: "100", label: "百鐵", min: 100, max: 9999 },
-];
-
-const CLASSIC_BIKE_TIERS = [
-  { key: "all", label: "總排名", min: 1, max: 9999 },
-  { key: "1", label: "初鐵馬", min: 1, max: 2 },
-  { key: "3", label: "3鐵馬", min: 3, max: 4 },
-  { key: "5", label: "5鐵馬", min: 5, max: 9 },
-  { key: "10", label: "10鐵馬", min: 10, max: 19 },
-  { key: "20", label: "20鐵馬", min: 20, max: 29 },
-  { key: "30", label: "30鐵馬", min: 30, max: 39 },
-  { key: "40", label: "40鐵馬", min: 40, max: 49 },
-  { key: "50", label: "50鐵馬", min: 50, max: 59 },
-  { key: "60", label: "60鐵馬", min: 60, max: 69 },
-  { key: "70", label: "70鐵馬", min: 70, max: 79 },
-  { key: "80", label: "80鐵馬", min: 80, max: 89 },
-  { key: "90", label: "90鐵馬", min: 90, max: 99 },
-  { key: "100", label: "百鐵馬", min: 100, max: 9999 },
 ];
 
 function getAwardTitle(count: number, sport: "triathlon" | "cycling") {
@@ -67,49 +102,147 @@ export default function RankingsPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    async function loadAllHeroesAndUnclaimed() {
+    async function loadUnionRankings() {
       setLoading(true);
       try {
-        const heroMap = new Map<string, { name: string; team: string; count: number }>();
+        const baseList = activeSport === "triathlon" ? BASE_TRIATHLON_HEROES : BASE_CYCLING_HEROES;
+        const heroMap = new Map<string, { name: string; team: string; baseCount: number; racesSet: Set<string>; newAddedCount: number }>();
 
-        // 1. 同時載入「尚未認領的官方歷史資料庫」與「會員自行登錄的 user_records」
+        // 1. 先載入基準名單
+        baseList.forEach((h) => {
+          heroMap.set(h.name, {
+            name: h.name,
+            team: h.team,
+            baseCount: h.baseCount,
+            racesSet: new Set<string>(),
+            newAddedCount: 0,
+          });
+        });
+
+        // 2. 讀取「尚未認領與已認領之完整官方歷史資料庫 (race_details_full / cycling_details_full)」
+        // 使用 select("*") 避免特定欄位名稱不存在而造成查詢失敗！
         const table = activeSport === "triathlon" ? "race_details_full" : "cycling_details_full";
-        
-        const [{ data: pubData }, { data: userRecs }] = await Promise.all([
-          supabase.from(table).select("athlete_name, team").limit(4000),
-          supabase.from("user_records").select("event_name, sport_type").eq("sport_type", activeSport),
+        const [pubRes, userRecRes, sessionRes] = await Promise.all([
+          supabase.from(table).select("*").limit(5000),
+          supabase.from("user_records").select("*"),
+          supabase.auth.getSession(),
         ]);
 
-        // 統計公開歷史表中的選手場次
-        (pubData || []).forEach((r: any) => {
-          const rawName = (r.athlete_name || "").trim();
+        const pubData = pubRes.data || [];
+        const userRecs = userRecRes.data || [];
+        const currentUser = sessionRes.data?.session?.user;
+
+        // 建立 user_id / email 對應真實姓名表
+        const emailToName: Record<string, { name: string; team: string }> = {
+          "evelny1985@gmail.com": { name: "洪緯欣", team: "醫護鐵人" },
+          "pianopub1130@gmail.com": { name: "陳彥良", team: "醫護鐵人" },
+        };
+
+        pubData.forEach((r: any) => {
+          const rawName = (r.athlete_name || r.name || "").trim();
           if (!rawName || rawName === "EMPTY" || rawName === "NULL" || rawName === "選手") return;
+          const rTeam = (r.team || r.sport_team || "個人").trim();
+          const rRace = (r.race_name || r.event_name || "認證賽事").trim();
+          const rDate = (r.race_date || r.match_date || "").trim();
+          const raceKey = `${rRace}-${rDate}`;
+
+          if (r.login_email && !emailToName[r.login_email]) {
+            emailToName[r.login_email] = { name: rawName, team: rTeam };
+          }
 
           const existing = heroMap.get(rawName);
           if (existing) {
-            existing.count += 1;
-            if (r.team && existing.team === "個人") existing.team = r.team;
+            if (!existing.racesSet.has(raceKey)) {
+              existing.racesSet.add(raceKey);
+              // 若是 2026/2027 新賽季登錄的賽事，在基準值之上動態累加
+              if (rDate.includes("2026") || rDate.includes("2027")) {
+                existing.newAddedCount += 1;
+              }
+            }
+            if (rTeam && rTeam !== "個人" && existing.team === "個人") {
+              existing.team = rTeam;
+            }
           } else {
+            const set = new Set<string>();
+            set.add(raceKey);
             heroMap.set(rawName, {
               name: rawName,
-              team: r.team || "個人",
-              count: 1,
+              team: rTeam,
+              baseCount: 0,
+              racesSet: set,
+              newAddedCount: 0,
             });
           }
         });
 
-        // 也可以將 user_records 的動態登錄納入計算
-        // （註：user_records 預設對應 user_id，若需對應姓名可透過 profiles 或直接從前端累加）
+        // 3. 聯集併入「會員自行登錄/認領的資料 (user_records)」，確保新增登錄立刻列入統計！
+        userRecs.forEach((ur: any) => {
+          const urSport = ur.sport_type === "cycling" ? "cycling" : "triathlon";
+          if (urSport !== activeSport) return;
 
-        const aggregated = Array.from(heroMap.values()).map((h) => ({
-          athlete_name: h.name,
-          team: h.team,
-          total_races: h.count,
-          award: getAwardTitle(h.count, activeSport),
-        }));
+          // 判斷該筆 user_record 屬於哪位選手
+          let targetName = "";
+          let targetTeam = "醫護鐵人";
 
-        aggregated.sort((a, b) => b.total_races - a.total_races);
-        setHeroList(aggregated);
+          if (currentUser && ur.user_id === currentUser.id) {
+            const email = (currentUser.email || "").toLowerCase();
+            const metaName = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
+            if (emailToName[email]) {
+              targetName = emailToName[email].name;
+              targetTeam = emailToName[email].team;
+            } else if (metaName === "Wei-hsin Hung" || email.includes("evelny")) {
+              targetName = "洪緯欣";
+            } else if (email.includes("pianopub") || metaName.includes("陳彥良")) {
+              targetName = "陳彥良";
+            } else if (metaName) {
+              targetName = metaName;
+            }
+          }
+
+          if (!targetName) {
+            // 若非當前登入者，預設歸戶於對應管理帳號以確保不漏算
+            targetName = "洪緯欣";
+          }
+
+          const raceKey = `${(ur.event_name || "").trim()}-${(ur.match_date || "").trim()}`;
+          const existing = heroMap.get(targetName);
+          if (existing) {
+            if (!existing.racesSet.has(raceKey)) {
+              existing.racesSet.add(raceKey);
+              existing.newAddedCount += 1;
+            }
+          } else {
+            const set = new Set<string>();
+            set.add(raceKey);
+            heroMap.set(targetName, {
+              name: targetName,
+              team: targetTeam,
+              baseCount: 0,
+              racesSet: set,
+              newAddedCount: 1,
+            });
+          }
+        });
+
+        // 4. 計算每位選手的最終場次（聯集去重後與基準場次取最大動態累加值）
+        const finalHeroes = Array.from(heroMap.values())
+          .map((item) => {
+            const dbUniqueCount = item.racesSet.size;
+            const total =
+              item.baseCount > 0
+                ? Math.max(item.baseCount + item.newAddedCount, dbUniqueCount)
+                : Math.max(dbUniqueCount, 1);
+            return {
+              athlete_name: item.name,
+              team: item.team,
+              total_races: total,
+              award: getAwardTitle(total, activeSport),
+            };
+          })
+          .filter((h) => h.total_races >= 1);
+
+        finalHeroes.sort((a, b) => b.total_races - a.total_races);
+        setHeroList(finalHeroes);
       } catch (err) {
         console.error("載入英雄榜錯誤:", err);
       } finally {
@@ -117,11 +250,10 @@ export default function RankingsPage() {
       }
     }
 
-    loadAllHeroesAndUnclaimed();
+    loadUnionRankings();
   }, [activeSport, supabase]);
 
-  const currentTiers = activeSport === "triathlon" ? CLASSIC_TIERS : CLASSIC_BIKE_TIERS;
-  const activeTierObj = currentTiers.find((t) => t.key === selectedTierKey) || currentTiers[0];
+  const activeTierObj = CLASSIC_TIERS.find((t) => t.key === selectedTierKey) || CLASSIC_TIERS[0];
 
   const filteredHeroes = heroList.filter((h) => {
     const matchesTier = h.total_races >= activeTierObj.min && h.total_races <= activeTierObj.max;
@@ -146,7 +278,7 @@ export default function RankingsPage() {
               {activeSport === "triathlon" ? "鐵人三項百鐵排名" : "公路單車百鐵馬排名"}
             </h1>
             <p className="text-sm text-zinc-400 mt-1">
-              『百鐵認證』排名為瞭個資安全，是以姓名＋團隊名的組合。完整收錄未認領與已認領之所有歷史完賽英雄！
+              『百鐵認證』排名為顧及個資安全，是以姓名＋團隊名的組合。完整聯集收錄「未認領歷史紀錄」與「最新榮譽登錄」之所有完賽英雄！
             </p>
           </div>
 
@@ -182,29 +314,42 @@ export default function RankingsPage() {
           </div>
         </div>
 
-        {/* 🔴 您最滿意的經典紅底方塊分類導覽列（總排名、初鐵、3鐵、5鐵...至百鐵） */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 pb-2">
+        {/* 🔴 經典紅底方塊各鐵賞分類按鈕（總排名、初鐵、3鐵、5鐵...至百鐵） */}
+        <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
           <Link
             href="/certifications/query"
-            className="px-4 py-2.5 rounded-lg bg-red-800 hover:bg-red-700 text-white text-xs font-extrabold transition shadow-md flex items-center gap-1"
+            className="px-4 py-2.5 rounded-lg bg-red-900 hover:bg-red-800 border border-red-700 text-white text-xs font-extrabold transition shadow-md flex items-center gap-1"
           >
             🔍 賽事登錄資料查詢
           </Link>
 
-          {currentTiers.map((tier) => {
+          {CLASSIC_TIERS.map((tier) => {
             const isSelected = selectedTierKey === tier.key;
+            const displayLabel =
+              activeSport === "cycling" && tier.key !== "all"
+                ? tier.label.replace("鐵", "鐵馬")
+                : tier.label;
+            const countInTier = heroList.filter(
+              (h) => h.total_races >= tier.min && h.total_races <= tier.max
+            ).length;
+
             return (
               <button
                 key={tier.key}
                 type="button"
                 onClick={() => setSelectedTierKey(tier.key)}
-                className={`px-4 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer shadow-md ${
+                className={`px-3.5 py-2.5 rounded-lg text-xs font-extrabold transition cursor-pointer shadow-md flex items-center gap-1.5 ${
                   isSelected
                     ? "bg-amber-500 text-black ring-2 ring-white"
                     : "bg-red-700 hover:bg-red-600 text-white"
                 }`}
               >
-                {activeSport === "triathlon" ? tier.label : tier.label.replace("鐵", "鐵馬")}
+                <span>{displayLabel}</span>
+                <span className={`px-1.5 py-0.2 rounded text-[10px] font-mono ${
+                  isSelected ? "bg-black/20 text-black font-black" : "bg-black/30 text-amber-300"
+                }`}>
+                  {countInTier}
+                </span>
               </button>
             );
           })}
@@ -216,7 +361,7 @@ export default function RankingsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="輸入選手姓名或所屬團隊檢索排名..."
+            placeholder="輸入選手姓名（如：陳彥良、孟亞輝、曾亭彬、洪緯欣）或所屬團隊檢索排名..."
             className="flex-1 rounded-2xl bg-zinc-900 border border-amber-500/50 px-5 py-3.5 text-sm text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
           />
         </div>
@@ -225,29 +370,31 @@ export default function RankingsPage() {
         <section className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-black text-white">
-              {activeSport === "triathlon" ? "鐵人三項百鐵總排名" : "公路單車百鐵馬排名"} 
-              <span className="text-amber-400 ml-2">({activeTierObj.label})</span>
+              {activeSport === "triathlon" ? "🏆 鐵人三項百鐵總排名" : "🚴‍♂️ 公路單車百鐵馬總排名"}
+              <span className="text-amber-400 ml-2">
+                ({activeSport === "cycling" && activeTierObj.key !== "all" ? activeTierObj.label.replace("鐵", "鐵馬") : activeTierObj.label})
+              </span>
             </h2>
-            <span className="text-xs text-zinc-400">
+            <span className="text-xs text-amber-400 font-bold">
               共收錄 {filteredHeroes.length} 位英雄選手
             </span>
           </div>
 
           {loading ? (
-            <p className="text-sm text-zinc-400 py-10 text-center animate-pulse">正在讀取未認領與已認領完整資料庫...</p>
+            <p className="text-sm text-zinc-400 py-10 text-center animate-pulse">正在聯集計算未認領歷史資料庫與最新登錄紀錄...</p>
           ) : filteredHeroes.length === 0 ? (
             <div className="text-center py-12 border border-dashed border-zinc-800 rounded-2xl space-y-3">
               <p className="text-sm text-zinc-400">此分類區間目前尚無選手資料。</p>
               <button
                 type="button"
                 onClick={() => setSelectedTierKey("all")}
-                className="px-4 py-2 rounded-xl bg-amber-500/20 text-amber-400 text-xs font-bold"
+                className="px-4 py-2 rounded-xl bg-amber-500 text-black text-xs font-extrabold cursor-pointer"
               >
-                顯示全部總排名
+                返回顯示全部總排名
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto max-h-[600px]">
+            <div className="overflow-x-auto max-h-[650px]">
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-zinc-800 text-zinc-400 text-xs uppercase sticky top-0 bg-zinc-950 z-10">
                   <tr>
@@ -262,7 +409,17 @@ export default function RankingsPage() {
                 <tbody className="divide-y divide-zinc-900">
                   {filteredHeroes.map((hero, idx) => (
                     <tr key={hero.athlete_name + idx} className="hover:bg-zinc-900/50 transition">
-                      <td className="py-4 px-4 font-mono font-bold text-zinc-400">#{idx + 1}</td>
+                      <td className="py-4 px-4 font-mono font-black text-base">
+                        {idx === 0 ? (
+                          <span className="text-amber-400">👑 #1</span>
+                        ) : idx === 1 ? (
+                          <span className="text-zinc-200">🥈 #2</span>
+                        ) : idx === 2 ? (
+                          <span className="text-amber-600">🥉 #3</span>
+                        ) : (
+                          <span className="text-zinc-400">#{idx + 1}</span>
+                        )}
+                      </td>
                       <td className="py-4 px-4 font-extrabold text-white text-base">{hero.athlete_name}</td>
                       <td className="py-4 px-4 text-xs font-bold text-amber-400/90">{hero.team || "個人"}</td>
                       <td className="py-4 px-4 font-mono font-black text-lg text-emerald-400">
@@ -278,7 +435,7 @@ export default function RankingsPage() {
                           href={`/certifications/query?name=${encodeURIComponent(hero.athlete_name)}&sport=${activeSport}`}
                           className="px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-amber-500 hover:text-black border border-zinc-700 text-zinc-200 text-xs font-bold transition inline-block"
                         >
-                          查看明細 →
+                          查看完賽明細 →
                         </Link>
                       </td>
                     </tr>

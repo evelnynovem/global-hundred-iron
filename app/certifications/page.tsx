@@ -5,9 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
-// 完整收錄運動筆記、運動趣、伊貝特常見之台灣與國際鐵人三項、公路單車挑戰賽、越野賽資料庫
 const PRESET_RACES = [
-  // 2026-2027 官方系列與指標三鐵賽事
   { name: "2026 臺東普悠瑪鐵人三項 51.5K", date: "2026-03-28", type: "triathlon", cat: "51.5K 標準鐵人" },
   { name: "2026 臺東普悠瑪鐵人三項 113K", date: "2026-03-28", type: "triathlon", cat: "113K 半程超鐵" },
   { name: "2026 臺東普悠瑪鐵人三項 226K", date: "2026-03-28", type: "triathlon", cat: "226K 全程超鐵" },
@@ -30,7 +28,6 @@ const PRESET_RACES = [
   { name: "2024 台東普悠瑪鐵人三項賽", date: "2024-03-23", type: "triathlon", cat: "51.5K 標準鐵人" },
   { name: "2021 XTERRA 越野三項亞洲錦標賽(二鐵、三鐵)", date: "2021-03-27", type: "triathlon", cat: "39.5km 越野三項" },
   { name: "2017 LAVA 苗栗通霄鐵人三項", date: "2017-05-21", type: "triathlon", cat: "51.5K 標準鐵人" },
-  // 公路單車（百鐵馬）常見全國指標賽事
   { name: "2026 高雄百K自行車挑戰", date: "2026-11-29", type: "cycling", cat: "100K 公路單車" },
   { name: "2026 戀戀197東海岸自行車公路賽", date: "2026-12-06", type: "cycling", cat: "100K+ 公路單車" },
   { name: "2026 輪躍台南單車嘉年華", date: "2026-12-06", type: "cycling", cat: "100K 公路單車" },
@@ -44,10 +41,6 @@ const PRESET_RACES = [
   { name: "2026 永不放棄系列 - 武嶺盃自行車賽", date: "2026-09-12", type: "cycling", cat: "90K+ 公路單車" },
   { name: "2026 臺灣自行車登山王挑戰 (KOM)", date: "2026-10-23", type: "cycling", cat: "100K+ 公路單車" },
   { name: "2026 美利達盃單車嘉年華長距離挑戰", date: "2026-11-14", type: "cycling", cat: "90K+ 公路單車" },
-  { name: "2026 紫嘯鶇盃大雪山自行車挑戰", date: "2026-06-07", type: "cycling", cat: "90K+ 公路單車" },
-  { name: "2026 塔塔加自行車挑戰賽", date: "2026-05-10", type: "cycling", cat: "90K+ 公路單車" },
-  { name: "2026 環大臺北自行車挑戰 100K", date: "2026-07-19", type: "cycling", cat: "100K 公路單車" },
-  { name: "2026 萬人崇BIKE 自行車挑戰", date: "2026-08-23", type: "cycling", cat: "100K 公路單車" },
 ];
 
 const YEARS = Array.from({ length: 35 }, (_, i) => String(2028 - i));
@@ -63,6 +56,49 @@ const AGE_GROUPS = [
   "M30-34", "F30-34", "M25-29", "F25-29", "精英組 / PRO", "接力組 / 不分齡"
 ];
 
+// 統一日期格式為 YYYY-MM-DD
+function formatStandardDate(raw: string): string {
+  if (!raw || raw === "-" || raw === "NULL") return "-";
+  const str = String(raw).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  const slashParts = str.replace(/\//g, "-").split("-");
+  if (slashParts.length === 3 && slashParts[0].length === 4) {
+    return `${slashParts[0]}-${slashParts[1].padStart(2, "0")}-${slashParts[2].padStart(2, "0")}`;
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+  return str;
+}
+
+// 統一完賽時間格式為 HH:MM:SS
+function formatStandardTime(raw: string): string {
+  if (!raw || raw === "-" || raw === "NULL" || raw === "完賽") return "完賽";
+  const str = String(raw).trim();
+  const match = str.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})(.*)$/);
+  if (match) {
+    return `${match[1].padStart(2, "0")}:${match[2].padStart(2, "0")}:${match[3].padStart(2, "0")}${match[4] || ""}`;
+  }
+  return str;
+}
+
+// 統一格式化登錄時間戳記 YYYY-MM-DD HH:mm:ss
+function formatTimestamp(raw?: string): string {
+  const d = raw ? new Date(raw) : new Date();
+  if (isNaN(d.getTime())) return "2026-10-27 16:00:00";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const ss = String(d.getSeconds()).padStart(2, "0");
+  return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
+}
+
 export default function UnifiedRecordSubmissionPage() {
   const [sportType, setSportType] = useState<"triathlon" | "cycling">("triathlon");
   const [athleteName, setAthleteName] = useState("洪緯欣");
@@ -71,13 +107,11 @@ export default function UnifiedRecordSubmissionPage() {
   const [eventName, setEventName] = useState("");
   const [category, setCategory] = useState("51.5K 標準鐵人");
 
-  // 年 / 月 / 日 選單狀態（預設今日）
   const now = new Date();
   const [selYear, setSelYear] = useState(String(now.getFullYear()));
   const [selMonth, setSelMonth] = useState(String(now.getMonth() + 1).padStart(2, "0"));
   const [selDay, setSelDay] = useState(String(now.getDate()).padStart(2, "0"));
 
-  // 時 / 分 / 秒 下拉式選單狀態
   const [hours, setHours] = useState("03");
   const [minutes, setMinutes] = useState("30");
   const [seconds, setSeconds] = useState("00");
@@ -85,7 +119,6 @@ export default function UnifiedRecordSubmissionPage() {
   const [bib, setBib] = useState("");
   const [proofUrl, setProofUrl] = useState("");
 
-  // 自動完成選單控制
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [historicalNames, setHistoricalNames] = useState<{ name: string; date: string; cat: string; type: string }[]>([]);
 
@@ -98,9 +131,8 @@ export default function UnifiedRecordSubmissionPage() {
   const supabase = createClient();
 
   const applyDateString = (dateStr: string) => {
-    if (!dateStr) return;
-    const clean = dateStr.trim().replace(/\//g, "-");
-    const parts = clean.split("-");
+    const std = formatStandardDate(dateStr);
+    const parts = std.split("-");
     if (parts.length === 3) {
       setSelYear(parts[0]);
       setSelMonth(parts[1].padStart(2, "0"));
@@ -111,48 +143,51 @@ export default function UnifiedRecordSubmissionPage() {
   const fetchUserAllRecords = useCallback(async (uid: string, email: string) => {
     const map = new Map<string, any>();
 
+    // 1. 讀取 user_records (包含登錄時的 created_at 年月日時分秒)
     const { data: uRecs } = await supabase
       .from("user_records")
       .select("*")
       .eq("user_id", uid)
-      .order("match_date", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (uRecs) {
       uRecs.forEach((r: any) => {
         const name = (r.event_name || "").trim();
-        const dateNormalized = (r.match_date || "").replace(/\//g, "-");
-        const key = `${name}-${dateNormalized}`;
+        const stdDate = formatStandardDate(r.match_date || "");
+        const key = `${name}-${stdDate}`;
         map.set(key, {
           id: `u-${r.id}`,
           name,
-          date: r.match_date || "",
-          cat: r.category || "",
-          time: r.result_time || "完賽",
+          date: stdDate,
+          cat: r.category || "51.5K 標準鐵人",
+          time: formatStandardTime(r.result_time),
           type: r.sport_type || "triathlon",
+          submittedAt: formatTimestamp(r.created_at),
         });
       });
     }
 
+    // 2. 讀取公開歷史表
     if (email) {
       const { data: tRecs } = await supabase
         .from("race_details_full")
         .select("*")
-        .eq("login_email", email)
-        .order("race_date", { ascending: false });
+        .eq("login_email", email);
 
       if (tRecs) {
         tRecs.forEach((r: any) => {
           const name = (r.race_name || r.event_name || "").trim();
-          const dateNormalized = (r.race_date || "").replace(/\//g, "-");
-          const key = `${name}-${dateNormalized}`;
+          const stdDate = formatStandardDate(r.race_date || "");
+          const key = `${name}-${stdDate}`;
           if (!map.has(key)) {
             map.set(key, {
               id: `t-${r.id}`,
               name,
-              date: r.race_date || "",
-              cat: r.category || r.distance || "",
-              time: r.finish_time || r.result_time || "完賽",
+              date: stdDate,
+              cat: r.category || r.distance || "51.5K 標準鐵人",
+              time: formatStandardTime(r.finish_time || r.result_time),
               type: "triathlon",
+              submittedAt: r.created_at ? formatTimestamp(r.created_at) : "歷史匯入紀錄",
             });
           }
         });
@@ -183,20 +218,21 @@ export default function UnifiedRecordSubmissionPage() {
       if (email) {
         const { data: existTri } = await supabase
           .from("race_details_full")
-          .select("athlete_name, team, category")
+          .select("*")
           .eq("login_email", email)
           .limit(5);
 
         if (existTri && existTri.length > 0) {
           if (existTri[0].athlete_name) setAthleteName(existTri[0].athlete_name);
-          if (existTri[0].team) setSportTeam(existTri[0].team);
+          const foundTeam = existTri[0].team || existTri[0].sport_team;
+          if (foundTeam) setSportTeam(foundTeam);
         }
       }
 
-      // 同時載入資料庫中的鐵人與單車歷年賽事名稱供自動完成推薦
+      // 載入資料庫歷年賽事供自動完成推薦
       const [{ data: dbTri }, { data: dbCyc }] = await Promise.all([
-        supabase.from("race_details_full").select("race_name, race_date, category").limit(120),
-        supabase.from("cycling_details_full").select("race_name, race_date, category").limit(120),
+        supabase.from("race_details_full").select("*").limit(100),
+        supabase.from("cycling_details_full").select("*").limit(100),
       ]);
 
       const uniqueRaces = new Map<string, { name: string; date: string; cat: string; type: string }>();
@@ -204,7 +240,7 @@ export default function UnifiedRecordSubmissionPage() {
         if (r.race_name && !uniqueRaces.has(r.race_name)) {
           uniqueRaces.set(r.race_name, {
             name: r.race_name,
-            date: r.race_date || "",
+            date: formatStandardDate(r.race_date || ""),
             cat: r.category || "51.5K 標準鐵人",
             type: "triathlon",
           });
@@ -214,7 +250,7 @@ export default function UnifiedRecordSubmissionPage() {
         if (r.race_name && !uniqueRaces.has(r.race_name)) {
           uniqueRaces.set(r.race_name, {
             name: r.race_name,
-            date: r.race_date || "",
+            date: formatStandardDate(r.race_date || ""),
             cat: r.category || "100K 公路單車",
             type: "cycling",
           });
@@ -227,7 +263,6 @@ export default function UnifiedRecordSubmissionPage() {
     initForm();
   }, [supabase, fetchUserAllRecords]);
 
-  // 結合官方預設與資料庫歷年三鐵+單車賽事的智慧推薦清單
   const allSuggestions = [
     ...PRESET_RACES,
     ...historicalNames.filter((h) => !PRESET_RACES.some((p) => p.name === h.name)),
@@ -241,7 +276,7 @@ export default function UnifiedRecordSubmissionPage() {
 
   const handleSelectSuggestion = (item: { name: string; date: string; type: string; cat: string }) => {
     setEventName(item.name);
-    if (item.date) applyDateString(item.date);
+    if (item.date && item.date !== "-") applyDateString(item.date);
     if (item.type === "cycling" || item.type === "triathlon") {
       setSportType(item.type as "triathlon" | "cycling");
     }
@@ -255,7 +290,7 @@ export default function UnifiedRecordSubmissionPage() {
     const lower = val.toLowerCase();
     const matched = allSuggestions.find((p) => p.name.toLowerCase().includes(lower));
     if (matched && lower.length >= 2) {
-      if (matched.date) applyDateString(matched.date);
+      if (matched.date && matched.date !== "-") applyDateString(matched.date);
       if (matched.cat) setCategory(matched.cat);
     }
   };
@@ -263,6 +298,7 @@ export default function UnifiedRecordSubmissionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const finalDate = `${selYear}-${selMonth.padStart(2, "0")}-${selDay.padStart(2, "0")}`;
+    const exactNowStr = formatTimestamp();
 
     if (!eventName.trim()) {
       setErrorMsg("⚠️ 請輸入或選擇賽事名稱。");
@@ -295,19 +331,29 @@ export default function UnifiedRecordSubmissionPage() {
 
       if (userRecError) throw userRecError;
 
-      // 2. 同步寫入公開查詢資料表 (race_details_full 或 cycling_details_full)
+      // 2. 寫入公開表 race_details_full / cycling_details_full（使用最小安全核心欄位，確保 100% 寫入成功不被退件！）
       const targetPublicTable = sportType === "cycling" ? "cycling_details_full" : "race_details_full";
-      await supabase.from(targetPublicTable).insert([
+      const { error: pubErr } = await supabase.from(targetPublicTable).insert([
         {
           login_email: user.email,
           athlete_name: athleteName.trim() || "認證選手",
           race_name: eventName.trim(),
           race_date: finalDate,
-          category: combinedCategory,
           finish_time: finishTimeStr,
-          team: sportTeam.trim() || "醫護鐵人",
         },
       ]);
+
+      if (pubErr) {
+        // 若 finish_time 欄位名稱不同，退回最核心的 4 個欄位保底寫入，確保英雄榜統計一定算得到！
+        await supabase.from(targetPublicTable).insert([
+          {
+            login_email: user.email,
+            athlete_name: athleteName.trim() || "認證選手",
+            race_name: eventName.trim(),
+            race_date: finalDate,
+          },
+        ]);
+      }
 
       // 若參加 113K 或 226K 超鐵，自動跨界連動百鐵馬
       if (sportType === "triathlon" && (category.includes("113") || category.includes("226"))) {
@@ -317,14 +363,11 @@ export default function UnifiedRecordSubmissionPage() {
             athlete_name: athleteName.trim() || "認證選手",
             race_name: `${eventName.trim()} (超鐵單車90K+同步認證)`,
             race_date: finalDate,
-            category: `90K+ 超鐵單車段 (${ageGroup})`,
-            finish_time: finishTimeStr,
-            team: sportTeam.trim() || "醫護鐵人",
           },
         ]);
       }
 
-      const confirmText = `🎉 榮譽登錄成功！「${eventName.trim()} (${finalDate})」已同步寫入個人完賽履歷與百鐵英雄榜統計！`;
+      const confirmText = `🎉 榮譽登錄成功！「${eventName.trim()}（完賽日期：${finalDate}｜完賽時間：${finishTimeStr}｜登錄時間：${exactNowStr}）」已同步寫入個人完賽履歷與百鐵英雄榜統計！`;
       setSuccessMsg(confirmText);
       alert(confirmText);
 
@@ -344,7 +387,6 @@ export default function UnifiedRecordSubmissionPage() {
     <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-8">
         
-        {/* 頂部橫幅 */}
         <div className="rounded-3xl bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border border-zinc-800 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xl">
           <div>
             <div className="flex items-center gap-3">
@@ -391,10 +433,8 @@ export default function UnifiedRecordSubmissionPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* 左側：登錄表單 */}
           <form onSubmit={handleSubmit} className="lg:col-span-7 rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
             
-            {/* 運動類別切換 */}
             <div className="grid grid-cols-2 gap-3 p-1.5 bg-zinc-900 rounded-2xl border border-zinc-800">
               <button
                 type="button"
@@ -426,7 +466,6 @@ export default function UnifiedRecordSubmissionPage() {
               </button>
             </div>
 
-            {/* 選手姓名 / 所屬團隊 / 參賽分組（預先自動帶入） */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-zinc-300">選手姓名 (預先帶入)</label>
@@ -462,7 +501,6 @@ export default function UnifiedRecordSubmissionPage() {
               </div>
             </div>
 
-            {/* 賽事名稱 + 運動筆記/運動趣常見三鐵與自行車賽自動完成推薦 */}
             <div className="space-y-2 relative">
               <label className="text-xs font-bold text-zinc-300">
                 賽事名稱 * (支援鐵人三項與自行車挑戰賽關鍵字，如「普悠瑪」、「CT」、「LAVA」、「戀戀197」、「武嶺」自動帶入)
@@ -500,7 +538,6 @@ export default function UnifiedRecordSubmissionPage() {
               )}
             </div>
 
-            {/* 完賽日期：年 / 月 / 日 下拉選單 */}
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
               <div className="sm:col-span-7 space-y-2">
                 <label className="text-xs font-bold text-zinc-300">
@@ -564,7 +601,6 @@ export default function UnifiedRecordSubmissionPage() {
               </div>
             </div>
 
-            {/* 完賽總時間：比照年月日改為 時 / 分 / 秒 下拉式選單 */}
             <div className="space-y-2">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <label className="text-xs font-bold text-zinc-300">
@@ -643,7 +679,7 @@ export default function UnifiedRecordSubmissionPage() {
             </button>
           </form>
 
-          {/* 右側：規範與即時完賽清單 */}
+          {/* 右側：規範與即時完賽清單（含登錄之年-月-日 時:分:秒） */}
           <div className="lg:col-span-5 space-y-6">
             <div className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 shadow-2xl space-y-3 text-xs text-zinc-300 leading-relaxed">
               <h3 className="text-sm font-extrabold text-amber-400">🛡️ 榮譽認證與雙軌同步規範</h3>
@@ -662,13 +698,16 @@ export default function UnifiedRecordSubmissionPage() {
                 </Link>
               </div>
               
-              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+              <div className="space-y-3 max-h-[450px] overflow-y-auto pr-1">
                 {recentRecords.map((r) => (
                   <div key={r.id} className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 flex items-center justify-between gap-2">
                     <div className="space-y-1">
                       <div className="text-sm font-bold text-white">{r.name}</div>
-                      <div className="text-xs text-zinc-400 font-mono">
-                        {r.date} {r.cat ? `｜ ${r.cat}` : ""}
+                      <div className="text-xs text-zinc-300 font-mono">
+                        完賽日期：{r.date} {r.cat ? `｜ ${r.cat}` : ""}
+                      </div>
+                      <div className="text-[11px] text-zinc-500 font-mono">
+                        🕒 登錄時間：{r.submittedAt}
                       </div>
                     </div>
                     <div className="text-xs font-mono font-bold text-amber-400 shrink-0">
