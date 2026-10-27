@@ -47,7 +47,7 @@ export default async function RootLayout({
               </p>
             </div>
             <p className="text-xs text-zinc-500">
-              © {new Date().getFullYear()} Global 100 Triathlon. All rights reserved.
+              © {new Date().getFullYear()} GLOBAL 100 TRIATHLON CERTIFICATION. All rights reserved.
             </p>
           </div>
         </footer>

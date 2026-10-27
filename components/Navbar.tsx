@@ -23,7 +23,7 @@ export default function Navbar() {
                 全球百鐵認證
               </span>
               <span className="text-xs text-gray-500 font-medium">
-                Global 100 Triathlon
+                GLOBAL 100 TRIATHLON CERTIFICATION
               </span>
             </div>
           </Link>
@@ -37,7 +37,7 @@ export default function Navbar() {
               系列賽事
             </Link>
             <Link href="/certifications/query" className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-amber-600 transition">
-              成績查詢與英雄榜
+              百鐵英雄榜
             </Link>
             <Link href="/certifications" className="text-xs sm:text-sm font-semibold text-gray-700 hover:text-amber-600 transition">
               完賽登錄
@@ -73,7 +73,7 @@ export default function Navbar() {
         <div className="md:hidden border-t border-gray-200 bg-white px-4 pt-3 pb-5 space-y-3 shadow-lg">
           <Link href="/association" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-bold text-orange-600 hover:bg-orange-50">台東城鄉生活運動協會</Link>
           <Link href="/series" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">系列賽事</Link>
-          <Link href="/certifications/query" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">成績查詢與英雄榜</Link>
+          <Link href="/certifications/query" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">百鐵英雄榜</Link>
           <Link href="/certifications" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">完賽登錄</Link>
           <Link href="/about" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">關於我們</Link>
           <Link href="/shop" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-100">榮耀商城</Link>

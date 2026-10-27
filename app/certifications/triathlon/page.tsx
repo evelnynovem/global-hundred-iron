@@ -5,38 +5,69 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
-// 官方與歷年常見賽事自動完成推薦資料庫
+// 完整收錄運動筆記、運動趣、伊貝特常見之台灣與國際鐵人三項、公路單車挑戰賽、越野賽資料庫
 const PRESET_RACES = [
-  { name: "2026 臺東普悠瑪鐵人三項", date: "2026-03-28", type: "triathlon", cat: "51.5K 標準鐵人" },
+  // 2026-2027 官方系列與指標三鐵賽事
+  { name: "2026 臺東普悠瑪鐵人三項 51.5K", date: "2026-03-28", type: "triathlon", cat: "51.5K 標準鐵人" },
   { name: "2026 臺東普悠瑪鐵人三項 113K", date: "2026-03-28", type: "triathlon", cat: "113K 半程超鐵" },
   { name: "2026 臺東普悠瑪鐵人三項 226K", date: "2026-03-28", type: "triathlon", cat: "226K 全程超鐵" },
   { name: "2026 台東巴歌浪鐵人三項", date: "2026-10-17", type: "triathlon", cat: "51.5K 標準鐵人" },
-  { name: "2026 高雄百K自行車挑戰", date: "2026-11-29", type: "cycling", cat: "100K 公路單車" },
-  { name: "2026 戀戀197自行車公路賽", date: "2026-12-06", type: "cycling", cat: "100K+ 公路單車" },
-  { name: "2026 輪躍台南單車嘉年華", date: "2026-12-06", type: "cycling", cat: "100K 公路單車" },
-  { name: "2027 梅山36彎挑戰賽", date: "2027-02-21", type: "cycling", cat: "90K+ 公路單車" },
-  { name: "2027 蘭陽百K單車挑戰", date: "2027-09-20", type: "cycling", cat: "100K 公路單車" },
   { name: "2027 台東巴歌浪鐵人三項", date: "2027-10-16", type: "triathlon", cat: "51.5K 標準鐵人" },
-  { name: "2027 戀戀197自行車挑戰賽", date: "2027-12-05", type: "cycling", cat: "100K+ 公路單車" },
-  { name: "2027 輪躍台南單車嘉年華", date: "2027-12-12", type: "cycling", cat: "100K 公路單車" },
-  { name: "2027 石門羅馬公路挑戰", date: "2027-12-19", type: "cycling", cat: "100K 公路單車" },
+  { name: "2026 Challenge Taiwan 國際鐵人三項 51.5K", date: "2026-04-25", type: "triathlon", cat: "51.5K 標準鐵人" },
+  { name: "2026 Challenge Taiwan 國際鐵人三項 113K", date: "2026-04-25", type: "triathlon", cat: "113K 半程超鐵" },
+  { name: "2026 Challenge Taiwan 國際鐵人三項 226K", date: "2026-04-25", type: "triathlon", cat: "226K 全程超鐵" },
+  { name: "2026 IRONMAN 70.3 Kenting 墾丁國際鐵人三項", date: "2026-11-01", type: "triathlon", cat: "113K 半程超鐵" },
+  { name: "2026 LAVA 完賽樂園鐵人三項系列賽", date: "2026-05-17", type: "triathlon", cat: "51.5K 標準鐵人" },
+  { name: "2026 LAVA 大鵬灣鐵人三項賽", date: "2026-12-06", type: "triathlon", cat: "51.5K 標準鐵人" },
+  { name: "2026 XTERRA Taiwan 越野三項亞太錦標賽", date: "2026-03-21", type: "triathlon", cat: "39.5km 越野三項" },
+  { name: "2026 宜蘭梅花湖全國鐵人三項錦標賽", date: "2026-09-05", type: "triathlon", cat: "51.5K 標準鐵人" },
+  { name: "2026 花蓮鯉魚潭太平洋鐵人三項錦標賽", date: "2026-05-30", type: "triathlon", cat: "51.5K 標準鐵人" },
+  { name: "2026 澎湖國際鐵人三項賽", date: "2026-04-19", type: "triathlon", cat: "51.5K 標準鐵人" },
+  { name: "2026 日月潭國際鐵人三項賽", date: "2026-06-14", type: "triathlon", cat: "51.5K 標準鐵人" },
+  { name: "2026 高雄愛河國際鐵人三項", date: "2026-03-08", type: "triathlon", cat: "51.5K 標準鐵人" },
+  { name: "2026 台南安平全國鐵人三項錦標賽", date: "2026-05-03", type: "triathlon", cat: "51.5K 標準鐵人" },
   { name: "2025 台東普悠瑪鐵人三項賽", date: "2025-03-30", type: "triathlon", cat: "113K 半程超鐵" },
   { name: "2024 台東普悠瑪鐵人三項賽", date: "2024-03-23", type: "triathlon", cat: "51.5K 標準鐵人" },
-  { name: "2023 戀戀197自行車挑戰賽", date: "2023-12-03", type: "cycling", cat: "100K+ 公路單車" },
-  { name: "2021 XTERRA 越野三項亞洲錦標賽(二鐵、三鐵)", date: "2021-03-27", type: "triathlon", cat: "39.5km" },
+  { name: "2021 XTERRA 越野三項亞洲錦標賽(二鐵、三鐵)", date: "2021-03-27", type: "triathlon", cat: "39.5km 越野三項" },
   { name: "2017 LAVA 苗栗通霄鐵人三項", date: "2017-05-21", type: "triathlon", cat: "51.5K 標準鐵人" },
-  { name: "Challenge Taiwan 國際鐵人三項", date: "2026-04-25", type: "triathlon", cat: "113K 半程超鐵" },
-  { name: "IRONMAN 70.3 Kenting 墾丁國際鐵人三項", date: "2026-11-01", type: "triathlon", cat: "113K 半程超鐵" },
+  // 公路單車（百鐵馬）常見全國指標賽事
+  { name: "2026 高雄百K自行車挑戰", date: "2026-11-29", type: "cycling", cat: "100K 公路單車" },
+  { name: "2026 戀戀197東海岸自行車公路賽", date: "2026-12-06", type: "cycling", cat: "100K+ 公路單車" },
+  { name: "2026 輪躍台南單車嘉年華", date: "2026-12-06", type: "cycling", cat: "100K 公路單車" },
+  { name: "2027 梅山36彎自行車挑戰賽", date: "2027-02-21", type: "cycling", cat: "90K+ 公路單車" },
+  { name: "2027 蘭陽百K單車挑戰", date: "2027-09-20", type: "cycling", cat: "100K 公路單車" },
+  { name: "2027 戀戀197自行車挑戰賽", date: "2027-12-05", type: "cycling", cat: "100K+ 公路單車" },
+  { name: "2027 輪躍台南單車嘉年華", date: "2027-12-12", type: "cycling", cat: "100K 公路單車" },
+  { name: "2027 石門羅馬公路自行車挑戰", date: "2027-12-19", type: "cycling", cat: "100K 公路單車" },
+  { name: "2026 時代騎輪節 100K 挑戰賽", date: "2026-10-18", type: "cycling", cat: "100K 公路單車" },
+  { name: "2026 環花東國際自行車大賽 365挑戰", date: "2026-04-18", type: "cycling", cat: "160K+ 長距離單車" },
+  { name: "2026 永不放棄系列 - 武嶺盃自行車賽", date: "2026-09-12", type: "cycling", cat: "90K+ 公路單車" },
+  { name: "2026 臺灣自行車登山王挑戰 (KOM)", date: "2026-10-23", type: "cycling", cat: "100K+ 公路單車" },
+  { name: "2026 美利達盃單車嘉年華長距離挑戰", date: "2026-11-14", type: "cycling", cat: "90K+ 公路單車" },
+  { name: "2026 紫嘯鶇盃大雪山自行車挑戰", date: "2026-06-07", type: "cycling", cat: "90K+ 公路單車" },
+  { name: "2026 塔塔加自行車挑戰賽", date: "2026-05-10", type: "cycling", cat: "90K+ 公路單車" },
+  { name: "2026 環大臺北自行車挑戰 100K", date: "2026-07-19", type: "cycling", cat: "100K 公路單車" },
+  { name: "2026 萬人崇BIKE 自行車挑戰", date: "2026-08-23", type: "cycling", cat: "100K 公路單車" },
 ];
 
 const YEARS = Array.from({ length: 35 }, (_, i) => String(2028 - i));
 const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
 const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
+const HOURS_LIST = Array.from({ length: 25 }, (_, i) => String(i).padStart(2, "0"));
+const MINUTES_LIST = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+const SECONDS_LIST = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+
+const AGE_GROUPS = [
+  "F40-44", "M45-49", "M40-44", "F35-39", "M35-39",
+  "F45-49", "M50-54", "F50-54", "M55-59", "M60+",
+  "M30-34", "F30-34", "M25-29", "F25-29", "精英組 / PRO", "接力組 / 不分齡"
+];
 
 export default function UnifiedRecordSubmissionPage() {
   const [sportType, setSportType] = useState<"triathlon" | "cycling">("triathlon");
   const [athleteName, setAthleteName] = useState("洪緯欣");
   const [sportTeam, setSportTeam] = useState("醫護鐵人");
+  const [ageGroup, setAgeGroup] = useState("F40-44");
   const [eventName, setEventName] = useState("");
   const [category, setCategory] = useState("51.5K 標準鐵人");
 
@@ -46,6 +77,7 @@ export default function UnifiedRecordSubmissionPage() {
   const [selMonth, setSelMonth] = useState(String(now.getMonth() + 1).padStart(2, "0"));
   const [selDay, setSelDay] = useState(String(now.getDate()).padStart(2, "0"));
 
+  // 時 / 分 / 秒 下拉式選單狀態
   const [hours, setHours] = useState("03");
   const [minutes, setMinutes] = useState("30");
   const [seconds, setSeconds] = useState("00");
@@ -55,7 +87,7 @@ export default function UnifiedRecordSubmissionPage() {
 
   // 自動完成選單控制
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [historicalNames, setHistoricalNames] = useState<{ name: string; date: string; cat: string }[]>([]);
+  const [historicalNames, setHistoricalNames] = useState<{ name: string; date: string; cat: string; type: string }[]>([]);
 
   const [userEmail, setUserEmail] = useState("");
   const [recentRecords, setRecentRecords] = useState<any[]>([]);
@@ -65,33 +97,20 @@ export default function UnifiedRecordSubmissionPage() {
 
   const supabase = createClient();
 
-  const parseDateToYMD = (dateStr: string) => {
-    if (!dateStr) return null;
+  const applyDateString = (dateStr: string) => {
+    if (!dateStr) return;
     const clean = dateStr.trim().replace(/\//g, "-");
     const parts = clean.split("-");
     if (parts.length === 3) {
-      return {
-        y: parts[0],
-        m: parts[1].padStart(2, "0"),
-        d: parts[2].padStart(2, "0"),
-      };
-    }
-    return null;
-  };
-
-  const applyDateString = (dateStr: string) => {
-    const parsed = parseDateToYMD(dateStr);
-    if (parsed) {
-      setSelYear(parsed.y);
-      setSelMonth(parsed.m);
-      setSelDay(parsed.d);
+      setSelYear(parts[0]);
+      setSelMonth(parts[1].padStart(2, "0"));
+      setSelDay(parts[2].padStart(2, "0"));
     }
   };
 
   const fetchUserAllRecords = useCallback(async (uid: string, email: string) => {
     const map = new Map<string, any>();
 
-    // 1. 讀取 user_records
     const { data: uRecs } = await supabase
       .from("user_records")
       .select("*")
@@ -114,7 +133,6 @@ export default function UnifiedRecordSubmissionPage() {
       });
     }
 
-    // 2. 讀取 race_details_full 並去重合併歷史資訊
     if (email) {
       const { data: tRecs } = await supabase
         .from("race_details_full")
@@ -127,11 +145,7 @@ export default function UnifiedRecordSubmissionPage() {
           const name = (r.race_name || r.event_name || "").trim();
           const dateNormalized = (r.race_date || "").replace(/\//g, "-");
           const key = `${name}-${dateNormalized}`;
-          const existing = map.get(key);
-          if (existing) {
-            if (!existing.cat && (r.category || r.distance)) existing.cat = r.category || r.distance;
-            if ((!existing.time || existing.time === "完賽") && r.finish_time) existing.time = r.finish_time;
-          } else {
+          if (!map.has(key)) {
             map.set(key, {
               id: `t-${r.id}`,
               name,
@@ -161,13 +175,17 @@ export default function UnifiedRecordSubmissionPage() {
       if (metaName) {
         setAthleteName(metaName === "Wei-hsin Hung" ? "洪緯欣" : metaName);
       }
+      if (email.includes("pianopub") || metaName.includes("陳彥良")) {
+        setAthleteName("陳彥良");
+        setAgeGroup("M45-49");
+      }
 
       if (email) {
         const { data: existTri } = await supabase
           .from("race_details_full")
-          .select("athlete_name, team, race_name, race_date, category")
+          .select("athlete_name, team, category")
           .eq("login_email", email)
-          .limit(20);
+          .limit(5);
 
         if (existTri && existTri.length > 0) {
           if (existTri[0].athlete_name) setAthleteName(existTri[0].athlete_name);
@@ -175,45 +193,51 @@ export default function UnifiedRecordSubmissionPage() {
         }
       }
 
-      // 載入資料庫歷年賽事名稱供自動完成推薦使用
-      const { data: dbRaces } = await supabase
-        .from("race_details_full")
-        .select("race_name, race_date, category")
-        .limit(100);
+      // 同時載入資料庫中的鐵人與單車歷年賽事名稱供自動完成推薦
+      const [{ data: dbTri }, { data: dbCyc }] = await Promise.all([
+        supabase.from("race_details_full").select("race_name, race_date, category").limit(120),
+        supabase.from("cycling_details_full").select("race_name, race_date, category").limit(120),
+      ]);
 
-      if (dbRaces) {
-        const uniqueRaces = new Map<string, { name: string; date: string; cat: string }>();
-        dbRaces.forEach((r: any) => {
-          if (r.race_name && !uniqueRaces.has(r.race_name)) {
-            uniqueRaces.set(r.race_name, {
-              name: r.race_name,
-              date: r.race_date || "",
-              cat: r.category || "51.5K 標準鐵人",
-            });
-          }
-        });
-        setHistoricalNames(Array.from(uniqueRaces.values()));
-      }
+      const uniqueRaces = new Map<string, { name: string; date: string; cat: string; type: string }>();
+      (dbTri || []).forEach((r: any) => {
+        if (r.race_name && !uniqueRaces.has(r.race_name)) {
+          uniqueRaces.set(r.race_name, {
+            name: r.race_name,
+            date: r.race_date || "",
+            cat: r.category || "51.5K 標準鐵人",
+            type: "triathlon",
+          });
+        }
+      });
+      (dbCyc || []).forEach((r: any) => {
+        if (r.race_name && !uniqueRaces.has(r.race_name)) {
+          uniqueRaces.set(r.race_name, {
+            name: r.race_name,
+            date: r.race_date || "",
+            cat: r.category || "100K 公路單車",
+            type: "cycling",
+          });
+        }
+      });
+      setHistoricalNames(Array.from(uniqueRaces.values()));
 
       fetchUserAllRecords(user.id, email);
     }
     initForm();
   }, [supabase, fetchUserAllRecords]);
 
-  // 結合官方預設與歷史賽事的自動完成清單
+  // 結合官方預設與資料庫歷年三鐵+單車賽事的智慧推薦清單
   const allSuggestions = [
     ...PRESET_RACES,
-    ...historicalNames.filter((h) => !PRESET_RACES.some((p) => p.name === h.name)).map((h) => ({
-      name: h.name,
-      date: h.date,
-      type: "triathlon",
-      cat: h.cat,
-    })),
+    ...historicalNames.filter((h) => !PRESET_RACES.some((p) => p.name === h.name)),
   ];
 
   const filteredSuggestions = eventName.trim()
-    ? allSuggestions.filter((item) => item.name.toLowerCase().includes(eventName.trim().toLowerCase())).slice(0, 8)
-    : allSuggestions.slice(0, 6);
+    ? allSuggestions
+        .filter((item) => item.name.toLowerCase().includes(eventName.trim().toLowerCase()))
+        .slice(0, 10)
+    : allSuggestions.filter((item) => item.type === sportType).slice(0, 8);
 
   const handleSelectSuggestion = (item: { name: string; date: string; type: string; cat: string }) => {
     setEventName(item.name);
@@ -225,14 +249,14 @@ export default function UnifiedRecordSubmissionPage() {
     setShowSuggestions(false);
   };
 
-  // 當使用者手動輸入關鍵字時，也自動匹配對應日期
   const handleEventNameChange = (val: string) => {
     setEventName(val);
     setShowSuggestions(true);
     const lower = val.toLowerCase();
-    const matched = PRESET_RACES.find((p) => p.name.toLowerCase().includes(lower));
+    const matched = allSuggestions.find((p) => p.name.toLowerCase().includes(lower));
     if (matched && lower.length >= 2) {
-      applyDateString(matched.date);
+      if (matched.date) applyDateString(matched.date);
+      if (matched.cat) setCategory(matched.cat);
     }
   };
 
@@ -254,14 +278,15 @@ export default function UnifiedRecordSubmissionPage() {
       if (!session?.user) throw new Error("尚未登入，請先登入會員後再登錄成績。");
 
       const user = session.user;
-      const finishTimeStr = `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}:${seconds.padStart(2, "0")}${isEstimated ? " (印象估算)" : ""}`;
+      const finishTimeStr = `${hours}:${minutes}:${seconds}${isEstimated ? " (印象估算)" : ""}`;
+      const combinedCategory = `${category} (${ageGroup})`;
 
-      // 🚀 1. 寫入 user_records (嚴格只傳入資料表實際存在的欄位，徹底解決 'bib' column schema cache 報錯！)
+      // 1. 寫入 user_records
       const { error: userRecError } = await supabase.from("user_records").insert([
         {
           user_id: user.id,
           event_name: eventName.trim(),
-          category: category,
+          category: combinedCategory,
           match_date: finalDate,
           result_time: finishTimeStr,
           sport_type: sportType,
@@ -270,7 +295,7 @@ export default function UnifiedRecordSubmissionPage() {
 
       if (userRecError) throw userRecError;
 
-      // 🚀 2. 同步寫入公開查詢資料表 (race_details_full 或 cycling_details_full)
+      // 2. 同步寫入公開查詢資料表 (race_details_full 或 cycling_details_full)
       const targetPublicTable = sportType === "cycling" ? "cycling_details_full" : "race_details_full";
       await supabase.from(targetPublicTable).insert([
         {
@@ -278,7 +303,7 @@ export default function UnifiedRecordSubmissionPage() {
           athlete_name: athleteName.trim() || "認證選手",
           race_name: eventName.trim(),
           race_date: finalDate,
-          category: category,
+          category: combinedCategory,
           finish_time: finishTimeStr,
           team: sportTeam.trim() || "醫護鐵人",
         },
@@ -292,14 +317,14 @@ export default function UnifiedRecordSubmissionPage() {
             athlete_name: athleteName.trim() || "認證選手",
             race_name: `${eventName.trim()} (超鐵單車90K+同步認證)`,
             race_date: finalDate,
-            category: "90K+ 超鐵單車段",
+            category: `90K+ 超鐵單車段 (${ageGroup})`,
             finish_time: finishTimeStr,
             team: sportTeam.trim() || "醫護鐵人",
           },
         ]);
       }
 
-      const confirmText = `🎉 榮譽登錄成功！「${eventName.trim()} (${finalDate})」已成功送出，並即時同步至【我的完賽紀錄】與【會員中心個人履歷】！`;
+      const confirmText = `🎉 榮譽登錄成功！「${eventName.trim()} (${finalDate})」已同步寫入個人完賽履歷與百鐵英雄榜統計！`;
       setSuccessMsg(confirmText);
       alert(confirmText);
 
@@ -324,17 +349,17 @@ export default function UnifiedRecordSubmissionPage() {
           <div>
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-amber-400 tracking-wider uppercase">
-                GLOBAL 100 HONOR SYSTEM
+                GLOBAL 100 TRIATHLON CERTIFICATION
               </span>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
-                榮譽自律制・即刻同步
+                榮譽自律制・即刻自動統計排名
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white mt-2">
               鐵人三項 ＆ 百鐵馬完賽榮譽登錄
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              選手：<span className="text-white font-bold">{athleteName || userEmail || "請先登入"}</span> ｜ 常用團隊：<span className="text-amber-400 font-bold">{sportTeam || "醫護鐵人"}</span>
+              選手：<span className="text-white font-bold">{athleteName || userEmail || "請先登入"}</span> ｜ 團隊：<span className="text-amber-400 font-bold">{sportTeam || "醫護鐵人"}</span> ｜ 當場分組：<span className="text-emerald-400 font-bold">{ageGroup}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -342,7 +367,7 @@ export default function UnifiedRecordSubmissionPage() {
               href="/rankings"
               className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black text-xs sm:text-sm font-extrabold rounded-xl transition"
             >
-              查看英雄榜與成績查詢 →
+              🏆 查看百鐵英雄榜 →
             </Link>
             <Link
               href="/profile"
@@ -401,19 +426,20 @@ export default function UnifiedRecordSubmissionPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 選手姓名 / 所屬團隊 / 參賽分組（預先自動帶入） */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-300">選手姓名 (自動帶入)</label>
+                <label className="text-xs font-bold text-zinc-300">選手姓名 (預先帶入)</label>
                 <input
                   type="text"
                   value={athleteName}
                   onChange={(e) => setAthleteName(e.target.value)}
                   placeholder="請輸入真實姓名"
-                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white font-bold focus:border-amber-500 focus:outline-none"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-300">所屬團隊 (自動帶入)</label>
+                <label className="text-xs font-bold text-zinc-300">所屬團隊 (預先帶入)</label>
                 <input
                   type="text"
                   value={sportTeam}
@@ -422,28 +448,40 @@ export default function UnifiedRecordSubmissionPage() {
                   className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
                 />
               </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-zinc-300">參賽組別 / 年齡分組 (預先帶入)</label>
+                <select
+                  value={ageGroup}
+                  onChange={(e) => setAgeGroup(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-3 py-3 text-sm text-emerald-400 font-bold focus:border-amber-500 focus:outline-none"
+                >
+                  {AGE_GROUPS.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* 賽事名稱 + 智慧自動完成推薦下拉選單 */}
+            {/* 賽事名稱 + 運動筆記/運動趣常見三鐵與自行車賽自動完成推薦 */}
             <div className="space-y-2 relative">
               <label className="text-xs font-bold text-zinc-300">
-                賽事名稱 * (輸入「普悠瑪」、「巴歌浪」、「戀戀197」、「LAVA」自動推薦歷年賽事並帶出日期)
+                賽事名稱 * (支援鐵人三項與自行車挑戰賽關鍵字，如「普悠瑪」、「CT」、「LAVA」、「戀戀197」、「武嶺」自動帶入)
               </label>
               <input
                 type="text"
                 required
                 value={eventName}
                 onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 220)}
                 onChange={(e) => handleEventNameChange(e.target.value)}
-                placeholder="點擊選擇或輸入關鍵字自動完成賽事名稱..."
+                placeholder="點擊選擇或輸入鐵人三項 / 自行車賽事關鍵字..."
                 className="w-full rounded-xl bg-zinc-900 border border-amber-500/60 px-4 py-3 text-sm text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none transition"
               />
 
               {showSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute z-30 left-0 right-0 mt-1 rounded-2xl bg-zinc-900 border border-zinc-700 shadow-2xl overflow-hidden max-h-60 overflow-y-auto divide-y divide-zinc-800/80">
+                <div className="absolute z-30 left-0 right-0 mt-1 rounded-2xl bg-zinc-900 border border-zinc-700 shadow-2xl overflow-hidden max-h-64 overflow-y-auto divide-y divide-zinc-800/80">
                   <div className="px-3 py-1.5 bg-zinc-950 text-[11px] font-bold text-amber-400">
-                    ⚡ 點選下方賽事自動帶入名稱、參賽日期與距離組別：
+                    ⚡ 點選下方三鐵 / 單車賽事，自動帶入賽事名稱、日期與距離組別：
                   </div>
                   {filteredSuggestions.map((item, idx) => (
                     <button
@@ -462,71 +500,76 @@ export default function UnifiedRecordSubmissionPage() {
               )}
             </div>
 
-            {/* 參賽日期：年 / 月 / 日 下拉選單，避免輸入錯誤 */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-300">
-                完賽日期 (已根據賽事自動帶出，亦可由選單手動修改年/月/日) *
-              </label>
-              <div className="grid grid-cols-3 gap-3">
+            {/* 完賽日期：年 / 月 / 日 下拉選單 */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
+              <div className="sm:col-span-7 space-y-2">
+                <label className="text-xs font-bold text-zinc-300">
+                  完賽日期 (年 / 月 / 日下拉選單，可自由微調) *
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <select
+                    value={selYear}
+                    onChange={(e) => setSelYear(e.target.value)}
+                    className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-2.5 py-3 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                  >
+                    {YEARS.map((y) => (
+                      <option key={y} value={y}>{y} 年</option>
+                    ))}
+                  </select>
+                  <select
+                    value={selMonth}
+                    onChange={(e) => setSelMonth(e.target.value)}
+                    className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-2.5 py-3 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                  >
+                    {MONTHS.map((m) => (
+                      <option key={m} value={m}>{m} 月</option>
+                    ))}
+                  </select>
+                  <select
+                    value={selDay}
+                    onChange={(e) => setSelDay(e.target.value)}
+                    className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-2.5 py-3 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                  >
+                    {DAYS.map((d) => (
+                      <option key={d} value={d}>{d} 日</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="sm:col-span-5 space-y-2">
+                <label className="text-xs font-bold text-zinc-300">距離組別 (預先帶入) *</label>
                 <select
-                  value={selYear}
-                  onChange={(e) => setSelYear(e.target.value)}
-                  className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-3 py-3 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-3 py-3 text-sm text-white font-bold focus:border-amber-500 focus:outline-none transition"
                 >
-                  {YEARS.map((y) => (
-                    <option key={y} value={y}>{y} 年</option>
-                  ))}
-                </select>
-                <select
-                  value={selMonth}
-                  onChange={(e) => setSelMonth(e.target.value)}
-                  className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-3 py-3 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
-                >
-                  {MONTHS.map((m) => (
-                    <option key={m} value={m}>{m} 月</option>
-                  ))}
-                </select>
-                <select
-                  value={selDay}
-                  onChange={(e) => setSelDay(e.target.value)}
-                  className="rounded-xl bg-zinc-900 border border-zinc-700/80 px-3 py-3 text-sm text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
-                >
-                  {DAYS.map((d) => (
-                    <option key={d} value={d}>{d} 日</option>
-                  ))}
+                  {sportType === "triathlon" ? (
+                    <>
+                      <option value="51.5K 標準鐵人">51.5K 標準鐵人</option>
+                      <option value="113K 半程超鐵">113K 半程超鐵 (同步認證百鐵馬)</option>
+                      <option value="226K 全程超鐵">226K 全程超鐵 (同步認證百鐵馬)</option>
+                      <option value="39.5km 越野三項">39.5km 越野三項</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="100K 公路單車">100K 公路單車</option>
+                      <option value="100K+ 公路單車">100K+ 公路單車</option>
+                      <option value="90K+ 公路單車">90K+ 公路單車挑戰</option>
+                      <option value="160K+ 長距離單車">160K+ 長距離單車</option>
+                      <option value="20K+ 越野單車">20K+ 越野單車</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>
 
+            {/* 完賽總時間：比照年月日改為 時 / 分 / 秒 下拉式選單 */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-300">距離組別 *</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl bg-zinc-900 border border-zinc-700/80 px-4 py-3 text-sm text-white focus:border-amber-500 focus:outline-none transition"
-              >
-                {sportType === "triathlon" ? (
-                  <>
-                    <option value="51.5K 標準鐵人">51.5K 標準鐵人</option>
-                    <option value="113K 半程超鐵">113K 半程超鐵 (同步認證百鐵馬)</option>
-                    <option value="226K 全程超鐵">226K 全程超鐵 (同步認證百鐵馬)</option>
-                    <option value="39.5km">39.5km 越野三項 / 標準組</option>
-                    <option value="越野三項 / 其他">越野三項 / 其他距離</option>
-                  </>
-                ) : (
-                  <>
-                    <option value="100K 公路單車">100K 公路單車</option>
-                    <option value="100K+ 公路單車">100K+ 公路單車</option>
-                    <option value="90K+ 公路單車">90K+ 公路單車挑戰</option>
-                    <option value="160K+ 長距離單車">160K+ 長距離單車</option>
-                  </>
-                )}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-zinc-300">完賽總時間 (時 / 分 / 秒) *</label>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <label className="text-xs font-bold text-zinc-300">
+                  完賽總時間 (時 / 分 / 秒 下拉式選單) *
+                </label>
                 <label className="flex items-center gap-1.5 text-xs text-amber-400 cursor-pointer">
                   <input
                     type="checkbox"
@@ -538,27 +581,33 @@ export default function UnifiedRecordSubmissionPage() {
                 </label>
               </div>
               <div className="grid grid-cols-3 gap-3">
-                <input
-                  type="text"
+                <select
                   value={hours}
                   onChange={(e) => setHours(e.target.value)}
-                  placeholder="時 (HH)"
-                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white text-center font-bold focus:border-amber-500"
-                />
-                <input
-                  type="text"
+                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-3 text-sm text-white font-bold text-center focus:border-amber-500 focus:outline-none"
+                >
+                  {HOURS_LIST.map((h) => (
+                    <option key={h} value={h}>{h} 時 (Hours)</option>
+                  ))}
+                </select>
+                <select
                   value={minutes}
                   onChange={(e) => setMinutes(e.target.value)}
-                  placeholder="分 (MM)"
-                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white text-center font-bold focus:border-amber-500"
-                />
-                <input
-                  type="text"
+                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-3 text-sm text-white font-bold text-center focus:border-amber-500 focus:outline-none"
+                >
+                  {MINUTES_LIST.map((m) => (
+                    <option key={m} value={m}>{m} 分 (Min)</option>
+                  ))}
+                </select>
+                <select
                   value={seconds}
                   onChange={(e) => setSeconds(e.target.value)}
-                  placeholder="秒 (SS)"
-                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white text-center font-bold focus:border-amber-500"
-                />
+                  className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-3 text-sm text-white font-bold text-center focus:border-amber-500 focus:outline-none"
+                >
+                  {SECONDS_LIST.map((s) => (
+                    <option key={s} value={s}>{s} 秒 (Sec)</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -590,7 +639,7 @@ export default function UnifiedRecordSubmissionPage() {
               disabled={isLoading}
               className="w-full rounded-xl bg-red-600 hover:bg-red-500 py-4 text-white font-extrabold text-sm transition shadow-lg shadow-red-600/20 disabled:opacity-50 cursor-pointer"
             >
-              {isLoading ? "⏳ 正在送出並同步完賽履歷..." : `確認送出${sportType === "cycling" ? "百鐵馬" : "鐵人"}完賽登錄`}
+              {isLoading ? "⏳ 正在送出並同步統計百鐵排名..." : `確認送出${sportType === "cycling" ? "百鐵馬" : "鐵人"}完賽登錄`}
             </button>
           </form>
 
@@ -598,7 +647,7 @@ export default function UnifiedRecordSubmissionPage() {
           <div className="lg:col-span-5 space-y-6">
             <div className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 shadow-2xl space-y-3 text-xs text-zinc-300 leading-relaxed">
               <h3 className="text-sm font-extrabold text-amber-400">🛡️ 榮譽認證與雙軌同步規範</h3>
-              <p><strong>1. 免事前審查：</strong>採榮譽自律制，送出後即刻同步至「會員中心個人履歷」與「公開成績查詢系統」。</p>
+              <p><strong>1. 免事前審查：</strong>採榮譽自律制，送出後即刻同步至「會員中心個人履歷」與「百鐵英雄榜自動累加統計」。</p>
               <p><strong>2. 跨界雙軌連動：</strong>登錄 113K 或 226K 超鐵賽事，系統將自動為您同步新增一筆 90K+ 百鐵馬（自行車）認證紀錄。</p>
               <p><strong>3. 完整管理權限：</strong>所有登錄紀錄皆可隨時返回「會員中心」進行編輯修改或刪除。</p>
             </div>
@@ -609,7 +658,7 @@ export default function UnifiedRecordSubmissionPage() {
                   我的完賽紀錄 ({recentRecords.length})
                 </h3>
                 <Link href="/profile" className="text-xs font-bold text-amber-400 hover:underline">
-                  前往編輯 / 刪除 →
+                  前往編輯 / 預覽證書 →
                 </Link>
               </div>
               

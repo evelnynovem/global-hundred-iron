@@ -1,200 +1,202 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
+import Footer from "@/components/Footer";
 
-interface ProfileUser {
+interface MemberRoleItem {
   id: string;
+  name: string;
   email: string;
-  full_name: string;
-  team_name: string;
-  role: string;
-  violation_count: number;
-  is_banned: boolean;
+  team: string;
+  role: "super_admin" | "editor" | "member";
 }
 
-export default function AdminDashboardPage() {
-  const supabase = createClient();
-  const router = useRouter();
+const INITIAL_MANAGERS: MemberRoleItem[] = [
+  { id: "1", name: "洪緯欣", email: "evelny1985@gmail.com", team: "醫護鐵人", role: "super_admin" },
+  { id: "2", name: "陳彥良", email: "pianopub1130@gmail.com", team: "醫護鐵人", role: "super_admin" },
+];
 
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [users, setUsers] = useState<ProfileUser[]>([]);
-  const [feedback, setFeedback] = useState<string | null>(null);
+export default function AdminRoleManagementPage() {
+  const [members, setMembers] = useState<MemberRoleItem[]>(INITIAL_MANAGERS);
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newTeam, setNewTeam] = useState("臺東城鄉生活運動協會");
+  const [newRole, setNewRole] = useState<"super_admin" | "editor">("editor");
+
+  const supabase = createClient();
 
   useEffect(() => {
-    async function checkAdminAndLoadUsers() {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push("/auth/login");
-        return;
+    const saved = localStorage.getItem("g100_role_managers");
+    if (saved) {
+      try {
+        setMembers(JSON.parse(saved));
+      } catch (e) {
+        console.error(e);
       }
-
-      // 檢查目前登入者是否為 admin
-      const { data: myProfile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if (!myProfile || myProfile.role !== "admin") {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
-
-      setIsAdmin(true);
-
-      // 載入所有註冊會員清單
-      const { data: profilesList } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("full_name", { ascending: true });
-
-      if (profilesList) {
-        setUsers(profilesList);
-      }
-      setLoading(false);
     }
+  }, []);
 
-    checkAdminAndLoadUsers();
-  }, [supabase, router]);
-
-  // 切換會員身分 (user <-> admin)
-  const handleToggleRole = async (targetUserId: string, currentRole: string) => {
-    const newRole = currentRole === "admin" ? "user" : "admin";
-    const actionText = newRole === "admin" ? "設為工作人員/管理員" : "降級為一般會員";
-
-    if (!confirm(`確定要將此會員${actionText}嗎？`)) return;
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({ role: newRole })
-      .eq("id", targetUserId);
-
-    if (error) {
-      setFeedback("更新權限失敗：" + error.message);
-    } else {
-      setFeedback("✅ 會員權限已成功更新！");
-      setUsers((prev) =>
-        prev.map((u) => (u.id === targetUserId ? { ...u, role: newRole } : u))
-      );
-    }
-    setTimeout(() => setFeedback(null), 4000);
+  const saveMembersList = (list: MemberRoleItem[]) => {
+    setMembers(list);
+    localStorage.setItem("g100_role_managers", JSON.stringify(list));
   };
 
-  if (loading) {
-    return <div className="min-h-[70vh] flex items-center justify-center text-zinc-400">載入管理後台中...</div>;
-  }
+  const handleAddManager = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmail.trim()) return;
 
-  if (!isAdmin) {
-    return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center space-y-4">
-        <div className="text-4xl">⛔</div>
-        <h1 className="text-xl font-black text-white">權限不足</h1>
-        <p className="text-xs text-zinc-400 max-w-md">
-          您目前沒有存取管理後台的權限。請確認您的帳號是否已被設定為系統管理員。
-        </p>
-        <Link
-          href="/"
-          className="px-5 py-2.5 bg-amber-400 text-black text-xs font-bold rounded-xl transition"
-        >
-          返回首頁
-        </Link>
-      </div>
-    );
-  }
+    const item: MemberRoleItem = {
+      id: String(Date.now()),
+      name: newName.trim() || "協會管理人員",
+      email: newEmail.trim(),
+      team: newTeam.trim() || "臺東城鄉生活運動協會",
+      role: newRole,
+    };
+
+    const updated = [...members, item];
+    saveMembersList(updated);
+    setNewEmail("");
+    setNewName("");
+    alert(`✅ 已成功將「${item.name} (${item.email})」委派為【${item.role === "super_admin" ? "第一層：最高管理員" : "第二層：公告與成績編輯管理員"}】！`);
+  };
+
+  const handleChangeRole = (id: string, nextRole: "super_admin" | "editor" | "member") => {
+    const updated = members.map((m) => (m.id === id ? { ...m, role: nextRole } : m));
+    saveMembersList(updated);
+  };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+      <div className="max-w-5xl w-full mx-auto px-6 py-12 space-y-8">
+        
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
           <div>
-            <span className="text-xs font-black tracking-widest text-amber-400 uppercase">
-              SYSTEM ADMINISTRATION
+            <span className="text-xs font-black text-amber-400 uppercase tracking-widest">
+              SYSTEM ADMINISTRATION (3-TIER PERMISSIONS)
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black mt-1">協會工作人員與權限管理後台</h1>
-            <p className="text-xs text-zinc-400 mt-1">
-              在此直接指定網站會員為「協會工作人員」，解鎖台東城鄉生活運動協會專區的編輯與上傳權限。
+            <h1 className="text-3xl font-black text-white mt-2">
+              協會工作人員與三層權限管理後台
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+              第一層【最高管理員（可委派人＋編輯公告＋上傳檔案/CSV成績）】｜ 第二層【編輯管理員（可編輯公告＋上傳檔案/CSV成績）】｜ 第三層【一般會員】
             </p>
           </div>
           <Link
-            href="/association"
-            className="px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition shadow"
+            href="/taitung-assoc"
+            className="px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs sm:text-sm transition shrink-0"
           >
             前往協會專區測試 →
           </Link>
         </div>
 
-        {feedback && (
-          <div className="p-4 rounded-xl bg-emerald-950 border border-emerald-500/50 text-emerald-200 text-sm font-bold">
-            {feedback}
+        {/* 新增 / 委派管理員表單 */}
+        <form onSubmit={handleAddManager} className="rounded-3xl bg-zinc-950 border border-amber-500/30 p-6 sm:p-8 space-y-5 shadow-2xl">
+          <h2 className="text-lg font-extrabold text-amber-400">
+            ➕ 新增 / 委派協會管理者（由洪緯欣最高管理員授權）
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <input
+              type="text"
+              required
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="真實姓名 (如：王小明)"
+              className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white"
+            />
+            <input
+              type="email"
+              required
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="登入 Email *"
+              className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white"
+            />
+            <input
+              type="text"
+              value={newTeam}
+              onChange={(e) => setNewTeam(e.target.value)}
+              placeholder="所屬單位/團隊"
+              className="rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white"
+            />
+            <select
+              value={newRole}
+              onChange={(e) => setNewRole(e.target.value as "super_admin" | "editor")}
+              className="rounded-xl bg-zinc-900 border border-amber-500/50 px-3 py-2.5 text-sm text-amber-400 font-bold"
+            >
+              <option value="super_admin">👑 第一層：最高管理員 (可委派+編輯上傳)</option>
+              <option value="editor">✏️ 第二層：編輯管理員 (僅編輯公告+上傳檔案)</option>
+            </select>
           </div>
-        )}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition cursor-pointer"
+            >
+              確認新增並授權
+            </button>
+          </div>
+        </form>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <h2 className="text-lg font-black text-white">網站註冊會員與權限一覽表 ({users.length})</h2>
+        {/* 權限一覽表 */}
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800 p-6 sm:p-8 space-y-6 shadow-2xl">
+          <h2 className="text-lg font-extrabold text-white">
+            網站管理員與三層權限一覽表 ({members.length})
+          </h2>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-zinc-800 text-xs text-zinc-400 uppercase bg-zinc-950">
-                  <th className="py-3 px-3">真實姓名</th>
-                  <th className="py-3 px-3">Email</th>
-                  <th className="py-3 px-3">運動團隊</th>
-                  <th className="py-3 px-3">目前身分權限</th>
-                  <th className="py-3 px-3">違規次數</th>
-                  <th className="py-3 px-3 text-right">權限調整操作</th>
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-zinc-800 text-zinc-400 text-xs uppercase">
+                <tr>
+                  <th className="py-3 px-4">真實姓名</th>
+                  <th className="py-3 px-4">EMAIL</th>
+                  <th className="py-3 px-4">所屬單位</th>
+                  <th className="py-3 px-4">目前三層權限等級</th>
+                  <th className="py-3 px-4 text-right">權限調整操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60">
-                {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-zinc-800/40 transition">
-                    <td className="py-3.5 px-3 font-bold text-white">{u.full_name || "未填寫"}</td>
-                    <td className="py-3.5 px-3 text-xs font-mono text-zinc-300">{u.email}</td>
-                    <td className="py-3.5 px-3 text-xs text-zinc-400">{u.team_name || "個人"}</td>
-                    <td className="py-3.5 px-3">
-                      <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          u.role === "admin"
-                            ? "bg-orange-500/20 text-orange-300 border border-orange-500/40"
-                            : "bg-zinc-800 text-zinc-300"
-                        }`}
-                      >
-                        {u.role === "admin" ? "👑 協會工作人員" : "👤 一般會員"}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3 text-xs">
-                      {u.violation_count > 0 ? (
-                        <span className="text-red-400 font-bold">{u.violation_count} 次</span>
+              <tbody className="divide-y divide-zinc-900">
+                {members.map((m) => (
+                  <tr key={m.id} className="hover:bg-zinc-900/40 transition">
+                    <td className="py-4 px-4 font-bold text-white">{m.name}</td>
+                    <td className="py-4 px-4 font-mono text-xs text-zinc-300">{m.email}</td>
+                    <td className="py-4 px-4 text-xs text-zinc-400">{m.team}</td>
+                    <td className="py-4 px-4">
+                      {m.role === "super_admin" ? (
+                        <span className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-extrabold">
+                          👑 第一層：最高管理員 (可委派人＋編輯上傳)
+                        </span>
+                      ) : m.role === "editor" ? (
+                        <span className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-extrabold">
+                          ✏️ 第二層：編輯管理員 (編輯公告＋上傳檔案/CSV)
+                        </span>
                       ) : (
-                        <span className="text-zinc-500">0 次</span>
+                        <span className="px-3 py-1 rounded-full bg-zinc-800 text-zinc-400 text-xs font-bold">
+                          👤 第三層：一般會員
+                        </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleRole(u.id, u.role)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition shadow ${
-                          u.role === "admin"
-                            ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
-                            : "bg-orange-600 hover:bg-orange-700 text-white"
-                        }`}
+                    <td className="py-4 px-4 text-right space-x-2">
+                      <select
+                        value={m.role}
+                        onChange={(e) => handleChangeRole(m.id, e.target.value as any)}
+                        className="rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-1.5 text-xs text-white font-bold"
                       >
-                        {u.role === "admin" ? "設為一般會員" : "設為工作人員"}
-                      </button>
+                        <option value="super_admin">設為第一層：最高管理員</option>
+                        <option value="editor">設為第二層：編輯管理員</option>
+                        <option value="member">設為第三層：一般會員</option>
+                      </select>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
+
       </div>
+      <Footer />
     </div>
   );
 }

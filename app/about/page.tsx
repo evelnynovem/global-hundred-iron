@@ -2,344 +2,159 @@
 
 import React from "react";
 import Link from "next/link";
-
-// 完美對應您以中文姓名命名的圖片檔案、原始自訂頭銜與分類
-const founderGroups = [
-  {
-    category: "核心領導與管理團隊",
-    members: [
-      { name: "陳彥良", title: "全球百鐵認證總召集人暨創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳彥良.jpg" },
-      { name: "施和鋐 & 陳素梅", title: "全球百鐵認證總召集人暨昇陽自行車創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/施和鋐與陳素梅.jpg" },
-      { name: "劉榮昌", title: "全球百鐵認證知識長暨活動咖總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/劉榮昌.jpg" },
-      { name: "林健鴻", title: "全球百鐵認證法務長", note: "（當時成立時倡議人自己提出）", img: "/initiators/林健鴻.jpg" },
-      { name: "袁宜如", title: "全球百鐵認證藝術總監", note: "（當時成立時倡議人自己提出）", img: "/initiators/袁宜如.jpg" },
-      { name: "陳霖毅", title: "全球百鐵認證資訊長", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳霖毅.jpg" },
-      { name: "黃興隆", title: "全球百鐵認證顧問暨普悠瑪及台東超鐵人三項裁判長", note: "（當時成立時倡議人自己提出）", img: "/initiators/黃興隆.jpg" },
-      { name: "施宜孝", title: "全球百鐵認證公關長", note: "（當時成立時倡議人自己提出）", img: "/initiators/施宜孝.jpg" },
-    ],
-  },
-  {
-    category: "KOL",
-    members: [
-      { name: "陳彥良", title: "全球百鐵認證創辦人暨醫護鐵人創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳彥良.jpg" },
-      { name: "簡翊倫 (一輪)", title: "全球百鐵認證創始倡議人暨知名YouTuber「一輪」", note: "（當時成立時倡議人自己提出）", img: "/initiators/簡翊倫.jpg" },
-      { name: "黃柏青 (柏青哥)", title: "全球百鐵認證創始倡議人暨鐵人運動專欄作家「柏青哥」", note: "（當時成立時倡議人自己提出）", img: "/initiators/黃柏青.jpg" },
-      { name: "劉祖寧", title: "全球百鐵認證創始倡議人暨老爺鐵人-知本老爺酒店總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/劉祖寧.jpg" },
-      { name: "詹益榮", title: "全球百鐵認證創始倡議人暨舒跑哥", note: "（當時成立時倡議人自己提出）", img: "/initiators/詹益榮.jpg" },
-      { name: "郭修森", title: "全球百鐵認證創始倡議人暨Vertex 丸鐵運動創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/郭修森.jpg" },
-      { name: "姚焱堯", title: "全球百鐵認證創始倡議人暨運動筆記創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/姚焱堯.jpg" },
-      { name: "李翰暄", title: "全球百鐵認證創始倡議人暨光頭神童", note: "（當時成立時倡議人自己提出）", img: "/initiators/李翰暄.jpg" },
-      { name: "姜義村", title: "全球百鐵認證創始倡議人暨身障運動推手", note: "（當時成立時倡議人自己提出）", img: "/initiators/姜義村.jpg" },
-      { name: "許仁茂", title: "全球百鐵認證創始倡議人暨地表最強的鐵人老爸、FXT 第一屆冠軍", note: "（當時成立時倡議人自己提出）", img: "/initiators/許仁茂.jpg" },
-      { name: "何航順", title: "全球百鐵認證創始倡議人暨公路車小馬暨醫護鐵人", note: "（當時成立時倡議人自己提出）", img: "/initiators/何航順.jpg" },
-      { name: "林美佐", title: "全球百鐵認證創始倡議人暨最速空姐", note: "（當時成立時倡議人自己提出）", img: "/initiators/林美佐.jpg" },
-      { name: "李詹瑩", title: "全球百鐵認證創始倡議人暨蛙式泳后", note: "（當時成立時倡議人自己提出）", img: "/initiators/李詹瑩.jpg" },
-      { name: "江昇峰", title: "全球百鐵認證創始倡議人暨樂高鐵人", note: "（當時成立時倡議人自己提出）", img: "/initiators/江昇峰.jpg" },
-      { name: "江晏慶", title: "全球百鐵認證創始倡議人暨XTERRA 專業教練", note: "（當時成立時倡議人自己提出）", img: "/initiators/江晏慶.jpg" },
-      { name: "王千由", title: "全球百鐵認證創始倡議人暨雙棲女王、277 自轉車競佐訓教練", note: "（當時成立時倡議人自己提出）", img: "/initiators/王千由.jpg" },
-      { name: "周青", title: "全球百鐵認證創始倡議人暨中華民國越野跑協會理事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/周青.jpg" },
-      { name: "陳家平", title: "全球百鐵認證創始倡議人暨嘉義市縣議員", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳家平.jpg" },
-      { name: "Hi Cindy", title: "Hi Cindy", note: "（當時成立時倡議人自己提出）", img: "/initiators/Hi Cindy.jpg" },
-      { name: "連俊宏", title: "全球百鐵認證創始倡議人暨工研院資通所技術副組長", note: "（當時成立時倡議人自己提出）", img: "/initiators/連俊宏.jpg" },
-      { name: "吳聰義", title: "全球百鐵認證創始倡議人暨台體大教授", note: "（當時成立時倡議人自己提出）", img: "/initiators/吳聰義.jpg" },
-      { name: "張怡潔", title: "全球百鐵認證創始倡議人暨中山醫學大學助理教授＆亞運女排國手", note: "（當時成立時倡議人自己提出）", img: "/initiators/張怡潔.jpg" },
-      { name: "方信淵", title: "全球百鐵認證創始倡議人暨實踐大學副教授", note: "（當時成立時倡議人自己提出）", img: "/initiators/方信淵.jpg" },
-    ],
-  },
-  {
-    category: "品牌代表",
-    members: [
-      { name: "曾上原", title: "全球百鐵認證創始倡議人暨美利達自行車總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/曾上原.jpg" },
-      { name: "張仕賢", title: "全球百鐵認證創始倡議人暨易飛網營運長", note: "（當時成立時倡議人自己提出）", img: "/initiators/張仕賢.jpg" },
-      { name: "黃成翰", title: "全球百鐵認證創始倡議人暨名衍行銷總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/黃成翰.jpg" },
-      { name: "陳衍豪", title: "全球百鐵認證創始倡議人暨SAEKO總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳衍豪.jpg" },
-      { name: "黃潔儀", title: "全球百鐵認證創始倡議人暨展盟展覽有限公司董事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/黃潔儀.jpg" },
-      { name: "王凌卿", title: "全球百鐵認證創始倡議人暨王大夫一條根股份有限公司營運長", note: "（當時成立時倡議人自己提出）", img: "/initiators/王凌卿.jpg" },
-      { name: "陳信仲", title: "全球百鐵認證創始倡議人暨277自転車創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳信仲.jpg" },
-      { name: "黃上慧", title: "全球百鐵認證創始倡議人暨LP台灣通路行銷經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/黃上慧.jpg" },
-      { name: "許榮裕", title: "全球百鐵認證創始倡議人暨KS凱薩克總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/許榮裕.jpg" },
-      { name: "楊世賓", title: "全球百鐵認證創始倡議人暨登薾國際貿易股份有限公司經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/楊世賓.jpg" },
-      { name: "林宗緯", title: "全球百鐵認證創始倡議人暨Akiwei總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/林宗緯.jpg" },
-      { name: "賴奕銘", title: "全球百鐵認證創始倡議人暨Footland總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/賴奕銘.jpg" },
-      { name: "傅漢武", title: "全球百鐵認證創始倡議人暨Compressport品牌經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/傅漢武.jpg" },
-      { name: "陳宣佑", title: "全球百鐵認證創始倡議人暨諾壯BCAA創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳宣佑.jpg" },
-      { name: "林明謙", title: "全球百鐵認證創始倡議人暨Zoot Taiwan營運長", note: "（當時成立時倡議人自己提出）", img: "/initiators/林明謙.jpg" },
-      { name: "劉宜承", title: "全球百鐵認證創始倡議人暨亞科太克品牌行銷部主任", note: "（當時成立時倡議人自己提出）", img: "/initiators/劉宜承.jpg" },
-      { name: "張立群", title: "全球百鐵認證創始倡議人暨淨極勁官方代表", note: "（當時成立時倡議人自己提出）", img: "/initiators/張立群.jpg" },
-      { name: "陳本偉", title: "全球百鐵認證創始倡議人暨ZIV運動眼鏡董事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳本偉.jpg" },
-      { name: "朱一帆", title: "全球百鐵認證創始倡議人暨台灣賓士客戶關係管理經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/朱一帆.jpg" },
-      { name: "陳谷銘", title: "全球百鐵認證創始倡議人暨Feebees赤足襪鞋創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳谷銘.jpg" },
-      { name: "古昌齡", title: "全球百鐵認證創始倡議人暨FLIPPOS襪創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/古昌齡.jpg" },
-      { name: "陳松君", title: "NOVATEC總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳松君.jpg" },
-    ],
-  },
-  {
-    category: "賽事主辦",
-    members: [
-      { name: "羅威士 (Jovi)", title: "全球百鐵認證創始倡議人暨WayPoint 鐵人工廠創辦人暨Challenge Taiwan 鐵人三項賽主辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/羅威士.jpg" },
-      { name: "王臨哲", title: "全球百鐵認證創始倡議人暨台東超級鐵人三項及普悠瑪鐵人三項統籌", note: "（當時成立時倡議人自己提出）", img: "/initiators/王臨哲.jpg" },
-      { name: "鄭世奇", title: "全球百鐵認證創始倡議人暨台灣鐵人三項公司總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/鄭世奇.jpg" },
-      { name: "劉玉峯", title: "全球百鐵認證創始倡議人暨中華民國鐵人三項協會 理事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/劉玉峯.jpg" },
-      { name: "賴曉春", title: "全球百鐵認證創始倡議人暨瘋三鐵百鐵教父", note: "（當時成立時倡議人自己提出）", img: "/initiators/賴曉春.jpg" },
-      { name: "孟亞輝", title: "全球百鐵認證創始倡議人暨高雄愛河鐵人三項", note: "（當時成立時倡議人自己提出）", img: "/initiators/孟亞輝.jpg" },
-      { name: "劉榮昌", title: "全球百鐵認證創始倡議人暨活動咖總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/劉榮昌.jpg" },
-      { name: "盧瑞忠", title: "全球百鐵認證創始倡議人暨亞洲馬拉松大聯盟主席", note: "（當時成立時倡議人自己提出）", img: "/initiators/盧瑞忠.jpg" },
-      { name: "陳信仲", title: "全球百鐵認證創始倡議人暨鹿港馬拉松統籌", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳信仲.jpg" },
-      { name: "辛雷達", title: "全球百鐵認證創始倡議人暨金門鐵人三項統籌", note: "（當時成立時倡議人自己提出）", img: "/initiators/辛雷達.jpg" },
-      { name: "李思璇", title: "全球百鐵認證創始倡議人暨司格特國際運動行銷有限公司執行長", note: "（當時成立時倡議人自己提出）", img: "/initiators/李思璇.jpg" },
-      { name: "莊憲紘", title: "有藝思國際娛樂執行長", note: "（當時成立時倡議人自己提出）", img: "/initiators/莊憲紘.jpg" },
-      { name: "光圈整合行銷", title: "全球百鐵認證創始倡議人暨光圈整合行銷有限公司", note: "（當時成立時倡議人自己提出）", img: "/initiators/光圈整合行銷.jpg" },
-      { name: "林毅展", title: "全球百鐵認證創始倡議人暨時代騎輪節總經理", note: "（當時成立時倡議人自己提出）", img: "/initiators/林毅展.jpg" },
-    ],
-  },
-  {
-    category: "媒體代表",
-    members: [
-      { name: "林宜慧", title: "全球百鐵認證創始倡議人暨城邦媒體集團墨刻出版社 編輯", note: "（當時成立時倡議人自己提出）", img: "/initiators/林宜慧.jpg" },
-      { name: "段慧琳", title: "全球百鐵認證創始倡議人暨民視主持人", note: "（當時成立時倡議人自己提出）", img: "/initiators/段慧琳.jpg" },
-      { name: "姚焱堯", title: "全球百鐵認證創始倡議人暨運動筆記創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/姚焱堯.jpg" },
-      { name: "Dan", title: "全球百鐵認證創始倡議人暨Podcast「走鐘運動日記」共同主持人&國立金門大學兼任助理教授", note: "（當時成立時倡議人自己提出）", img: "/initiators/Dan.jpg" },
-      { name: "Light", title: "全球百鐵認證創始倡議人暨Podcast「走鐘運動日記」製作人暨主持人&自由教練", note: "（當時成立時倡議人自己提出）", img: "/initiators/Light.jpg" },
-      { name: "洛克", title: "全球百鐵認證創始倡議人暨Youtuber 洛克", note: "（當時成立時倡議人自己提出）", img: "/initiators/洛克.jpg" },
-      { name: "吳奕德", title: "全球百鐵認證創始倡議人暨運動人的pain cave主持人", note: "（當時成立時倡議人自己提出）", img: "/initiators/吳奕德.jpg" },
-      { name: "林毅展", title: "全球百鐵認證創始倡議人暨時代社群行銷有限公司執行長", note: "（當時成立時倡議人自己提出）", img: "/initiators/林毅展.jpg" },
-      { name: "陳柏如", title: "全球百鐵認證創始倡議人暨單車誌&戶外探索總編輯", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳柏如.jpg" },
-    ],
-  },
-  {
-    category: "演藝影視",
-    members: [
-      { name: "陳雅琳", title: "全球百鐵認證創始倡議人暨知名新聞主持人", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳雅琳.jpg" },
-      { name: "楊守義", title: "全球百鐵認證創始倡議人暨紀錄片導演", note: "（當時成立時倡議人自己提出）", img: "/initiators/楊守義.jpg" },
-      { name: "姚黛瑋", title: "全球百鐵認證創始倡議人暨知名藝人", note: "（當時成立時倡議人自己提出）", img: "/initiators/姚黛瑋.jpg" },
-      { name: "王心恬", title: "全球百鐵認證創始倡議人暨鐵人名模", note: "（當時成立時倡議人自己提出）", img: "/initiators/王心恬.jpg" },
-      { name: "段慧琳", title: "全球百鐵認證創始倡議人暨民視主持人", note: "（當時成立時倡議人自己提出）", img: "/initiators/段慧琳.jpg" },
-      { name: "吳永吉 (阿吉)", title: "全球百鐵認證創始倡議人暨董事長樂團 編號· 主唱 吳永吉（阿吉）", note: "（當時成立時倡議人自己提出）", img: "/initiators/吳永吉.jpg" },
-      { name: "杜文祥 (小白)", title: "全球百鐵認證創始倡議人暨董事長樂團吉他手 / 金鐘導播 杜文祥（小白）", note: "（當時成立時倡議人自己提出）", img: "/initiators/杜文祥.jpg" },
-    ],
-  },
-  {
-    category: "社團團長",
-    members: [
-      { name: "曾國誌", title: "全球百鐵認證創始倡議人暨NEWHOPE鐵人團團長", note: "（當時成立時倡議人自己提出）", img: "/initiators/曾國誌.jpg" },
-      { name: "李日益", title: "全球百鐵認證創始倡議人暨台北市內湖鐵人三項運動協會理事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/李日益.jpg" },
-      { name: "陳瑞傳", title: "全球百鐵認證創始倡議人暨伊果鐵人創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳瑞傳.jpg" },
-      { name: "黃柏青", title: "全球百鐵認證創始倡議人暨DWD 臺灣追不到鐵人三項休閒運動協會理事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/黃柏青.jpg" },
-      { name: "郭修森", title: "全球百鐵認證創始倡議人暨丸鐵創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/郭修森.jpg" },
-      { name: "魏睿呈", title: "全球百鐵認證創始倡議人暨南投鐵人總教練", note: "（當時成立時倡議人自己提出）", img: "/initiators/魏睿呈.jpg" },
-      { name: "辛雷達", title: "全球百鐵認證創始倡議人暨金門體育會秘書長", note: "（當時成立時倡議人自己提出）", img: "/initiators/辛雷達.jpg" },
-      { name: "陳智文", title: "全球百鐵認證創始倡議人暨愛戀鐵團長", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳智文.jpg" },
-      { name: "謝文甲", title: "全球百鐵認證創始倡議人暨金門鐵人團隊長", note: "（當時成立時倡議人自己提出）", img: "/initiators/謝文甲.jpg" },
-      { name: "嚴浩銘", title: "全球百鐵認證創始倡議人暨步輪不累鐵人團創辦人", note: "（當時成立時倡議人自己提出）", img: "/initiators/嚴浩銘.jpg" },
-      { name: "洪志青", title: "全球百鐵認證創始倡議人暨高雄市自行車運動推廣協會理事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/洪志青.jpg" },
-      { name: "陳信仲", title: "全球百鐵認證創始倡議人暨二鹿慢跑協會理事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳信仲.jpg" },
-      { name: "孟亞輝", title: "全球百鐵認證創始倡議人暨高雄鐵人", note: "（當時成立時倡議人自己提出）", img: "/initiators/孟亞輝.jpg" },
-      { name: "蔡淙緯", title: "台南山山來馳代表人", note: "（當時成立時倡議人自己提出）", img: "/initiators/蔡淙緯.jpg" },
-      { name: "蔡玉婷", title: "全球百鐵認證創始倡議人暨群創鐵人社社長", note: "（當時成立時倡議人自己提出）", img: "/initiators/蔡玉婷.jpg" },
-      { name: "陳仁和", title: "全球百鐵認證創始倡議人暨愛跑者協會理事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳仁和.jpg" },
-      { name: "劉光武", title: "全球百鐵認證創始倡議人暨光聿工作室負責人", note: "（當時成立時倡議人自己提出）", img: "/initiators/劉光武.jpg" },
-      { name: "簡佳齊", title: "全球百鐵認證創始倡議人暨高雄鐵人扶輪社23-24社長", note: "（當時成立時倡議人自己提出）", img: "/initiators/簡佳齊.jpg" },
-      { name: "李國威", title: "全球百鐵認證創始倡議人暨高雄鐵人扶輪社25-26社長", note: "（當時成立時倡議人自己提出）", img: "/initiators/李國威.jpg" },
-      { name: "趙傳亨", title: "全球百鐵認證創始倡議人暨高雄鐵人扶輪社創社社長", note: "（當時成立時倡議人自己提出）", img: "/initiators/趙傳亨.jpg" },
-      { name: "李宇山", title: "全球百鐵認證創始倡議人暨高雄鐵人扶輪社24-25社長", note: "（當時成立時倡議人自己提出）", img: "/initiators/李宇山.jpg" },
-      { name: "許瑞弘", title: "全球百鐵認證創始倡議人暨台北鐵人扶輪社卸任社長", note: "（當時成立時倡議人自己提出）", img: "/initiators/許瑞弘.jpg" },
-      { name: "裴家榆", title: "全球百鐵認證創始倡議人暨台北鐵人扶輪社24-25社長", note: "（當時成立時倡議人自己提出）", img: "/initiators/裴家榆.jpg" },
-      { name: "徐慕雯", title: "全球百鐵認證創始倡議人暨亂跑團團長", note: "（當時成立時倡議人自己提出）", img: "/initiators/徐慕雯.jpg" },
-      { name: "邱仲簾", title: "全球百鐵認證創始倡議人暨台南鐵人隊教練", note: "（當時成立時倡議人自己提出）", img: "/initiators/邱仲簾.jpg" },
-      { name: "詹益榮", title: "全球百鐵認證創始倡議人暨舒跑哥", note: "（當時成立時倡議人自己提出）", img: "/initiators/詹益榮.jpg" },
-      { name: "李翰暄", title: "全球百鐵認證創始倡議人暨光頭神童", note: "（當時成立時倡議人自己提出）", img: "/initiators/李翰暄.jpg" },
-      { name: "姜義村", title: "全球百鐵認證創始倡議人暨身障運動推手", note: "（當時成立時倡議人自己提出）", img: "/initiators/姜義村.jpg" },
-      { name: "許仁茂", title: "全球百鐵認證創始倡議人暨地表最強的鐵人老爸、FXT 第一屆冠軍", note: "（當時成立時倡議人自己提出）", img: "/initiators/許仁茂.jpg" },
-      { name: "何航順", title: "全球百鐵認證創始倡議人暨公路車小馬暨醫護鐵人", note: "（當時成立時倡議人自己提出）", img: "/initiators/何航順.jpg" },
-      { name: "林美佐", title: "全球百鐵認證創始倡議人暨最速空姐", note: "（當時成立時倡議人自己提出）", img: "/initiators/林美佐.jpg" },
-      { name: "李詹瑩", title: "全球百鐵認證創始倡議人暨蛙式泳后", note: "（當時成立時倡議人自己提出）", img: "/initiators/李詹瑩.jpg" },
-      { name: "江昇峰", title: "全球百鐵認證創始倡議人暨樂高鐵人", note: "（當時成立時倡議人自己提出）", img: "/initiators/江昇峰.jpg" },
-      { name: "江晏慶", title: "全球百鐵認證創始倡議人暨XTERRA 專業教練", note: "（當時成立時倡議人自己提出）", img: "/initiators/江晏慶.jpg" },
-      { name: "王千由", title: "全球百鐵認證創始倡議人暨雙棲女王、277 自轉車競佐訓教練", note: "（當時成立時倡議人自己提出）", img: "/initiators/王千由.jpg" },
-      { name: "周青", title: "全球百鐵認證創始倡議人暨中華民國越野跑協會理事長", note: "（當時成立時倡議人自己提出）", img: "/initiators/周青.jpg" },
-      { name: "陳家平", title: "全球百鐵認證創始倡議人暨嘉義市縣議員", note: "（當時成立時倡議人自己提出）", img: "/initiators/陳家平.jpg" },
-      { name: "Hi Cindy", title: "Hi Cindy", note: "（當時成立時倡議人自己提出）", img: "/initiators/Hi Cindy.jpg" },
-      { name: "連俊宏", title: "全球百鐵認證創始倡議人暨工研院資通所技術副組長", note: "（當時成立時倡議人自己提出）", img: "/initiators/連俊宏.jpg" },
-      { name: "吳聰義", title: "全球百鐵認證創始倡議人暨台體大教授", note: "（當時成立時倡議人自己提出）", img: "/initiators/吳聰義.jpg" },
-      { name: "張怡潔", title: "全球百鐵認證創始倡議人暨中山醫學大學助理教授＆亞運女排國手", note: "（當時成立時倡議人自己提出）", img: "/initiators/張怡潔.jpg" },
-      { name: "方信淵", title: "全球百鐵認證創始倡議人暨實踐大學副教授", note: "（當時成立時倡議人自己提出）", img: "/initiators/方信淵.jpg" },
-    ],
-  },
-];
-
-const awardTiers = [
-  { tier: "初鐵賞", count: "1 場", desc: "完成人生第一場標準鐵人三項（51.5K以上）或百K單車挑戰" },
-  { tier: "十鐵賞", count: "10 場", desc: "累積完成 10 場認證賽事，解鎖十鐵榮譽電子證書" },
-  { tier: "三十鐵賞", count: "30 場", desc: "累積完成 30 場認證賽事，展現穩定不懈的耐力紀律" },
-  { tier: "五十鐵賞", count: "50 場", desc: "邁入半百鐵人殿堂，可申請專屬五十鐵榮耀紀念物" },
-  { tier: "百鐵賞", count: "100 場", desc: "最高殿堂！完成 100 場認證賽事，受邀年度百鐵英雄授證宴" },
-];
+import Footer from "@/components/Footer";
 
 export default function AboutPage() {
+  const triAwards = [
+    "《初鐵賞》", "《三鐵賞》", "《五鐵賞》", "《十鐵賞》",
+    "《二十鐵賞》", "《三十鐵賞》", "《四十鐵賞》", "《五十鐵賞》",
+    "《六十鐵賞》", "《七十鐵賞》", "《八十鐵賞》", "《九十鐵賞》", "《百鐵賞》"
+  ];
+
+  const bikeAwards = [
+    "《初鐵馬賞》", "《三鐵馬賞》", "《五鐵馬賞》", "《十鐵馬賞》",
+    "《二十鐵馬賞》", "《三十鐵馬賞》", "《四十鐵馬賞》", "《五十鐵馬賞》",
+    "《六十鐵馬賞》", "《七十鐵馬賞》", "《八十鐵馬賞》", "《九十鐵馬賞》", "《百鐵馬賞》"
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-20">
-      {/* Hero Section */}
-      <section className="relative border-b border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 py-20 px-6">
-        <div className="mx-auto max-w-5xl text-center">
-          <span className="inline-block rounded-full bg-amber-500/10 border border-amber-500/30 px-4 py-1.5 text-xs font-semibold tracking-wider text-amber-400 uppercase mb-4">
-            About Global 100 Triathlon
-          </span>
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-6">
-            每一場堅持，都值得被永恆記錄
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+      <main className="max-w-5xl w-full mx-auto px-6 py-12 space-y-10">
+        
+        {/* 頂部導言 */}
+        <section className="rounded-3xl bg-gradient-to-br from-zinc-950 via-[#100a0c] to-zinc-950 border border-zinc-800 p-8 sm:p-10 shadow-2xl space-y-5">
+          <div className="inline-block px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-extrabold tracking-widest uppercase">
+            ABOUT GLOBAL 100 TRIATHLON CERTIFICATION (G100TC)
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">
+            關於「全球百鐵認證 Global 100 Triathlon Certification」
           </h1>
-          <p className="mx-auto max-w-3xl text-base md:text-lg text-slate-300 leading-relaxed">
-            「全球百鐵認證」是一個完全免費、公益性質的耐力運動榮譽登錄平台。我們匯聚台灣各大鐵人三項與自行車賽事主辦方、運動社團與跨界推手，不區分賽事品牌，只為幫每一位在賽道上流汗堅持的選手，建立跨越一生的完賽履歷。
-          </p>
-        </div>
-      </section>
-
-      <div className="mx-auto max-w-5xl px-6 space-y-20 mt-16">
-        {/* 認證辦法與合格標準 */}
-        <section>
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-7 w-1.5 bg-amber-500 rounded-full" />
-            <h2 className="text-2xl font-bold text-white">認證辦法與合格賽事標準</h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-              <div className="text-amber-400 font-bold text-lg mb-2">🏊‍♂️ 鐵人三項與越野認證</div>
-              <p className="text-sm text-slate-300 leading-relaxed mb-4">
-                凡完成國內外具備合法路權與晶片計時之標準距離以上賽事皆可登錄：
-              </p>
-              <ul className="text-sm text-slate-400 space-y-2 list-disc list-inside">
-                <li>標準鐵人 51.5K（含以上距離）</li>
-                <li>超級鐵人 113公里 / 70.3英里</li>
-                <li>超級鐵人 226K / IRONMAN</li>
-                <li>XTERRA 等越野鐵人三項正式賽事</li>
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-              <div className="text-amber-400 font-bold text-lg mb-2">🚴‍♂️ 公路車 / 長途單車認證</div>
-              <p className="text-sm text-slate-300 leading-relaxed mb-4">
-                鼓勵單車耐力挑戰，符合以下條件之正式活動即可納入百鐵累計：
-              </p>
-              <ul className="text-sm text-slate-400 space-y-2 list-disc list-inside">
-                <li>單日騎乘距離達 90 公里（含）以上</li>
-                <li>具政府合法路權申請之正式賽事/活動</li>
-                <li>具備大會官方晶片計時與完賽證書</li>
-                <li>註：已具獨立認證之北高/雙塔不重複計入</li>
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
-              <div className="text-amber-400 font-bold text-lg mb-2">🛡️ 榮譽自律與審核機制</div>
-              <p className="text-sm text-slate-300 leading-relaxed mb-4">
-                平台採「免費自主登錄」結合「系列賽自動勾稽」雙軌制：
-              </p>
-              <ul className="text-sm text-slate-400 space-y-2 list-disc list-inside">
-                <li>平時登錄採鐵人榮譽自律精神</li>
-                <li>合作系列賽由大會賽後提供數據快速認領</li>
-                <li>申請實體百鐵獎牌或授證時進行資格複核</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* 給獎階梯 */}
-        <section>
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-7 w-1.5 bg-amber-500 rounded-full" />
-            <h2 className="text-2xl font-bold text-white">榮譽階梯與給獎標準</h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {awardTiers.map((item, idx) => (
-              <div
-                key={idx}
-                className="rounded-xl border border-slate-800 bg-slate-900/40 p-5 flex flex-col justify-between hover:border-amber-500/40 transition"
-              >
-                <div>
-                  <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded">
-                    累計 {item.count}
-                  </span>
-                  <h3 className="text-xl font-bold text-white mt-3 mb-2">{item.tier}</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 完整名人照片牆 */}
-        <section className="pt-6 border-t border-slate-800/80">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-7 w-1.5 bg-amber-500 rounded-full" />
-              <h2 className="text-2xl font-bold text-white">共同倡議與創始榮譽推手</h2>
-            </div>
-            <p className="text-xs text-slate-400 ml-4">
-              * 以下頭銜為當時成立時倡議人自己提出的原始說明。
+          <div className="space-y-4 text-sm sm:text-base text-zinc-300 leading-relaxed">
+            <p>
+              鐵人三項源自於夏威夷，而<strong className="text-amber-400">全球百鐵認證則創始自台灣</strong>。全球百鐵認證 <strong className="text-white">Global 100 Triathlon Certification (G100TC)</strong> 為全球首創鐵人三項賽事及鐵馬賽事完賽紀錄認證平台。這個源自台灣、全球首創的鐵人三項賽事、公路自由車賽與登山越野車賽完賽紀錄登錄及認證平台，為<strong className="text-amber-400">醫護鐵人</strong>主導統籌、國際知名<strong className="text-amber-400">美利達自行車</strong>及眾多品牌支持的認證單位。有鑒於馬拉松的百馬認證廣為人知，故百鐵認證採<strong className="text-emerald-400">線上零收費認證</strong>，結合實體賽事現場讓更多愛好者共同參與。
+            </p>
+            <p>
+              鐵人三項代表耐力和毅力，而鐵馬更是貼近大家日常生活，我們的目標是鼓勵熱愛耐力運動的鐵人與鐵馬愛好者挑戰「百鐵」。認證過程簡單，只要登錄本網會員，填寫入會申請表，註冊會員，登錄合格賽事，不需任何費用。
             </p>
           </div>
+        </section>
 
-          <div className="space-y-12">
-            {founderGroups.map((group, gIdx) => (
-              <div key={gIdx} className="space-y-4">
-                <h3 className="text-sm font-bold text-amber-400 tracking-wider uppercase border-b border-slate-800/60 pb-2">
-                  {group.category}
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {group.members.map((member, mIdx) => (
-                    <div
-                      key={mIdx}
-                      className="flex items-center gap-4 rounded-xl border border-slate-800/90 bg-slate-900/50 p-4 hover:border-amber-500/40 transition"
-                    >
-                      {/* 頭像改為 h-20 w-20 (80px) 讓人物更清晰 */}
-                      <div className="relative h-20 w-20 shrink-0 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center">
-                        <img
-                          src={`/initiators/${member.name}.jpg`}
-                          alt={member.name}
-                          className="h-full w-full object-cover"
-                          onError={(e) => {
-                            // 若中文檔名圖片不存在時，嘗試回退讀取原始亂數圖片路徑
-                            const target = e.currentTarget;
-                            if (target.src.includes(".jpg") && !target.src.includes(member.img)) {
-                              target.src = member.img;
-                            } else {
-                              target.style.display = "none";
-                            }
-                          }}
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-bold text-white text-base truncate">{member.name}</div>
-                        <div className="text-xs text-slate-300 mt-0.5 leading-snug">{member.title}</div>
-                        <div className="text-[10px] text-amber-500/80 mt-1 italic">{member.note}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+        {/* 三大認證標準 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 鐵人三項認證標準 */}
+          <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-6 sm:p-7 space-y-4 shadow-xl">
+            <div className="flex items-center gap-2 text-amber-400 font-black text-lg">
+              🏊‍♂️ 【鐵人三項認證標準】
+            </div>
+            <ul className="space-y-3 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              <li><strong className="text-white">原則一：</strong>僅開放登錄 51.5 公里以上距離之鐵人三項賽事（同時具備游泳項目 1.5 公里（含）或以上、自行車 40 公里（含）或以上、跑步 10 公里（含）或以上），且時間必須為連續性，且必須於大會規定的時間內完賽。</li>
+              <li><strong className="text-white">原則二：</strong>僅開放登錄政府單位主辦或經政府立案之民間團體所主辦，或由全球百鐵認證特別認可之 51.5km 以上鐵人三項賽事，私人舉辦的賽事恕不接受。</li>
+              <li><strong className="text-white">原則三：</strong>僅開放登錄國內外政府核准申辦（如：路權）的賽事。</li>
+              <li><strong className="text-white">原則四：</strong>僅開放登錄合格賽事必須設有晶片感應計時，且必須設有完整的補給及醫護措施。</li>
+            </ul>
+          </section>
+
+          {/* 公路單車認證標準 */}
+          <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-6 sm:p-7 space-y-4 shadow-xl">
+            <div className="flex items-center gap-2 text-red-400 font-black text-lg">
+              🚴‍♂️ 【公路單車認證標準】
+            </div>
+            <ul className="space-y-3 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              <li><strong className="text-white">原則一：</strong>僅開放登錄 90km 以上距離之公路賽或 113km 以上鐵人三項參賽組別之完賽紀錄，越野單車賽不列入本登記範圍，未完賽者亦不能登錄，且時間必須為連續性，且必須於大會規定的時間內完賽。</li>
+              <li><strong className="text-white">原則二：</strong>僅開放登錄政府單位主辦或經政府立案之民間團體所主辦，或由全球百鐵認證特別認可之公路單車賽事及 113km 以上鐵人三項賽事，私人舉辦的賽事恕不接受。</li>
+              <li><strong className="text-white">原則三：</strong>為尊重其他已開放各式認證的賽事單位，類似賽事恕不開放登錄（如：北高、雙塔、三塔系列自我挑戰認證賽事）。</li>
+              <li><strong className="text-white">原則四：</strong>僅開放登錄國內外政府核准申辦（如：路權）的公路單車賽事。</li>
+              <li><strong className="text-white">原則五：</strong>僅開放登錄合格賽事必須設有晶片感應計時，且必須設有完整的補給及醫護措施。</li>
+            </ul>
+          </section>
+
+          {/* 越野單車認證標準 */}
+          <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-6 sm:p-7 space-y-4 shadow-xl">
+            <div className="flex items-center gap-2 text-emerald-400 font-black text-lg">
+              🚵‍♂️ 【越野單車認證標準】
+            </div>
+            <ul className="space-y-3 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              <li><strong className="text-white">原則一：</strong>僅開放登錄 20km 以上距離之越野單車賽或 XTERRA 鐵人三項參賽組別之完賽紀錄，公路單車賽不列入本登記範圍，未完賽者亦不能登錄且時間必須為連續性，且必須於大會規定的時間內完賽。</li>
+              <li><strong className="text-white">原則二：</strong>僅開放登錄政府單位主辦或經政府立案之民間團體所主辦，或由全球百鐵認證特別認可之越野單車賽事，私人舉辦的賽事恕不接受。</li>
+              <li><strong className="text-white">原則三：</strong>為尊重其他已開放各式認證的賽事單位，類似賽事恕不開放登錄（如：北高、雙塔、三塔系列自我挑戰認證賽事）。</li>
+              <li><strong className="text-white">原則四：</strong>僅開放登錄政府核准申辦（如：路權）的越野單車賽事。</li>
+              <li><strong className="text-white">原則五：</strong>僅開放登錄合格賽事必須設有晶片感應計時，且必須設有完整的補給及醫護措施。</li>
+            </ul>
+          </section>
+        </div>
+
+        {/* 認證辦法與獎勵 */}
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800 p-8 space-y-6 shadow-xl">
+          <div className="space-y-3">
+            <h2 className="text-xl font-black text-amber-400">📋 【鐵人三項、公路單車及越野單車認證辦法】</h2>
+            <ol className="list-decimal list-inside space-y-2 text-sm text-zinc-300 leading-relaxed">
+              <li>上網填寫「全球百鐵認證」入會申請表並註冊登錄成為會員（免繳會費）。</li>
+              <li>登錄合格賽事名稱、舉辦時間、地點，並將完賽成績登錄於指定表單才算百鐵中的一鐵。基於對運動愛好者的榮譽信任，全球百鐵認證不另做審核，請申請「全球百鐵認證」的鐵人們務必詳閱相關規定。</li>
+            </ol>
+          </div>
+
+          <div className="space-y-2 pt-2 border-t border-zinc-800/80">
+            <h2 className="text-xl font-black text-amber-400">🏅 【獎勵】</h2>
+            <p className="text-sm text-zinc-300">於全球百鐵認證的官網上列出姓名及榮耀英雄榜排名。</p>
           </div>
         </section>
 
-        {/* 底部行動呼籲 */}
-        <section className="rounded-2xl bg-gradient-to-r from-amber-500/10 via-slate-900 to-slate-900 border border-amber-500/20 p-8 text-center">
-          <h3 className="text-xl font-bold text-white mb-2">準備好記錄您的下一場榮耀了嗎？</h3>
-          <p className="text-sm text-slate-400 mb-6">零報名費、永久保存，立即加入全球百鐵認證行列。</p>
-          <div className="flex justify-center gap-4">
+        {/* 獎項與領獎條件 */}
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800 p-8 space-y-6 shadow-xl">
+          <h2 className="text-2xl font-black text-white">🏆 【獎項與授證規範】</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="rounded-2xl bg-zinc-900/60 border border-amber-500/30 p-5 space-y-3">
+              <h3 className="text-base font-extrabold text-amber-400">1. 鐵人三項獎項設有：</h3>
+              <div className="flex flex-wrap gap-2">
+                {triAwards.map((aw) => (
+                  <span key={aw} className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
+                    {aw}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-zinc-900/60 border border-red-500/30 p-5 space-y-3">
+              <h3 className="text-base font-extrabold text-red-400">2. 公路單車及越野單車獎項設有：</h3>
+              <div className="flex flex-wrap gap-2">
+                {bikeAwards.map((aw) => (
+                  <span key={aw} className="px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-bold">
+                    {aw}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2.5 pt-4 border-t border-zinc-800">
+            <h3 className="text-base font-extrabold text-white">3. 頒獎時間及領獎條件：</h3>
+            <ul className="space-y-2 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              <li><strong className="text-amber-400">3.1</strong> 得獎標準以登錄審核截止日（含）前於全球百鐵認證網站上所登錄的合格賽事數為標準。</li>
+              <li><strong className="text-amber-400">3.2</strong> 鐵人三項得獎者必須參加每年於台灣台東市超級鐵人三項或普悠瑪鐵人三項賽事聯名舉辦的全球百鐵英雄授證宴並購買獎牌與獎狀（約每年十月或三月）方得領獎。</li>
+              <li><strong className="text-amber-400">3.3</strong> 公路單車及越野單車得獎者則另行公告。</li>
+              <li><strong className="text-amber-400">3.4</strong> 每年各獎項不得重複領取，亦不能同時領取二種以上獎項。</li>
+            </ul>
+          </div>
+
+          <div className="pt-4 flex flex-wrap gap-3">
             <Link
-              href="/certifications"
-              className="rounded-lg bg-amber-500 px-6 py-2.5 text-sm font-bold text-slate-950 hover:bg-amber-400 transition"
+              href="/profile/new-record"
+              className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition"
             >
-              前往完賽登錄
+              ✍️ 立即登錄完賽紀錄
             </Link>
             <Link
               href="/shop"
-              className="rounded-lg border border-slate-700 bg-slate-800 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition"
+              className="px-6 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-bold text-sm transition"
             >
-              瀏覽榮耀商城
+              🛍️ 前往榮耀商城查看獎牌與水晶證書
             </Link>
           </div>
         </section>
-      </div>
+
+      </main>
+      <Footer />
     </div>
   );
 }
