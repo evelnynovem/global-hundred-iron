@@ -124,6 +124,39 @@ export default function TaitungAssociationPage() {
     if (!file) return;
     setSelectedFileName(file.name);
 
+    // 🚀 1. 自動擷取檔案名稱（去除 .csv / .xlsx / .xls 副檔名）帶入「對應賽事名稱」欄位！
+    const baseRaceName = file.name.replace(/\.(csv|xlsx|xls)$/i, "").trim();
+    if (baseRaceName) {
+      setCsvRaceName(baseRaceName);
+      if (baseRaceName.includes("197") || baseRaceName.includes("單車") || baseRaceName.includes("自行車") || baseRaceName.includes("百K")) {
+        setCsvSportType("cycling");
+      } else {
+        setCsvSportType("triathlon");
+      }
+      // 若檔名含有年份（如 2024），自動更新對應年份
+      const yearMatch = baseRaceName.match(/\b(20\d{2})\b/);
+      if (yearMatch) {
+        const y = yearMatch[1];
+        if (baseRaceName.includes("巴歌浪")) setCsvRaceDate(`${y}-10-17`);
+        else if (baseRaceName.includes("普悠瑪")) setCsvRaceDate(`${y}-03-28`);
+        else if (baseRaceName.includes("戀戀197")) setCsvRaceDate(`${y}-12-06`);
+      }
+    }
+
+    // 轉換 Excel 小數時間 (如 0.476195) 為標準 HH:MM:SS
+    const formatExcelTime = (val: any): string => {
+      if (val === null || val === undefined || val === "") return "完賽";
+      const num = Number(val);
+      if (!isNaN(num) && num > 0 && num < 2 && String(val).includes(".")) {
+        const totalSeconds = Math.round(num * 86400);
+        const hh = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+        const mm = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+        const ss = String(totalSeconds % 60).padStart(2, "0");
+        return `${hh}:${mm}:${ss}`;
+      }
+      return String(val).trim() || "完賽";
+    };
+
     try {
       const arrayBuffer = await file.arrayBuffer();
       const workbook = XLSX.read(arrayBuffer, { type: "array" });
@@ -138,57 +171,65 @@ export default function TaitungAssociationPage() {
         return;
       }
 
-      const firstRowStr = validRows[0].map((c) => String(c).toLowerCase()).join(" ");
-      const hasHeader =
-        firstRowStr.includes("name") ||
-        firstRowStr.includes("姓名") ||
-        firstRowStr.includes("選手") ||
-        firstRowStr.includes("email") ||
-        firstRowStr.includes("時間") ||
-        firstRowStr.includes("成績");
-
-      const dataRows = hasHeader ? validRows.slice(1) : validRows;
-
-      let nameIdx = 0;
-      let catIdx = 1;
-      let timeIdx = 2;
-      let teamIdx = 3;
-      let emailIdx = 4;
-
-      if (hasHeader) {
-        validRows[0].forEach((colName, idx) => {
-          const s = String(colName).toLowerCase().trim();
-          if (s.includes("姓名") || s.includes("選手") || s === "name" || s.includes("athlete")) nameIdx = idx;
-          else if (s.includes("組別") || s.includes("距離") || s.includes("category") || s.includes("group")) catIdx = idx;
-          else if (s.includes("時間") || s.includes("成績") || s.includes("time") || s.includes("result")) timeIdx = idx;
-          else if (s.includes("團隊") || s.includes("車隊") || s.includes("team")) teamIdx = idx;
-          else if (s.includes("mail") || s.includes("信箱")) emailIdx = idx;
-        });
+      // 尋找真正的標題列（可能在第 1~5 列）
+      let headerRowIdx = 0;
+      for (let i = 0; i < Math.min(validRows.length, 5); i++) {
+        const rowStr = validRows[i].map((c) => String(c).toLowerCase()).join(" ");
+        if (rowStr.includes("姓名") || rowStr.includes("選手") || rowStr.includes("name")) {
+          headerRowIdx = i;
+          break;
+        }
       }
+
+      const headerRow = validRows[headerRowIdx].map((c) => String(c).toLowerCase().trim());
+      const dataRows = validRows.slice(headerRowIdx + 1);
+
+      let nameIdx = -1;
+      let catIdx = -1;
+      let timeIdx = -1;
+      let teamIdx = -1;
+      let emailIdx = -1;
+
+      headerRow.forEach((s, idx) => {
+        if (nameIdx === -1 && (s.includes("姓名") || s.includes("選手") || s === "name" || s.includes("athlete"))) nameIdx = idx;
+        else if (catIdx === -1 && (s.includes("組別") || s.includes("距離") || s.includes("項目") || s.includes("category"))) catIdx = idx;
+        else if (timeIdx === -1 && (s.includes("總成績") || s.includes("完賽時間") || s.includes("成績") || s.includes("時間") || s.includes("total") || s.includes("finish"))) timeIdx = idx;
+        else if (teamIdx === -1 && (s.includes("團隊") || s.includes("車隊") || s.includes("單位") || s.includes("team"))) teamIdx = idx;
+        else if (emailIdx === -1 && (s.includes("mail") || s.includes("信箱"))) emailIdx = idx;
+      });
+
+      // 若標題列沒標示「姓名」，自動從第一筆資料找出「不是純數字、不是距離、不是時間」的中文/英文姓名欄！
+      if (nameIdx === -1 && dataRows.length > 0) {
+        const sample = dataRows[0];
+        for (let idx = 0; idx < sample.length; idx++) {
+          const val = String(sample[idx]).trim();
+          if (val && isNaN(Number(val)) && !val.includes(":") && !val.toLowerCase().includes("km") && val.length >= 2 && val.length <= 20) {
+            nameIdx = idx;
+            break;
+          }
+        }
+      }
+      if (nameIdx === -1) nameIdx = 0;
 
       const parsed = dataRows
         .map((cols) => {
           const rawName = String(cols[nameIdx] ?? "").trim();
-          if (!rawName || rawName === "EMPTY" || rawName === "NULL") return null;
+          // 過濾掉空白或純數字編號
+          if (!rawName || rawName === "EMPTY" || rawName === "NULL" || /^\d+$/.test(rawName)) return null;
           return {
             athlete_name: rawName,
-            category: String(cols[catIdx] ?? "").trim() || (csvSportType === "cycling" ? "100K 公路單車" : "51.5K 標準鐵人"),
-            finish_time: String(cols[timeIdx] ?? "").trim() || "完賽",
-            team: String(cols[teamIdx] ?? "").trim() || "個人",
-            login_email: String(cols[emailIdx] ?? "").trim() || "",
+            category: (catIdx !== -1 ? String(cols[catIdx] ?? "").trim() : "") || (baseRaceName.includes("226") ? "226K 全程超鐵" : baseRaceName.includes("113") ? "113K 半程超鐵" : "51.5K 標準鐵人"),
+            finish_time: timeIdx !== -1 ? formatExcelTime(cols[timeIdx]) : "完賽",
+            team: (teamIdx !== -1 ? String(cols[teamIdx] ?? "").trim() : "") || "個人",
+            login_email: emailIdx !== -1 ? String(cols[emailIdx] ?? "").trim() : "",
           };
         })
         .filter(Boolean);
 
-      if (parsed.length === 0) {
-        alert("⚠️ 未能從檔案中解析出有效的選手姓名列，請確認第一欄為選手姓名。");
-        return;
-      }
-
       setCsvPreviewRows(parsed);
     } catch (err: any) {
       console.error("解析 Excel/CSV 錯誤:", err);
-      alert("❌ 檔案解析失敗：" + (err.message || "請確認檔案格式為 .xlsx, .xls 或 .csv"));
+      alert("❌ 檔案解析失敗：" + (err.message || "請確認檔案格式"));
     }
   };
 
