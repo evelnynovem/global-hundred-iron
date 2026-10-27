@@ -35,7 +35,6 @@ export default function ClaimRecordsPage() {
         setUser(currentUser);
         const email = currentUser.email || "";
 
-        // 1. 讀取該用戶在 user_records 中已經認領/登錄過的紀錄
         const { data: myRecs } = await supabase
           .from("user_records")
           .select("event_name, match_date")
@@ -47,7 +46,6 @@ export default function ClaimRecordsPage() {
         });
         setClaimedKeys(claimed);
 
-        // 2. 讀取歷史資料表
         const table = activeTab === "cycling" ? "cycling_details_full" : "race_details_full";
         const { data: hist } = await supabase
           .from(table)
@@ -104,7 +102,7 @@ export default function ClaimRecordsPage() {
       });
       setClaimedKeys(updatedClaimed);
       setSelectedIds(new Set());
-      alert(`🎉 成功認領 ${toInsert.length} 筆歷史完賽紀錄！已標示為「已認領」並同步至個人履歷。`);
+      alert(`🎉 成功認領 ${toInsert.length} 筆歷史完賽紀錄！已標示為「✅ 已認領」並同步至個人履歷與百鐵英雄榜。`);
     } catch (err: any) {
       alert("❌ 認領失敗：" + err.message);
     } finally {
@@ -116,7 +114,20 @@ export default function ClaimRecordsPage() {
     <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-5xl w-full mx-auto px-6 py-12 space-y-8">
         
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-6">
+        {/* 頂部雙功能直通切換橫幅：讓使用者隨時可在「手動完賽登錄」與「認領歷史紀錄」間一鍵切換 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-zinc-900 p-2 rounded-2xl border border-zinc-800">
+          <Link
+            href="/profile/new-record"
+            className="py-3.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-sm text-center transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2"
+          >
+            ✍️ 前往「手動完賽榮譽登錄」（登錄新賽事） →
+          </Link>
+          <div className="py-3.5 px-4 rounded-xl bg-zinc-950 border border-amber-500/40 text-amber-400 font-black text-sm text-center flex items-center justify-center gap-2">
+            📥 目前所在：歷史成績智慧認領（認領既有賽事）
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
           <div>
             <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
               LEGACY RECORDS CLAIM
@@ -125,12 +136,12 @@ export default function ClaimRecordsPage() {
               歷史成績智慧認領
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              系統自動比對您的歷史完賽紀錄，已認領過的賽事會直接標示「✅ 已認領」。
+              系統自動比對您的歷史完賽紀錄，已認領過的賽事會直接標示「✅ 已認領」。若要手動新增賽事請點選上方橘色按鈕。
             </p>
           </div>
           <Link
             href="/profile"
-            className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs sm:text-sm font-bold rounded-xl transition"
+            className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs sm:text-sm font-bold rounded-xl transition shrink-0"
           >
             ← 返回會員中心
           </Link>
@@ -162,17 +173,25 @@ export default function ClaimRecordsPage() {
           </button>
         </div>
 
-        <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 p-4 flex items-center justify-between">
+        <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 p-4 flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm text-zinc-300">
-            找到 <span className="text-amber-400 font-bold">{candidateRecords.length}</span> 筆紀錄，已勾選 <span className="text-emerald-400 font-bold">{selectedIds.size}</span> 筆
+            找到 <span className="text-amber-400 font-bold">{candidateRecords.length}</span> 筆歷史紀錄，已勾選 <span className="text-emerald-400 font-bold">{selectedIds.size}</span> 筆
           </div>
-          <button
-            type="button"
-            onClick={handleSelectAll}
-            className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white transition cursor-pointer"
-          >
-            一鍵全選未認領賽事
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSelectAll}
+              className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white transition cursor-pointer"
+            >
+              一鍵全選未認領賽事
+            </button>
+            <Link
+              href="/profile/new-record"
+              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-extrabold text-white transition"
+            >
+              找不到賽事？點此手動登錄 →
+            </Link>
+          </div>
         </div>
 
         {loading ? (

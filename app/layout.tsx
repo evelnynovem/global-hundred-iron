@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "全球百鐵認證暨普悠瑪聯合服務平台",
+    default: "全球百鐵認證 Global 100 Triathlon Certification",
     template: "%s｜全球百鐵認證",
   },
   description:

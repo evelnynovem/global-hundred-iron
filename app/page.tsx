@@ -7,7 +7,6 @@ import Footer from "@/components/Footer";
 export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 精準對應您放在 public/images/ 底下的真實官方賽事海報
   const slides = [
     {
       badge: "單車百鐵認證",
@@ -24,7 +23,7 @@ export default function HomePage() {
       title: "台東巴歌浪鐵人三項",
       desc: "2026/10/17-18 & 2027/10/16-17｜馳騁東海岸壯闊山海，體驗純粹而熱血的鐵人意志。",
       link: "/series",
-      poster: "/images/pakelang.jpg",
+      poster: "/images/pakelangTSTA.jpeg",
       fallbackPoster: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=85"
     },
     {
@@ -59,9 +58,9 @@ export default function HomePage() {
       id: 1,
       isPinned: true,
       category: "系統公告",
-      title: "【重要公告】全球百鐵認證官網全新改版上線，開放歷史完賽紀錄認領與查詢！",
-      date: "2026-10-25",
-      href: "/profile/claim"
+      title: "【重要公告】全球百鐵認證官網全新改版上線，開放完賽榮譽登錄、歷史紀錄認領與各階段賞別查詢！",
+      date: "2026-10-27",
+      href: "/profile/new-record"
     },
     {
       id: 2,
@@ -81,15 +80,44 @@ export default function HomePage() {
     }
   ];
 
+  const sponsors = [
+    { name: "醫護鐵人 IRONMEDIC", role: "主導統籌單位", desc: "全球首創運動安全暨百鐵認證統籌機構" },
+    { name: "美利達自行車 MERIDA", role: "國際領導單車品牌", desc: "全力支持台灣鐵人與百鐵馬耐力運動發展" },
+    { name: "SYB 昇陽自行車", role: "頂級單車與三鐵戰袍夥伴", desc: "專業三鐵車、競速裝備與客製化百鐵戰袍" },
+    { name: "邁克仕 AminoMax", role: "官方指定運動補給", desc: "專業胺基酸、BCAA 與長距離耐力能量補給" },
+    { name: "肌樂 Mentholatum", role: "官方運動防護夥伴", desc: "賽前熱身與賽後舒緩之運動噴劑領導品牌" },
+    { name: "ZIV 專業運動眼鏡", role: "官方指定運動眼鏡", desc: "專為亞洲臉型設計之防風抗 UV 頂級光學鏡片" },
+    { name: "SAEKO 專業泳鏡", role: "官方指定開放水域泳鏡", desc: "台灣外銷全球之三鐵開放水域廣角防霧泳鏡" },
+    { name: "NOVATEC 久裕興業", role: "官方指定高階輪組", desc: "國際頂尖碳纖維輪組與高順暢度花鼓技術" },
+  ];
+
+  const columns = [
+    {
+      badge: "單車誌 × 醫護鐵人運動醫學專欄",
+      badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+      title: "長距離耐力賽事的心肺評估、熱傷害預防與精準補給策略",
+      author: "洪緯欣 醫師（屏東榮總胸腔內科暨運動醫學專家）× 醫護鐵人團隊",
+      summary: "深入解析 113K/226K 超鐵與百K單車挑戰中常見之抽筋、低血鈉與高溫脫水風險，如何透過科學化配速與電解質補給安全完賽。",
+      link: "/about"
+    },
+    {
+      badge: "單車誌 × 全球百鐵認證藝人騎乘專欄",
+      badgeColor: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+      title: "向前一步，就是解方：狂飆的鐵人與跨界藝人破風故事",
+      author: "全球百鐵認證名人堂 × 跨界藝人與搖滾鐵人實戰分享",
+      summary: "從舞台聚光燈走向東海岸活水湖與 197 縣道，看跨界藝人與百鐵推手們如何透過游泳、單車與跑步療癒焦慮、突破中年危機！",
+      link: "/about"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
-      <main className="max-w-6xl mx-auto w-full px-6 pt-5 pb-14 space-y-5">
+      <main className="max-w-6xl mx-auto w-full px-6 pt-5 pb-14 space-y-6">
         
         {/* 第一屏上半部：主視覺與賽事海報輪播 */}
         <section className="relative rounded-3xl bg-gradient-to-br from-zinc-950 via-[#0d090a] to-[#1a0a0d] border border-zinc-800/80 p-6 md:p-8 shadow-2xl overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* 左側標語與漸層色保留 */}
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-block px-3.5 py-1 rounded-full bg-red-950/60 border border-red-800/50 text-red-400 text-xs font-bold tracking-widest uppercase">
                 GLOBAL 100 TRIATHLON CERTIFICATION
@@ -107,6 +135,7 @@ export default function HomePage() {
                 全球百鐵認證，為鐵人三項與單車選手保存每一次出發、完賽與突破。從初鐵到百鐵，累積屬於你的榮耀里程碑。
               </p>
 
+              {/* 四大明確行動按鈕：同時直接提供「完賽登錄」與「認領歷史紀錄」 */}
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Link
                   href="/rankings"
@@ -121,10 +150,16 @@ export default function HomePage() {
                   🔍 歷年完賽成績查詢
                 </Link>
                 <Link
-                  href="/profile/claim"
+                  href="/profile/new-record"
                   className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition shadow-lg shadow-amber-500/20 flex items-center gap-2"
                 >
-                  ✍️ 完賽登錄 / 認領紀錄
+                  ✍️ 完賽榮譽登錄
+                </Link>
+                <Link
+                  href="/profile/claim"
+                  className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-amber-500/40 text-amber-400 font-extrabold text-sm transition flex items-center gap-1.5"
+                >
+                  📥 認領歷史紀錄
                 </Link>
               </div>
             </div>
@@ -195,7 +230,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 第一屏下半部：最新協會與賽事公告 */}
+        {/* 最新協會與賽事公告 */}
         <section className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 p-5 shadow-xl">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-3 mb-2.5">
             <div className="flex items-center gap-2.5">
@@ -247,9 +282,9 @@ export default function HomePage() {
             className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-500/50 p-6 transition space-y-2 group"
           >
             <div className="text-xs font-black text-amber-400 tracking-wider">01 / 百鐵排名</div>
-            <h3 className="text-lg font-extrabold text-white group-hover:text-amber-400 transition">鐵人三項英雄榜</h3>
+            <h3 className="text-lg font-extrabold text-white group-hover:text-amber-400 transition">百鐵 ＆ 百鐵馬英雄榜</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              免登入公開查詢總排名、初鐵、10鐵至百鐵各階段榮耀選手名單。
+              免登入公開查詢總排名、初鐵、三鐵、五鐵、十鐵至百鐵各階段榮耀選手名單。
             </p>
           </Link>
 
@@ -260,7 +295,7 @@ export default function HomePage() {
             <div className="text-xs font-black text-red-400 tracking-wider">02 / 成績查詢</div>
             <h3 className="text-lg font-extrabold text-white group-hover:text-red-400 transition">賽事登錄資料查詢</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              輸入選手姓名或賽事名稱，快速檢索歷年上萬筆完賽成績與分段紀錄。
+              輸入選手姓名或賽事名稱，快速檢索歷年上萬筆三鐵與單車完賽成績。
             </p>
           </Link>
 
@@ -271,20 +306,97 @@ export default function HomePage() {
             <div className="text-xs font-black text-amber-400 tracking-wider">03 / 協會專區</div>
             <h3 className="text-lg font-extrabold text-white group-hover:text-amber-400 transition">台東城鄉生活運動協會</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              最新協會公告、巴歌浪鐵人三項與戀戀197官方賽事成績連動。
+              最新協會公告、秩序冊下載、巴歌浪鐵人三項與戀戀197官方成績連動。
             </p>
           </Link>
 
           <Link
-            href="/profile"
+            href="/profile/new-record"
             className="rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:border-blue-500/50 p-6 transition space-y-2 group"
           >
-            <div className="text-xs font-black text-blue-400 tracking-wider">04 / 會員中心</div>
-            <h3 className="text-lg font-extrabold text-white group-hover:text-blue-400 transition">認領與完賽登錄</h3>
+            <div className="text-xs font-black text-blue-400 tracking-wider">04 / 完賽登錄 ＆ 認領</div>
+            <h3 className="text-lg font-extrabold text-white group-hover:text-blue-400 transition">榮譽登錄與歷史認領</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              登入後即可認領歷史完賽數據、登錄最新賽事證書並申請百鐵認證獎章。
+              10秒下拉選單快速登錄最新完賽成績、一鍵認領歷史數據並預覽個人賞別水晶證書。
             </p>
           </Link>
+        </section>
+
+        {/* 📚 新增：單車誌 × 醫護鐵人運動醫學專欄 ＆ 全球百鐵認證藝人騎乘經驗分享專欄 */}
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-6 sm:p-8 space-y-5 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800 pb-4">
+            <div>
+              <span className="text-xs font-black text-amber-400 uppercase tracking-widest">
+                CYCLINGTIME MEDIA × IRONMEDIC COLUMNS
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-white mt-1">
+                📚 單車誌專欄：醫護鐵人運動醫學 ＆ 百鐵名人堂騎乘經驗分享
+              </h2>
+            </div>
+            <Link href="/about" className="text-xs font-bold text-amber-400 hover:underline">
+              閱讀更多專欄文章 →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {columns.map((col, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-amber-500/40 p-6 flex flex-col justify-between space-y-4 transition"
+              >
+                <div className="space-y-3">
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold border ${col.badgeColor}`}>
+                    {col.badge}
+                  </span>
+                  <h3 className="text-lg font-black text-white leading-snug">
+                    {col.title}
+                  </h3>
+                  <div className="text-xs font-bold text-amber-400/90">
+                    撰文 / 專訪：{col.author}
+                  </div>
+                  <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+                    {col.summary}
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href={col.link}
+                    className="text-xs font-extrabold text-white hover:text-amber-400 transition inline-flex items-center gap-1"
+                  >
+                    前往閱讀完整專欄 →
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 🤝 新增：官方領銜與贊助夥伴榮耀牆（美利達、SYB昇陽、邁克仕、肌樂、ZIV、SAEKO、NOVATEC） */}
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-6 sm:p-8 space-y-5 shadow-xl">
+          <div className="text-center space-y-1">
+            <span className="text-xs font-black text-amber-400 uppercase tracking-widest">
+              OFFICIAL SPONSORS & STRATEGIC PARTNERS
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-white">
+              🤝 全球百鐵認證 官方統籌與榮耀贊助夥伴
+            </h2>
+            <p className="text-xs text-zinc-400">
+              感謝各大國際運動領導品牌與醫護鐵人共同守護賽道安全、支持台灣耐力運動發展
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-2">
+            {sponsors.map((sp, i) => (
+              <div
+                key={i}
+                className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 hover:border-amber-500/40 p-4 text-center space-y-1.5 transition"
+              >
+                <div className="text-[11px] font-bold text-amber-400">{sp.role}</div>
+                <div className="text-sm sm:text-base font-black text-white">{sp.name}</div>
+                <p className="text-[11px] text-zinc-400 leading-snug">{sp.desc}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
       </main>
