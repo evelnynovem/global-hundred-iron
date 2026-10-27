@@ -265,7 +265,7 @@ export default function RankingsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+    <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-8">
         
         {/* 頂部標題與切換按鈕 */}

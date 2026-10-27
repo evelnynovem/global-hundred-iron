@@ -96,7 +96,7 @@ export default function SeriesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+    <div translate="no" className="notranslate min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
       <div className="mx-auto max-w-5xl w-full py-12 px-6 space-y-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
           <div>

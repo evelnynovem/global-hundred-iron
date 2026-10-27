@@ -111,7 +111,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+    <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <main className="max-w-6xl mx-auto w-full px-6 pt-5 pb-14 space-y-6">
         
         {/* 第一屏上半部：主視覺與賽事海報輪播 */}

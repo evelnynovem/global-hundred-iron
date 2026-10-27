@@ -26,7 +26,7 @@ export default async function RootLayout({
 
   return (
     <html lang="zh-Hant">
-      <body className="min-h-screen bg-gray-50 text-zinc-950 antialiased flex flex-col justify-between">
+      <head><meta name="google" content="notranslate" /></head><body className="min-h-screen bg-gray-50 text-zinc-950 antialiased flex flex-col justify-between">
         <div>
           {/* 頂部導覽列（支援百鐵與普悠瑪切換） */}
           <Navbar />

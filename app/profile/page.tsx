@@ -277,7 +277,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#070709] text-white flex items-center justify-center">
+      <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex items-center justify-center">
         <p className="text-zinc-400 animate-pulse font-bold">同步所有完賽資料庫中...</p>
       </div>
     );

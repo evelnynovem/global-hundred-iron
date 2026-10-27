@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function PuyumaHomePage() {
   return (
-    <div className="min-h-screen bg-amber-50/30 text-gray-800">
+    <div translate="no" className="notranslate min-h-screen bg-amber-50/30 text-gray-800">
       {/* 普悠瑪專區主視覺 Banner */}
       <div className="bg-gradient-to-r from-amber-900 to-orange-800 text-white py-16 px-6 text-center shadow-md">
         <h1 className="text-3xl md:text-5xl font-extrabold tracking-wider mb-4">

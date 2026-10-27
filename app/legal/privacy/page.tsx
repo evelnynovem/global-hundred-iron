@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div translate="no" className="notranslate min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-10 space-y-6 text-slate-700">
         <div className="border-b border-slate-200 pb-4">
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">

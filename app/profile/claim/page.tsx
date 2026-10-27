@@ -111,7 +111,7 @@ export default function ClaimRecordsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+    <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-5xl w-full mx-auto px-6 py-12 space-y-8">
         
         {/* 頂部雙功能直通切換橫幅：讓使用者隨時可在「手動完賽登錄」與「認領歷史紀錄」間一鍵切換 */}
