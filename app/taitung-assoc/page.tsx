@@ -118,7 +118,7 @@ export default function TaitungAssociationPage() {
     alert(`✅ 協會公告已發布！${uploadedFileName ? `（已附加檔案：${uploadedFileName}）` : ""}`);
   };
 
-  // 🚀 全新升級：使用 XLSX 引擎同時支援 .xlsx、.xls 與 .csv 檔案格式智慧解析！
+  // 使用 XLSX 引擎同時支援 .xlsx、.xls 與 .csv 檔案格式智慧解析
   const handleExcelOrCsvSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -130,7 +130,6 @@ export default function TaitungAssociationPage() {
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
 
-      // 轉為二維陣列以相容各種有無標題列的 Excel 或 CSV
       const rows: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
       const validRows = rows.filter((r) => Array.isArray(r) && r.some((cell) => String(cell).trim() !== ""));
 
@@ -139,7 +138,6 @@ export default function TaitungAssociationPage() {
         return;
       }
 
-      // 判斷第一列是否為標題列
       const firstRowStr = validRows[0].map((c) => String(c).toLowerCase()).join(" ");
       const hasHeader =
         firstRowStr.includes("name") ||
@@ -151,7 +149,6 @@ export default function TaitungAssociationPage() {
 
       const dataRows = hasHeader ? validRows.slice(1) : validRows;
 
-      // 自動智慧對應欄位位置
       let nameIdx = 0;
       let catIdx = 1;
       let timeIdx = 2;
@@ -195,19 +192,16 @@ export default function TaitungAssociationPage() {
     }
   };
 
-  // 🚀 確認批次匯入：自動分批寫入並具備容錯保護，確保 100% 匯入成功！
   const handleConfirmCsvImport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (csvPreviewRows.length === 0) {
-      alert("⚠️ 請先選擇要上傳的 Excel (.xlsx/.xls) 或 .csv 成績檔案！");
+      alert("⚠️ 請先選擇要上傳的檔案！");
       return;
     }
 
     setImportingCsv(true);
     try {
       const targetTable = csvSportType === "cycling" ? "cycling_details_full" : "race_details_full";
-
-      // 只傳送資料表確定存在的標準核心欄位，避免 schema 欄位不符報錯
       const fullPayload = csvPreviewRows.map((r) => ({
         athlete_name: r.athlete_name,
         race_name: csvRaceName.trim(),
@@ -216,13 +210,10 @@ export default function TaitungAssociationPage() {
         login_email: r.login_email || null,
       }));
 
-      // 分批寫入（每批 100 筆）
       for (let i = 0; i < fullPayload.length; i += 100) {
         const chunk = fullPayload.slice(i, i + 100);
         const { error } = await supabase.from(targetTable).insert(chunk);
         if (error) {
-          console.warn("部分欄位重試最小化寫入:", error.message);
-          // 最小化欄位保底寫入
           const minimalChunk = chunk.map((c) => ({
             athlete_name: c.athlete_name,
             race_name: c.race_name,
@@ -232,7 +223,6 @@ export default function TaitungAssociationPage() {
         }
       }
 
-      // 同時將匯入結果立即顯示於下方協會成績列表，讓管理員馬上看到匯入成果！
       setAssocResults(
         csvPreviewRows.slice(0, 50).map((r, idx) => ({
           id: `imported-${idx}`,
@@ -244,7 +234,7 @@ export default function TaitungAssociationPage() {
         }))
       );
 
-      alert(`🎉 匯入成功！已將檔案「${selectedFileName}」內共 ${csvPreviewRows.length} 筆「${csvRaceName}」完賽成績正式匯入系統，並已立即顯示於下方成績表中！`);
+      alert(`🎉 匯入成功！已將檔案內共 ${csvPreviewRows.length} 筆「${csvRaceName}」完賽成績正式匯入系統！`);
       setCsvPreviewRows([]);
       setSelectedFileName("");
       setShowCsvModal(false);
@@ -283,7 +273,6 @@ export default function TaitungAssociationPage() {
     <div className="min-h-screen bg-[#060911] text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-6 py-10 space-y-10">
         
-        {/* 頂部導覽列 */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800/80 pb-5">
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 rounded-full bg-amber-500 text-black text-xs font-black uppercase tracking-wider">
@@ -308,7 +297,6 @@ export default function TaitungAssociationPage() {
           </div>
         </div>
 
-        {/* 三層管理員控制面板 */}
         {canEdit && (
           <section className="rounded-3xl bg-gradient-to-r from-amber-950/40 via-zinc-900 to-zinc-950 border border-amber-500/40 p-6 shadow-2xl space-y-4">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -351,7 +339,6 @@ export default function TaitungAssociationPage() {
           </section>
         )}
 
-        {/* 主視覺區塊 */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-4">
             <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white">
@@ -361,7 +348,7 @@ export default function TaitungAssociationPage() {
               深耕東台灣耐力運動・打造活水湖與東海岸經典傳奇
             </p>
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              本專區為「臺東城鄉生活運動協會」與「全球百鐵認證」共同建置之官方數位服務中心。完整收錄本會主辦之「普悠瑪鐵人三項」、「臺東超級鐵人」及「戀戀197自行車公路賽」最新賽事公告、秩序冊下載與歷年完賽成績資料庫。所有完賽紀錄皆可直接勾稽匯入全球百鐵認證個人履歷。
+              本專區為「臺東城鄉生活運動協會」與「全球百鐵認證」共同建置之官方數位服務中心。完整收錄本會主辦之「普悠瑪鐵人三項」、「臺東超級鐵人」及「戀戀197自行車公路賽」最新賽事公告、秩序冊下載與歷年完賽成績資料庫。
             </p>
           </div>
 
@@ -374,71 +361,9 @@ export default function TaitungAssociationPage() {
               <div className="text-3xl font-black text-white">100%</div>
               <div className="text-xs text-zinc-400 font-bold">成績直通百鐵認證</div>
             </div>
-            <div className="col-span-2 rounded-2xl bg-zinc-900/60 border border-zinc-800 p-4 flex items-center justify-between">
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold text-emerald-400">● 數位無紙化服務已啟用</div>
-                <div className="text-[11px] text-zinc-400">提供選手歷年成績秒查與電子證書下載</div>
-              </div>
-              <span className="px-3 py-1 rounded-lg bg-zinc-800 text-zinc-300 text-xs font-bold">
-                官方認證
-              </span>
-            </div>
           </div>
         </div>
 
-        {/* 四大賽事切換頁籤 */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-zinc-900/60 p-2 rounded-2xl border border-zinc-800">
-          <button
-            type="button"
-            onClick={() => setActiveTab("all")}
-            className={`p-4 rounded-xl text-left transition cursor-pointer ${
-              activeTab === "all" ? "bg-amber-500 text-black font-black" : "hover:bg-zinc-800/60 text-white"
-            }`}
-          >
-            <div className="text-sm font-extrabold">🏆 協會總覽與全部賽事</div>
-            <div className={`text-[11px] mt-0.5 ${activeTab === "all" ? "text-black/80" : "text-zinc-400"}`}>
-              All Association Events
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("puyuma")}
-            className={`p-4 rounded-xl text-left transition cursor-pointer ${
-              activeTab === "puyuma" ? "bg-amber-500 text-black font-black" : "hover:bg-zinc-800/60 text-white"
-            }`}
-          >
-            <div className="text-sm font-extrabold">🏊‍♂️ 普悠瑪鐵人三項</div>
-            <div className={`text-[11px] mt-0.5 ${activeTab === "puyuma" ? "text-black/80" : "text-zinc-400"}`}>
-              226K / 113K / 51.5K
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("super")}
-            className={`p-4 rounded-xl text-left transition cursor-pointer ${
-              activeTab === "super" ? "bg-amber-500 text-black font-black" : "hover:bg-zinc-800/60 text-white"
-            }`}
-          >
-            <div className="text-sm font-extrabold">🏃‍♂️ 臺東超級鐵人賽</div>
-            <div className={`text-[11px] mt-0.5 ${activeTab === "super" ? "text-black/80" : "text-zinc-400"}`}>
-              秋季活水湖經典賽
-            </div>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("love197")}
-            className={`p-4 rounded-xl text-left transition cursor-pointer ${
-              activeTab === "love197" ? "bg-amber-500 text-black font-black" : "hover:bg-zinc-800/60 text-white"
-            }`}
-          >
-            <div className="text-sm font-extrabold">🚴‍♂️ 戀戀197自行車賽</div>
-            <div className={`text-[11px] mt-0.5 ${activeTab === "love197" ? "text-black/80" : "text-zinc-400"}`}>
-              197縣道東海岸公路賽
-            </div>
-          </button>
-        </div>
-
-        {/* 協會官方置頂公告 & 秩序冊簡章下載 */}
         <section className="rounded-3xl bg-zinc-950/90 border border-zinc-800/90 p-6 sm:p-8 space-y-6 shadow-2xl">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
             <div>
@@ -446,7 +371,6 @@ export default function TaitungAssociationPage() {
                 <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
                 協會官方置頂公告 & 秩序冊簡章下載
               </h2>
-              <p className="text-xs text-zinc-400 mt-1">顯示協會所有最新賽事公告與附加檔案下載</p>
             </div>
             {canEdit && (
               <button
@@ -463,7 +387,7 @@ export default function TaitungAssociationPage() {
             {announcements.map((ann) => (
               <div
                 key={ann.id}
-                className="rounded-2xl bg-zinc-900/60 border border-zinc-800/90 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-zinc-700 transition"
+                className="rounded-2xl bg-zinc-900/60 border border-zinc-800/90 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -507,88 +431,13 @@ export default function TaitungAssociationPage() {
           </div>
         </section>
 
-        {/* 臺東城鄉協會 — 歷年賽事成績查詢暨電子證書系統 */}
-        <section className="rounded-3xl bg-zinc-950/90 border border-zinc-800/90 p-6 sm:p-8 space-y-6 shadow-2xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
-            <div>
-              <div className="text-xs font-black text-amber-400 uppercase tracking-wider">
-                OFFICIAL RESULTS & E-CERTIFICATE
-              </div>
-              <h2 className="text-xl font-black text-white mt-1">
-                臺東城鄉協會 — 歷年賽事成績查詢暨電子證書系統
-              </h2>
-            </div>
-            <div className="flex items-center gap-2">
-              {canEdit && (
-                <button
-                  type="button"
-                  onClick={() => setShowCsvModal(true)}
-                  className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-extrabold transition cursor-pointer"
-                >
-                  📊 上傳 Excel / .csv 成績檔
-                </button>
-              )}
-              <Link
-                href="/profile/claim"
-                className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-amber-500/40 text-amber-400 text-xs font-extrabold transition shrink-0"
-              >
-                前往百鐵會員一鍵認領 →
-              </Link>
-            </div>
-          </div>
-
-          <form onSubmit={handleSearchAssocResults} className="flex gap-3">
-            <input
-              type="text"
-              value={searchKw}
-              onChange={(e) => setSearchKw(e.target.value)}
-              placeholder="輸入選手姓名（例如：陳彥良、洪緯欣）檢索協會歷年完賽紀錄..."
-              className="flex-1 rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition cursor-pointer"
-            >
-              {searching ? "查詢中..." : "查詢協會成績"}
-            </button>
-          </form>
-
-          {assocResults.length > 0 && (
-            <div className="overflow-x-auto pt-2">
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-zinc-800 text-zinc-400 text-xs">
-                  <tr>
-                    <th className="py-2.5 px-3">選手姓名</th>
-                    <th className="py-2.5 px-3">賽事名稱</th>
-                    <th className="py-2.5 px-3">參賽日期</th>
-                    <th className="py-2.5 px-3">組別</th>
-                    <th className="py-2.5 px-3">完賽時間</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-900">
-                  {assocResults.map((r, i) => (
-                    <tr key={r.id || i} className="hover:bg-zinc-900/40">
-                      <td className="py-3 px-3 font-bold text-amber-400">{r.athlete_name}</td>
-                      <td className="py-3 px-3 font-bold text-white">{r.race_name}</td>
-                      <td className="py-3 px-3 font-mono text-xs text-zinc-300">{r.race_date}</td>
-                      <td className="py-3 px-3 text-xs text-zinc-300">{r.category || "-"}</td>
-                      <td className="py-3 px-3 font-mono text-xs font-bold text-emerald-400">{r.finish_time || "完賽"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-
       </div>
 
-      {/* Modal 1：新增公告與上傳檔案 */}
       {showStaffModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 z-50">
           <div className="bg-zinc-950 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-              <h3 className="text-lg font-black text-white">📄 發布協會公告 ＆ 上傳檔案至公告區</h3>
+              <h3 className="text-lg font-black text-white">📄 發布協會公告 ＆ 上傳檔案</h3>
               <button
                 type="button"
                 onClick={() => setShowStaffModal(false)}
@@ -609,50 +458,18 @@ export default function TaitungAssociationPage() {
                   className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-2.5 text-sm text-white"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-300">分類標籤</label>
-                  <select
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-sm text-white"
-                  >
-                    <option value="秩序冊下載">秩序冊下載</option>
-                    <option value="交通管制公告">交通管制公告</option>
-                    <option value="賽事公告">賽事公告</option>
-                    <option value="成績公告">成績公告</option>
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-300">發布日期</label>
-                  <input
-                    type="date"
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-sm text-amber-400 font-bold"
-                  />
-                </div>
-              </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-300">上傳附件檔案（支援 PDF / Word / Excel / 簡章秩序冊）</label>
+                <label className="text-xs font-bold text-zinc-300">上傳附件檔案</label>
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.png"
                   onChange={handleFileUploadChange}
-                  className="w-full rounded-xl bg-zinc-900 border border-dashed border-amber-500/50 px-4 py-3 text-xs text-zinc-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-black hover:file:bg-amber-400"
+                  className="w-full rounded-xl bg-zinc-900 border border-dashed border-amber-500/50 px-4 py-3 text-xs text-zinc-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer"
                 />
                 {uploadedFileName && (
                   <p className="text-xs text-emerald-400 font-bold pt-1">✅ 已選取檔案：{uploadedFileName}</p>
                 )}
               </div>
-              <label className="flex items-center gap-2 text-xs text-amber-400 font-bold cursor-pointer pt-1">
-                <input
-                  type="checkbox"
-                  checked={newPinned}
-                  onChange={(e) => setNewPinned(e.target.checked)}
-                />
-                設為置頂重要公告
-              </label>
               <div className="pt-4 flex justify-end gap-3">
                 <button
                   type="button"
@@ -665,7 +482,7 @@ export default function TaitungAssociationPage() {
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-amber-500 text-black text-sm font-extrabold"
                 >
-                  確認發布並上傳
+                  確認發布
                 </button>
               </div>
             </form>
@@ -673,12 +490,11 @@ export default function TaitungAssociationPage() {
         </div>
       )}
 
-      {/* Modal 2：Excel (.xlsx/.xls) 與 .csv 完賽成績檔案直接上傳匯入 */}
       {showCsvModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 z-50">
           <div className="bg-zinc-950 border border-zinc-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-              <h3 className="text-lg font-black text-white">📊 批次上傳 Excel (.xlsx/.xls) 或 .csv 完賽成績檔</h3>
+              <h3 className="text-lg font-black text-white">📊 批次上傳 Excel / .csv 完賽成績檔</h3>
               <button
                 type="button"
                 onClick={() => setShowCsvModal(false)}
@@ -713,20 +529,8 @@ export default function TaitungAssociationPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-300">賽事類別</label>
-                <select
-                  value={csvSportType}
-                  onChange={(e) => setCsvSportType(e.target.value as "triathlon" | "cycling")}
-                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-sm text-white font-bold"
-                >
-                  <option value="triathlon">🏊‍♂️ 鐵人三項成績匯入 (race_details_full)</option>
-                  <option value="cycling">🚴‍♂️ 公路單車百鐵馬成績匯入 (cycling_details_full)</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-300">
-                  選擇電腦中的 Excel (.xlsx / .xls) 或 .csv 檔案（自動辨識選手姓名、組別、時間、團隊）
+                  選擇 Excel (.xlsx/.xls) 或 .csv 檔案
                 </label>
                 <input
                   type="file"
@@ -739,14 +543,7 @@ export default function TaitungAssociationPage() {
               {csvPreviewRows.length > 0 && (
                 <div className="rounded-xl bg-zinc-900 border border-emerald-500/30 p-3 space-y-2">
                   <div className="text-xs text-emerald-400 font-extrabold">
-                    ✅ 已成功解析「{selectedFileName}」共 {csvPreviewRows.length} 筆選手成績！前 3 筆預覽：
-                  </div>
-                  <div className="text-[11px] text-zinc-300 font-mono space-y-1">
-                    {csvPreviewRows.slice(0, 3).map((r, i) => (
-                      <div key={i}>
-                        {i + 1}. 姓名：{r.athlete_name} ｜ 組別：{r.category} ｜ 時間：{r.finish_time}
-                      </div>
-                    ))}
+                    ✅ 已成功解析「{selectedFileName}」共 {csvPreviewRows.length} 筆選手成績！
                   </div>
                 </div>
               )}
@@ -762,7 +559,7 @@ export default function TaitungAssociationPage() {
                 <button
                   type="submit"
                   disabled={importingCsv || csvPreviewRows.length === 0}
-                  className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold cursor-pointer disabled:opacity-40"
+                  className="px-5 py-2 rounded-xl bg-emerald-500 text-black text-sm font-extrabold cursor-pointer disabled:opacity-40"
                 >
                   {importingCsv ? "正在寫入資料庫..." : `確認匯入成績 (${csvPreviewRows.length} 筆)`}
                 </button>
