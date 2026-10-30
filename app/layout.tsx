@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "官方賽事與認證數位服務平台",
-  description: "提供歷年賽事成績查詢、線上榮譽登錄、秩序冊下載與會員中心服務。",
-  other: {
-    google: "notranslate",
-  },
+  title: "全球百鐵認證 Global 100 Triathlon Certification",
+  description: "每一場挑戰，都值得被記錄。",
 };
 
 export default function RootLayout({
@@ -17,9 +15,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-TW" translate="no" className="notranslate">
-      <body className="bg-[#070709] text-white antialiased selection:bg-amber-500 selection:text-black">
+      <head>
+        <meta name="google" content="notranslate" />
+      </head>
+      <body className="bg-[#070709] text-white antialiased selection:bg-amber-500 selection:text-black min-h-screen flex flex-col justify-between">
         <Navbar />
-        {children}
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );
