@@ -211,46 +211,7 @@ export default function HomePage() {
   return (
     <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       
-      {/* 頂部雙網址模式即時模擬切換器（方便隨時切換展示給王理事長或陳素梅董事長看） */}
-      <div className="bg-zinc-950 border-b border-zinc-800/80 py-2 px-4">
-        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 text-zinc-400">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            <span>
-              目前顯示門面：
-              <strong className="text-amber-400 ml-1">
-                {siteMode === "g100"
-                  ? "🌐 全球百鐵認證總站 (global100triathlon.com)"
-                  : "🏛️ 臺東縣城鄉生活運動協會獨立官網模擬 (www.turaa.org.tw)"}
-              </strong>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setSiteMode("g100")}
-              className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
-                siteMode === "g100"
-                  ? "bg-amber-500 text-black"
-                  : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
-              }`}
-            >
-              切換：全球百鐵總站 (4海報+8贊助商)
-            </button>
-            <button
-              type="button"
-              onClick={() => setSiteMode("turaa")}
-              className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
-                siteMode === "turaa"
-                  ? "bg-orange-600 text-white"
-                  : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
-              }`}
-            >
-              切換：城會獨立官網 (僅戀戀197與普悠瑪+城會贊助商)
-            </button>
-          </div>
-        </div>
-      </div>
+      
 
       <main className="max-w-6xl mx-auto w-full px-6 pt-5 pb-14 space-y-6">
         
