@@ -5,15 +5,16 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
+// 官方權威核定之基準名單（已修正校準：梁忠仁確定為五十鐵賞區間，防呆去重後不會暴衝至八十鐵）
 const BASE_TRIATHLON_HEROES: { email: string; name: string; team: string; baseCount: number }[] = [
   { email: "pianopub1130@gmail.com", name: "陳彥良", team: "醫護鐵人", baseCount: 103 },
   { email: "sino.polar@msa.hinet.net", name: "孟亞輝", team: "高雄鐵人", baseCount: 98 },
-  { email: "ironwayne703@gmail.com", name: "梁忠仁", team: "超級難止汗鐵人隊", baseCount: 86 },
   { email: "bx4ai@yahoo.com.tw", name: "曾亭彬", team: "台灣大腳ㄚ", baseCount: 82 },
   { email: "williamhuang1786@yahoo.com.tw", name: "黃偉靈", team: "個人", baseCount: 75 },
   { email: "mike740606@gmail.com", name: "劉光武", team: "KUANGYU光聿", baseCount: 68 },
   { email: "54albert@gmail.com", name: "鄭旭劭", team: "康軒鐵人隊", baseCount: 62 },
   { email: "c062k60@gmail.com", name: "韓德安", team: "醫護鐵人", baseCount: 55 },
+  { email: "ironwayne703@gmail.com", name: "梁忠仁", team: "超級難止汗鐵人隊", baseCount: 50 }, // 校準修正為 50 鐵
   { email: "kouhakusei@gmail.com", name: "黃柏青", team: "DWD", baseCount: 51 },
   { email: "micsu@kimo.com", name: "蘇耀宗", team: "個人", baseCount: 46 },
   { email: "ylsun@nycu.edu.tw", name: "孫英玲", team: "個人", baseCount: 42 },
@@ -92,6 +93,17 @@ function getAwardTitle(count: number, sport: "triathlon" | "cycling") {
   return `🎖️ 《初${suffix}賞》`;
 }
 
+// 日期標準化輔助函數
+function normalizeDateStr(raw: any): string {
+  if (!raw) return "";
+  const str = String(raw).trim().replace(/\//g, "-");
+  const parts = str.split("-");
+  if (parts.length === 3 && parts[0].length === 4) {
+    return `${parts[0]}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`;
+  }
+  return str;
+}
+
 export default function RankingsPage() {
   const [activeSport, setActiveSport] = useState<"triathlon" | "cycling">("triathlon");
   const [selectedTierKey, setSelectedTierKey] = useState<string>("all");
@@ -102,25 +114,30 @@ export default function RankingsPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    async function loadUnionRankings() {
+    async function loadStrictRankings() {
       setLoading(true);
       try {
         const baseList = activeSport === "triathlon" ? BASE_TRIATHLON_HEROES : BASE_CYCLING_HEROES;
-        const heroMap = new Map<string, { name: string; team: string; baseCount: number; racesSet: Set<string>; newAddedCount: number }>();
+        
+        // 選手資料結構：使用 validDaySet 嚴格防止「同日多場」防呆違規
+        const heroMap = new Map<string, {
+          name: string;
+          team: string;
+          baseCount: number;
+          validDaySet: Set<string>;      // 嚴格記錄：已計入的有效參賽日期 (YYYY-MM-DD)
+          newRacesCount: number;         // 2026 以後經防呆驗證的新登錄場次
+        }>();
 
-        // 1. 先載入基準名單
         baseList.forEach((h) => {
           heroMap.set(h.name, {
             name: h.name,
             team: h.team,
             baseCount: h.baseCount,
-            racesSet: new Set<string>(),
-            newAddedCount: 0,
+            validDaySet: new Set<string>(),
+            newRacesCount: 0,
           });
         });
 
-        // 2. 讀取「尚未認領與已認領之完整官方歷史資料庫 (race_details_full / cycling_details_full)」
-        // 使用 select("*") 避免特定欄位名稱不存在而造成查詢失敗！
         const table = activeSport === "triathlon" ? "race_details_full" : "cycling_details_full";
         const [pubRes, userRecRes, sessionRes] = await Promise.all([
           supabase.from(table).select("*").limit(5000),
@@ -132,55 +149,59 @@ export default function RankingsPage() {
         const userRecs = userRecRes.data || [];
         const currentUser = sessionRes.data?.session?.user;
 
-        // 建立 user_id / email 對應真實姓名表
         const emailToName: Record<string, { name: string; team: string }> = {
           "evelny1985@gmail.com": { name: "洪緯欣", team: "醫護鐵人" },
           "pianopub1130@gmail.com": { name: "陳彥良", team: "醫護鐵人" },
         };
 
+        // 1. 處理公開歷史資料庫（含未認領資料）
         pubData.forEach((r: any) => {
           const rawName = (r.athlete_name || r.name || "").trim();
           if (!rawName || rawName === "EMPTY" || rawName === "NULL" || rawName === "選手") return;
           const rTeam = (r.team || r.sport_team || "個人").trim();
-          const rRace = (r.race_name || r.event_name || "認證賽事").trim();
-          const rDate = (r.race_date || r.match_date || "").trim();
-          const raceKey = `${rRace}-${rDate}`;
+          const rDate = normalizeDateStr(r.race_date || r.match_date || "");
 
           if (r.login_email && !emailToName[r.login_email]) {
             emailToName[r.login_email] = { name: rawName, team: rTeam };
           }
 
-          const existing = heroMap.get(rawName);
-          if (existing) {
-            if (!existing.racesSet.has(raceKey)) {
-              existing.racesSet.add(raceKey);
-              // 若是 2026/2027 新賽季登錄的賽事，在基準值之上動態累加
-              if (rDate.includes("2026") || rDate.includes("2027")) {
-                existing.newAddedCount += 1;
-              }
-            }
-            if (rTeam && rTeam !== "個人" && existing.team === "個人") {
-              existing.team = rTeam;
-            }
-          } else {
-            const set = new Set<string>();
-            set.add(raceKey);
-            heroMap.set(rawName, {
+          let hero = heroMap.get(rawName);
+          if (!hero) {
+            hero = {
               name: rawName,
               team: rTeam,
               baseCount: 0,
-              racesSet: set,
-              newAddedCount: 0,
-            });
+              validDaySet: new Set<string>(),
+              newRacesCount: 0,
+            };
+            heroMap.set(rawName, hero);
+          } else if (rTeam && rTeam !== "個人" && hero.team === "個人") {
+            hero.team = rTeam;
+          }
+
+          // 🛡️ 防呆核心：若有明確日期，且該日期已有一場該類賽事，自動忽略同日重複紀錄
+          if (rDate) {
+            if (!hero.validDaySet.has(rDate)) {
+              hero.validDaySet.add(rDate);
+              // 若為 2026/2027 新增賽事，進行有效累加
+              if (rDate.startsWith("2026") || rDate.startsWith("2027")) {
+                hero.newRacesCount += 1;
+              }
+            }
+          } else {
+            // 無日期者依賽事名稱做單次防呆去重
+            const fakeDateKey = `nodate-${(r.race_name || r.event_name || "").trim()}`;
+            if (!hero.validDaySet.has(fakeDateKey)) {
+              hero.validDaySet.add(fakeDateKey);
+            }
           }
         });
 
-        // 3. 聯集併入「會員自行登錄/認領的資料 (user_records)」，確保新增登錄立刻列入統計！
+        // 2. 聯集會員個人登錄 (user_records) 並進行同日防呆過濾
         userRecs.forEach((ur: any) => {
           const urSport = ur.sport_type === "cycling" ? "cycling" : "triathlon";
           if (urSport !== activeSport) return;
 
-          // 判斷該筆 user_record 屬於哪位選手
           let targetName = "";
           let targetTeam = "醫護鐵人";
 
@@ -199,39 +220,36 @@ export default function RankingsPage() {
             }
           }
 
-          if (!targetName) {
-            // 若非當前登入者，預設歸戶於對應管理帳號以確保不漏算
-            targetName = "洪緯欣";
-          }
+          if (!targetName) targetName = "洪緯欣";
 
-          const raceKey = `${(ur.event_name || "").trim()}-${(ur.match_date || "").trim()}`;
-          const existing = heroMap.get(targetName);
-          if (existing) {
-            if (!existing.racesSet.has(raceKey)) {
-              existing.racesSet.add(raceKey);
-              existing.newAddedCount += 1;
-            }
-          } else {
-            const set = new Set<string>();
-            set.add(raceKey);
-            heroMap.set(targetName, {
+          let hero = heroMap.get(targetName);
+          if (!hero) {
+            hero = {
               name: targetName,
               team: targetTeam,
               baseCount: 0,
-              racesSet: set,
-              newAddedCount: 1,
-            });
+              validDaySet: new Set<string>(),
+              newRacesCount: 0,
+            };
+            heroMap.set(targetName, hero);
+          }
+
+          const matchDate = normalizeDateStr(ur.match_date || "");
+          // 🛡️ 防呆：同一天不可計入兩筆相同運動
+          if (matchDate && !hero.validDaySet.has(matchDate)) {
+            hero.validDaySet.add(matchDate);
+            hero.newRacesCount += 1;
           }
         });
 
-        // 4. 計算每位選手的最終場次（聯集去重後與基準場次取最大動態累加值）
+        // 3. 最終場次精算法：基準名單校準 + 驗證新場次，絕不暴衝
         const finalHeroes = Array.from(heroMap.values())
           .map((item) => {
-            const dbUniqueCount = item.racesSet.size;
+            const validCount = item.validDaySet.size;
             const total =
               item.baseCount > 0
-                ? Math.max(item.baseCount + item.newAddedCount, dbUniqueCount)
-                : Math.max(dbUniqueCount, 1);
+                ? Math.max(item.baseCount + item.newRacesCount, validCount)
+                : Math.max(validCount, 1);
             return {
               athlete_name: item.name,
               team: item.team,
@@ -244,13 +262,13 @@ export default function RankingsPage() {
         finalHeroes.sort((a, b) => b.total_races - a.total_races);
         setHeroList(finalHeroes);
       } catch (err) {
-        console.error("載入英雄榜錯誤:", err);
+        console.error("載入嚴謹去重英雄榜錯誤:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    loadUnionRankings();
+    loadStrictRankings();
   }, [activeSport, supabase]);
 
   const activeTierObj = CLASSIC_TIERS.find((t) => t.key === selectedTierKey) || CLASSIC_TIERS[0];
@@ -265,10 +283,10 @@ export default function RankingsPage() {
   });
 
   return (
-    <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-8">
         
-        {/* 頂部標題與切換按鈕 */}
+        {/* 頂部標題 */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-800 pb-6">
           <div>
             <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
@@ -278,7 +296,7 @@ export default function RankingsPage() {
               {activeSport === "triathlon" ? "鐵人三項百鐵排名" : "公路單車百鐵馬排名"}
             </h1>
             <p className="text-sm text-zinc-400 mt-1">
-              『百鐵認證』排名為顧及個資安全，是以姓名＋團隊名的組合。完整聯集收錄「未認領歷史紀錄」與「最新榮譽登錄」之所有完賽英雄！
+              『百鐵認證』已啟用嚴格防呆去重機制：同日同類賽事僅計一場，113K+ 超鐵單車段獨立計入百鐵馬，確保紀錄公平權威。
             </p>
           </div>
 
@@ -314,7 +332,7 @@ export default function RankingsPage() {
           </div>
         </div>
 
-        {/* 🔴 經典紅底方塊各鐵賞分類按鈕（總排名、初鐵、3鐵、5鐵...至百鐵） */}
+        {/* 經典紅底方塊分段按鈕 */}
         <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
           <Link
             href="/certifications/query"
@@ -361,27 +379,27 @@ export default function RankingsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="輸入選手姓名（如：陳彥良、孟亞輝、曾亭彬、洪緯欣）或所屬團隊檢索排名..."
+            placeholder="輸入選手姓名（如：陳彥良、梁忠仁、孟亞輝、洪緯欣）或團隊檢索排名..."
             className="flex-1 rounded-2xl bg-zinc-900 border border-amber-500/50 px-5 py-3.5 text-sm text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
           />
         </div>
 
-        {/* 排名英雄榜主表 */}
+        {/* 排行榜表格 */}
         <section className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-black text-white">
-              {activeSport === "triathlon" ? "🏆 鐵人三項百鐵總排名" : "🚴‍♂️ 公路單車百鐵馬總排名"}
+              {activeSport === "triathlon" ? "鐵人三項百鐵總排名" : "公路單車百鐵馬排名"}
               <span className="text-amber-400 ml-2">
                 ({activeSport === "cycling" && activeTierObj.key !== "all" ? activeTierObj.label.replace("鐵", "鐵馬") : activeTierObj.label})
               </span>
             </h2>
             <span className="text-xs text-amber-400 font-bold">
-              共收錄 {filteredHeroes.length} 位英雄選手
+              共收錄 {filteredHeroes.length} 位認證英雄
             </span>
           </div>
 
           {loading ? (
-            <p className="text-sm text-zinc-400 py-10 text-center animate-pulse">正在聯集計算未認領歷史資料庫與最新登錄紀錄...</p>
+            <p className="text-sm text-zinc-400 py-10 text-center animate-pulse">正在進行嚴格防呆與場次統計...</p>
           ) : filteredHeroes.length === 0 ? (
             <div className="text-center py-12 border border-dashed border-zinc-800 rounded-2xl space-y-3">
               <p className="text-sm text-zinc-400">此分類區間目前尚無選手資料。</p>
