@@ -110,49 +110,49 @@ export default function HomePage() {
   // 全球百鐵認證 G100TC 官方八大戰略贊助夥伴（已綁定真實官方外部連結）
   const g100Sponsors = [
     {
-      name: "醫護鐵人 IRONMEDIC",
+      name: "醫護鐵人 IRONMEDIC", logo: "/images/sponsors/ironmedic.png", shortLogo: "IRONMEDIC",
       role: "主導統籌單位",
       desc: "全球首創運動安全暨百鐵認證統籌機構",
       url: "https://www.facebook.com/ironmedic.tw",
     },
     {
-      name: "美利達自行車 MERIDA",
+      name: "美利達自行車 MERIDA", logo: "/images/sponsors/merida.png", shortLogo: "MERIDA",
       role: "國際領導單車品牌",
       desc: "全力支持台灣鐵人與百鐵馬耐力運動發展",
       url: "https://www.merida-bikes.com/zh-tw",
     },
     {
-      name: "SYB 昇陽自行車",
+      name: "SYB 昇陽自行車", logo: "/images/sponsors/syb.png", shortLogo: "SYB 昇陽",
       role: "頂級單車與三鐵戰袍夥伴",
       desc: "專業三鐵車、競速裝備與客製化百鐵戰袍",
       url: "https://www.syb-cycling.com/",
     },
     {
-      name: "邁克仕 AminoMax",
+      name: "邁克仕 AminoMax", logo: "/images/sponsors/aminomax.png", shortLogo: "aminoMax",
       role: "官方指定運動補給",
       desc: "專業胺基酸、BCAA 與長距離耐力能量補給",
       url: "https://www.aminomax.com.tw/",
     },
     {
-      name: "肌樂 Mentholatum",
+      name: "肌樂 Mentholatum", logo: "/images/sponsors/mentholatum.png", shortLogo: "肌樂",
       role: "官方運動防護夥伴",
       desc: "賽前熱身與賽後舒緩之運動噴劑領導品牌",
       url: "https://www.mentholatum.com.tw/",
     },
     {
-      name: "ZIV 專業運動眼鏡",
+      name: "ZIV 專業運動眼鏡", logo: "/images/sponsors/ziv.png", shortLogo: "ZIV",
       role: "官方指定運動眼鏡",
       desc: "專為亞洲臉型設計之防風抗 UV 頂級光學鏡片",
       url: "https://www.ziv.com.tw/",
     },
     {
-      name: "SAEKO 專業泳鏡",
+      name: "SAEKO 專業泳鏡", logo: "/images/sponsors/saeko.png", shortLogo: "SAEKO",
       role: "官方指定開放水域泳鏡",
       desc: "台灣外銷全球之三鐵開放水域廣角防霧泳鏡",
       url: "https://www.saeko.com.tw/",
     },
     {
-      name: "NOVATEC 久裕興業",
+      name: "NOVATEC 久裕興業", logo: "/images/sponsors/novatec.png", shortLogo: "NOVATEC",
       role: "官方指定高階輪組",
       desc: "國際頂尖碳纖維輪組與高順暢度花鼓技術",
       url: "https://www.novatecusa.net/",
@@ -505,8 +505,29 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 hover:border-amber-500 hover:bg-zinc-900 p-4 text-center space-y-1.5 transition group block"
               >
-                <div className="text-[11px] font-bold text-amber-400">{sp.role}</div>
-                <div className="text-sm sm:text-base font-black text-white group-hover:text-amber-300 transition flex items-center justify-center gap-1">
+                {/* 去背 Logo 視覺展示區 */}
+                <div className="h-16 w-full flex items-center justify-center px-3 py-2 rounded-xl bg-gradient-to-b from-zinc-800/40 to-transparent">
+                  {(sp as any).logo ? (
+                    <img
+                      src={(sp as any).logo}
+                      alt={sp.name}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const nextEl = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (nextEl) nextEl.style.display = "flex";
+                      }}
+                      className="max-h-12 max-w-[150px] object-contain drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform"
+                    />
+                  ) : null}
+                  <div
+                    style={{ display: (sp as any).logo ? "none" : "flex" }}
+                    className="h-12 items-center justify-center text-xl sm:text-2xl font-black tracking-widest bg-gradient-to-r from-white via-zinc-200 to-amber-300 bg-clip-text text-transparent select-none"
+                  >
+                    {(sp as any).shortLogo || sp.name}
+                  </div>
+                </div>
+                <div className="text-[11px] font-bold text-amber-400 pt-1">{sp.role}</div>
+                <div className="text-xs sm:text-sm font-black text-white group-hover:text-amber-300 transition flex items-center justify-center gap-1">
                   <span>{sp.name}</span>
                   <span className="text-xs text-zinc-500 group-hover:text-amber-400">↗</span>
                 </div>

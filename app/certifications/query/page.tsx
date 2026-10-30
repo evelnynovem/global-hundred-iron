@@ -55,6 +55,7 @@ export default function FullQueryPage() {
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const supabase = createClient();
 
@@ -96,6 +97,12 @@ export default function FullQueryPage() {
       ]);
 
       const currentUser = sessionRes.data?.session?.user;
+      if (currentUser?.email) {
+        const em = currentUser.email.toLowerCase();
+        if (em.includes("evelny") || em.includes("pianopub") || em.includes("novem")) {
+          setIsAdmin(true);
+        }
+      }
       const unifiedList: any[] = [];
       const seenKeys = new Set<string>();
 
@@ -175,6 +182,20 @@ export default function FullQueryPage() {
       console.error("查詢錯誤:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  
+  const handleAdminDeleteSingleRow = async (row: any) => {
+    if (!confirm(`確定要從資料庫徹底刪除「${row.athlete_name} - ${row.race_name}」這筆紀錄嗎？`)) return;
+    try {
+      await supabase.from("user_records").delete().eq("event_name", row.race_name);
+      await supabase.from("race_details_full").delete().eq("athlete_name", row.athlete_name).eq("race_name", row.race_name);
+      await supabase.from("cycling_details_full").delete().eq("athlete_name", row.athlete_name).eq("race_name", row.race_name);
+      setResults((prev) => prev.filter((item) => !(item.athlete_name === row.athlete_name && item.race_name === row.race_name && item.race_date === row.race_date)));
+      alert("✅ 已徹底刪除此筆紀錄！");
+    } catch (e: any) {
+      alert("刪除失敗：" + e.message);
     }
   };
 
@@ -268,6 +289,7 @@ export default function FullQueryPage() {
                   <th className="py-3.5 px-4">完賽時間 (HH:MM:SS)</th>
                   <th className="py-3.5 px-4">所屬團隊</th>
                   <th className="py-3.5 px-4">登錄時間 (年-月-日 時:分:秒)</th>
+                  {isAdmin && <th className="py-3.5 px-4 text-right">管理操作</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-900">
@@ -282,6 +304,17 @@ export default function FullQueryPage() {
                     </td>
                     <td className="py-4 px-4 text-xs text-amber-400/90 font-semibold whitespace-nowrap">{r.team}</td>
                     <td className="py-4 px-4 font-mono text-[11px] text-zinc-400 whitespace-nowrap">{r.submitted_at}</td>
+                    {isAdmin && (
+                      <td className="py-4 px-4 text-right whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleAdminDeleteSingleRow(r)}
+                          className="px-2.5 py-1 rounded-lg bg-red-500/15 hover:bg-red-600 hover:text-white border border-red-500/30 text-red-400 text-xs font-bold transition cursor-pointer"
+                        >
+                          刪除
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

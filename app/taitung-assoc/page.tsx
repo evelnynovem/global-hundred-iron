@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
@@ -33,6 +33,13 @@ const DEFAULT_ANNOUNCEMENTS = [
   },
 ];
 
+interface UploadedBatchSummary {
+  race_name: string;
+  race_date: string;
+  sport_type: "triathlon" | "cycling";
+  count: number;
+}
+
 export default function TaitungAssociationPage() {
   const [activeTab, setActiveTab] = useState<"all" | "puyuma" | "super" | "love197">("all");
   const [roleLevel, setRoleLevel] = useState<"super_admin" | "editor" | "member">("member");
@@ -42,18 +49,23 @@ export default function TaitungAssociationPage() {
   const [showStaffModal, setShowStaffModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newTag, setNewTag] = useState("秩序冊下載");
-  const [newDate, setNewDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [newDate, setNewDate] = useState("2026-10-30");
   const [newPinned, setNewPinned] = useState(true);
   const [uploadedFileName, setUploadedFileName] = useState("");
 
-  // Excel / CSV 成績檔案上傳匯入狀態
+  // Excel / CSV 成績上傳與防呆去重狀態
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvRaceName, setCsvRaceName] = useState("2026 台東巴歌浪鐵人三項");
   const [csvRaceDate, setCsvRaceDate] = useState("2026-10-17");
   const [csvSportType, setCsvSportType] = useState<"triathlon" | "cycling">("triathlon");
   const [csvPreviewRows, setCsvPreviewRows] = useState<any[]>([]);
+  const [dedupStats, setDedupStats] = useState<{ rawCount: number; cleanCount: number }>({ rawCount: 0, cleanCount: 0 });
   const [selectedFileName, setSelectedFileName] = useState("");
   const [importingCsv, setImportingCsv] = useState(false);
+
+  // 已上傳場次管理清單（供管理員檢視與整場刪除）
+  const [uploadedBatches, setUploadedBatches] = useState<UploadedBatchSummary[]>([]);
+  const [loadingBatches, setLoadingBatches] = useState(false);
 
   const [searchKw, setSearchKw] = useState("");
   const [assocResults, setAssocResults] = useState<any[]>([]);
@@ -61,8 +73,62 @@ export default function TaitungAssociationPage() {
 
   const supabase = createClient();
 
+  // 載入已上傳的所有場次統計清單
+  const loadUploadedRaceBatches = useCallback(async () => {
+    setLoadingBatches(true);
+    try {
+      const [{ data: triData }, { data: cycData }] = await Promise.all([
+        supabase.from("race_details_full").select("race_name, race_date").limit(5000),
+        supabase.from("cycling_details_full").select("race_name, race_date").limit(5000),
+      ]);
+
+      const batchMap = new Map<string, UploadedBatchSummary>();
+
+      (triData || []).forEach((r: any) => {
+        const name = (r.race_name || "").trim();
+        if (!name || name === "EMPTY" || name === "NULL") return;
+        const key = `tri-${name}`;
+        const ex = batchMap.get(key);
+        if (ex) {
+          ex.count += 1;
+        } else {
+          batchMap.set(key, {
+            race_name: name,
+            race_date: r.race_date || "-",
+            sport_type: "triathlon",
+            count: 1,
+          });
+        }
+      });
+
+      (cycData || []).forEach((r: any) => {
+        const name = (r.race_name || "").trim();
+        if (!name || name === "EMPTY" || name === "NULL") return;
+        const key = `cyc-${name}`;
+        const ex = batchMap.get(key);
+        if (ex) {
+          ex.count += 1;
+        } else {
+          batchMap.set(key, {
+            race_name: name,
+            race_date: r.race_date || "-",
+            sport_type: "cycling",
+            count: 1,
+          });
+        }
+      });
+
+      const list = Array.from(batchMap.values()).sort((a, b) => (b.race_date || "").localeCompare(a.race_date || ""));
+      setUploadedBatches(list);
+    } catch (e) {
+      console.error("載入場次統計失敗:", e);
+    } finally {
+      setLoadingBatches(false);
+    }
+  }, [supabase]);
+
   useEffect(() => {
-    async function checkTierPermission() {
+    async function checkTierPermissionAndInit() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const email = (session.user.email || "").toLowerCase();
@@ -87,9 +153,80 @@ export default function TaitungAssociationPage() {
           }
         }
       }
+
+      // 載入未被刪除的公告清單
+      const deletedIdsRaw = localStorage.getItem("g100_deleted_ann_ids");
+      const deletedSet = new Set<string>(deletedIdsRaw ? JSON.parse(deletedIdsRaw) : []);
+
+      const { data: dbAnn } = await supabase
+        .from("association_announcements")
+        .select("*")
+        .order("date", { ascending: false });
+
+      const combined = [...(dbAnn || []), ...DEFAULT_ANNOUNCEMENTS].filter((a) => !deletedSet.has(String(a.id)));
+      setAnnouncements(combined);
+
+      loadUploadedRaceBatches();
     }
-    checkTierPermission();
-  }, [supabase]);
+    checkTierPermissionAndInit();
+  }, [supabase, loadUploadedRaceBatches]);
+
+  // 權限控管之「刪除公告」功能（僅第一層與第二層管理員可執行）
+  const handleDeleteAnnouncement = async (id: string, title: string) => {
+    if (roleLevel !== "super_admin" && roleLevel !== "editor") {
+      alert("⚠️ 權限不足：僅限授權之管理人員可刪除公告。");
+      return;
+    }
+    if (!confirm(`確定要刪除公告「${title}」嗎？`)) return;
+
+    try {
+      if (!String(id).startsWith("default-") && !String(id).startsWith("custom-")) {
+        await supabase.from("association_announcements").delete().eq("id", id);
+      }
+      const deletedIdsRaw = localStorage.getItem("g100_deleted_ann_ids");
+      const deletedArr: string[] = deletedIdsRaw ? JSON.parse(deletedIdsRaw) : [];
+      if (!deletedArr.includes(String(id))) {
+        deletedArr.push(String(id));
+        localStorage.setItem("g100_deleted_ann_ids", JSON.stringify(deletedArr));
+      }
+      setAnnouncements((prev) => prev.filter((a) => String(a.id) !== String(id)));
+      alert("✅ 公告已成功刪除！");
+    } catch (e: any) {
+      alert("❌ 刪除公告失敗：" + e.message);
+    }
+  };
+
+  // 🗑️ 網站最高管理員專屬：一鍵刪除「整場賽事」的所有完賽資料！
+  const handleDeleteEntireRaceBatch = async (batch: UploadedBatchSummary) => {
+    if (roleLevel !== "super_admin" && roleLevel !== "editor") {
+      alert("⚠️ 權限不足：僅限網站管理者可刪除整場賽事資料。");
+      return;
+    }
+    if (
+      !confirm(
+        `⚠️ 危險操作確認：\n您確定要刪除「${batch.race_name}」整場賽事的全部 ${batch.count} 筆完賽資料嗎？\n刪除後將同步從成績查詢與英雄榜重新計算。`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const targetTable = batch.sport_type === "cycling" ? "cycling_details_full" : "race_details_full";
+      const { error } = await supabase.from(targetTable).delete().eq("race_name", batch.race_name);
+      if (error) throw error;
+
+      // 同步清除 user_records 中同名賽事
+      await supabase.from("user_records").delete().eq("event_name", batch.race_name);
+
+      setUploadedBatches((prev) =>
+        prev.filter((b) => !(b.race_name === batch.race_name && b.sport_type === batch.sport_type))
+      );
+      setAssocResults((prev) => prev.filter((r) => r.race_name !== batch.race_name));
+      alert(`✅ 已成功刪除「${batch.race_name}」全部 ${batch.count} 筆完賽資料！`);
+    } catch (err: any) {
+      alert("❌ 刪除場次失敗：" + err.message);
+    }
+  };
 
   const handleFileUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -111,6 +248,20 @@ export default function TaitungAssociationPage() {
       file_name: uploadedFileName,
     };
 
+    try {
+      await supabase.from("association_announcements").insert([
+        {
+          title: newItem.title,
+          tag: newItem.tag,
+          date: newItem.date,
+          is_pinned: newItem.is_pinned,
+          pdf_url: newItem.file_name,
+        },
+      ]);
+    } catch (e) {
+      console.warn(e);
+    }
+
     setAnnouncements([newItem, ...announcements]);
     setNewTitle("");
     setUploadedFileName("");
@@ -118,13 +269,28 @@ export default function TaitungAssociationPage() {
     alert(`✅ 協會公告已發布！${uploadedFileName ? `（已附加檔案：${uploadedFileName}）` : ""}`);
   };
 
-  // 使用 XLSX 引擎同時支援 .xlsx、.xls 與 .csv 檔案格式智慧解析
+  // 計算單筆資料的「完整度分數」，當有重複列時，自動保留資訊最豐富完整的那一筆！
+  const scoreRowCompleteness = (row: {
+    athlete_name: string;
+    category: string;
+    finish_time: string;
+    team: string;
+    login_email: string;
+  }) => {
+    let score = 0;
+    if (row.finish_time && row.finish_time !== "完賽" && row.finish_time.includes(":")) score += 4;
+    if (row.category && row.category !== "-") score += 2;
+    if (row.team && row.team !== "個人" && row.team !== "-") score += 2;
+    if (row.login_email && row.login_email.includes("@")) score += 3;
+    return score;
+  };
+
+  // 🛡️ Excel / CSV 解析 ＋ 檔案內自動去重擇優（同選手只留最完整一筆）
   const handleExcelOrCsvSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setSelectedFileName(file.name);
 
-    // 🚀 1. 自動擷取檔案名稱（去除 .csv / .xlsx / .xls 副檔名）帶入「對應賽事名稱」欄位！
     const baseRaceName = file.name.replace(/\.(csv|xlsx|xls)$/i, "").trim();
     if (baseRaceName) {
       setCsvRaceName(baseRaceName);
@@ -133,7 +299,6 @@ export default function TaitungAssociationPage() {
       } else {
         setCsvSportType("triathlon");
       }
-      // 若檔名含有年份（如 2024），自動更新對應年份
       const yearMatch = baseRaceName.match(/\b(20\d{2})\b/);
       if (yearMatch) {
         const y = yearMatch[1];
@@ -143,7 +308,6 @@ export default function TaitungAssociationPage() {
       }
     }
 
-    // 轉換 Excel 小數時間 (如 0.476195) 為標準 HH:MM:SS
     const formatExcelTime = (val: any): string => {
       if (val === null || val === undefined || val === "") return "完賽";
       const num = Number(val);
@@ -171,7 +335,6 @@ export default function TaitungAssociationPage() {
         return;
       }
 
-      // 尋找真正的標題列（可能在第 1~5 列）
       let headerRowIdx = 0;
       for (let i = 0; i < Math.min(validRows.length, 5); i++) {
         const rowStr = validRows[i].map((c) => String(c).toLowerCase()).join(" ");
@@ -198,7 +361,6 @@ export default function TaitungAssociationPage() {
         else if (emailIdx === -1 && (s.includes("mail") || s.includes("信箱"))) emailIdx = idx;
       });
 
-      // 若標題列沒標示「姓名」，自動從第一筆資料找出「不是純數字、不是距離、不是時間」的中文/英文姓名欄！
       if (nameIdx === -1 && dataRows.length > 0) {
         const sample = dataRows[0];
         for (let idx = 0; idx < sample.length; idx++) {
@@ -211,28 +373,59 @@ export default function TaitungAssociationPage() {
       }
       if (nameIdx === -1) nameIdx = 0;
 
-      const parsed = dataRows
-        .map((cols) => {
-          const rawName = String(cols[nameIdx] ?? "").trim();
-          // 過濾掉空白或純數字編號
-          if (!rawName || rawName === "EMPTY" || rawName === "NULL" || /^\d+$/.test(rawName)) return null;
-          return {
-            athlete_name: rawName,
-            category: (catIdx !== -1 ? String(cols[catIdx] ?? "").trim() : "") || (baseRaceName.includes("226") ? "226K 全程超鐵" : baseRaceName.includes("113") ? "113K 半程超鐵" : "51.5K 標準鐵人"),
-            finish_time: timeIdx !== -1 ? formatExcelTime(cols[timeIdx]) : "完賽",
-            team: (teamIdx !== -1 ? String(cols[teamIdx] ?? "").trim() : "") || "個人",
-            login_email: emailIdx !== -1 ? String(cols[emailIdx] ?? "").trim() : "",
-          };
-        })
-        .filter(Boolean);
+      const rawParsed: any[] = [];
+      dataRows.forEach((cols) => {
+        const rawName = String(cols[nameIdx] ?? "").trim();
+        if (!rawName || rawName === "EMPTY" || rawName === "NULL" || /^\d+$/.test(rawName)) return;
+        rawParsed.push({
+          athlete_name: rawName,
+          category:
+            (catIdx !== -1 ? String(cols[catIdx] ?? "").trim() : "") ||
+            (baseRaceName.includes("226") ? "226K 全程超鐵" : baseRaceName.includes("113") ? "113K 半程超鐵" : "51.5K 標準鐵人"),
+          finish_time: timeIdx !== -1 ? formatExcelTime(cols[timeIdx]) : "完賽",
+          team: (teamIdx !== -1 ? String(cols[teamIdx] ?? "").trim() : "") || "個人",
+          login_email: emailIdx !== -1 ? String(cols[emailIdx] ?? "").trim() : "",
+        });
+      });
 
-      setCsvPreviewRows(parsed);
+      // 🛡️ 第一道防呆：核對上傳檔案內部重複選手，比較欄位完整度，只留一份最完整的完賽資料！
+      const uniqueAthleteMap = new Map<string, any>();
+      rawParsed.forEach((item) => {
+        const key = item.athlete_name.toLowerCase();
+        const existing = uniqueAthleteMap.get(key);
+        if (!existing) {
+          uniqueAthleteMap.set(key, item);
+        } else {
+          // 比較哪一筆資料更完整，並把缺漏欄位互補合併成最完整的一份！
+          const merged = {
+            athlete_name: item.athlete_name,
+            category:
+              item.category && item.category.length > (existing.category || "").length
+                ? item.category
+                : existing.category,
+            finish_time:
+              item.finish_time && item.finish_time !== "完賽"
+                ? item.finish_time
+                : existing.finish_time,
+            team:
+              item.team && item.team !== "個人"
+                ? item.team
+                : existing.team,
+            login_email: item.login_email || existing.login_email,
+          };
+          uniqueAthleteMap.set(key, merged);
+        }
+      });
+
+      const deduplicatedList = Array.from(uniqueAthleteMap.values());
+      setDedupStats({ rawCount: rawParsed.length, cleanCount: deduplicatedList.length });
+      setCsvPreviewRows(deduplicatedList);
     } catch (err: any) {
-      console.error("解析 Excel/CSV 錯誤:", err);
       alert("❌ 檔案解析失敗：" + (err.message || "請確認檔案格式"));
     }
   };
 
+  // 🛡️ 第二道防呆：寫入資料庫前，先核對資料庫中該場賽事是否已有舊資料，自動合併保留最完整唯一的一份，絕不重複疊加！
   const handleConfirmCsvImport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (csvPreviewRows.length === 0) {
@@ -243,16 +436,62 @@ export default function TaitungAssociationPage() {
     setImportingCsv(true);
     try {
       const targetTable = csvSportType === "cycling" ? "cycling_details_full" : "race_details_full";
-      const fullPayload = csvPreviewRows.map((r) => ({
+      const cleanRaceName = csvRaceName.trim();
+
+      // 1. 先查詢資料庫裡是否已經有同場賽事 (`race_name`) 的資料
+      const { data: existingDbRows } = await supabase
+        .from(targetTable)
+        .select("*")
+        .eq("race_name", cleanRaceName)
+        .limit(5000);
+
+      const finalMergedMap = new Map<string, any>();
+
+      // 先放入資料庫既有紀錄
+      (existingDbRows || []).forEach((dbRow: any) => {
+        const name = (dbRow.athlete_name || "").trim();
+        if (!name) return;
+        finalMergedMap.set(name.toLowerCase(), {
+          athlete_name: name,
+          category: dbRow.category || dbRow.distance || "",
+          finish_time: dbRow.finish_time || dbRow.result_time || "完賽",
+          team: dbRow.team || dbRow.sport_team || "個人",
+          login_email: dbRow.login_email || "",
+        });
+      });
+
+      // 將新上傳的資料與既有資料核對擇優合併（只留一份最完整的！）
+      csvPreviewRows.forEach((newRow) => {
+        const key = newRow.athlete_name.toLowerCase();
+        const ex = finalMergedMap.get(key);
+        if (!ex) {
+          finalMergedMap.set(key, newRow);
+        } else {
+          finalMergedMap.set(key, {
+            athlete_name: newRow.athlete_name,
+            category: newRow.category || ex.category,
+            finish_time: newRow.finish_time !== "完賽" ? newRow.finish_time : ex.finish_time,
+            team: newRow.team !== "個人" ? newRow.team : ex.team,
+            login_email: newRow.login_email || ex.login_email,
+          });
+        }
+      });
+
+      // 若資料庫原本已有這場比賽的舊資料，先清除該場舊資料，再寫入合併後唯一且最完整的清單！
+      if (existingDbRows && existingDbRows.length > 0) {
+        await supabase.from(targetTable).delete().eq("race_name", cleanRaceName);
+      }
+
+      const finalPayload = Array.from(finalMergedMap.values()).map((r) => ({
         athlete_name: r.athlete_name,
-        race_name: csvRaceName.trim(),
+        race_name: cleanRaceName,
         race_date: csvRaceDate,
         finish_time: r.finish_time,
         login_email: r.login_email || null,
       }));
 
-      for (let i = 0; i < fullPayload.length; i += 100) {
-        const chunk = fullPayload.slice(i, i + 100);
+      for (let i = 0; i < finalPayload.length; i += 100) {
+        const chunk = finalPayload.slice(i, i + 100);
         const { error } = await supabase.from(targetTable).insert(chunk);
         if (error) {
           const minimalChunk = chunk.map((c) => ({
@@ -264,24 +503,16 @@ export default function TaitungAssociationPage() {
         }
       }
 
-      setAssocResults(
-        csvPreviewRows.slice(0, 50).map((r, idx) => ({
-          id: `imported-${idx}`,
-          athlete_name: r.athlete_name,
-          race_name: csvRaceName,
-          race_date: csvRaceDate,
-          category: r.category,
-          finish_time: r.finish_time,
-        }))
-      );
+      await loadUploadedRaceBatches();
 
-      alert(`🎉 匯入成功！已將檔案內共 ${csvPreviewRows.length} 筆「${csvRaceName}」完賽成績正式匯入系統！`);
+      alert(
+        `🎉 防呆核對與匯入成功！\n・賽事名稱：${cleanRaceName}\n・原始讀取：${dedupStats.rawCount} 筆\n・與資料庫核對去重後保留最完整唯一紀錄：${finalPayload.length} 筆！`
+      );
       setCsvPreviewRows([]);
       setSelectedFileName("");
       setShowCsvModal(false);
     } catch (err: any) {
-      console.error("匯入異常:", err);
-      alert("❌ 匯入發生異常：" + (err.message || "請確認網路連線"));
+      alert("❌ 匯入異常：" + (err.message || "請確認網路連線"));
     } finally {
       setImportingCsv(false);
     }
@@ -296,7 +527,7 @@ export default function TaitungAssociationPage() {
         q = supabase
           .from("race_details_full")
           .select("*")
-          .ilike("athlete_name", `%${searchKw.trim()}%`)
+          .or(`athlete_name.ilike.%${searchKw.trim()}%,race_name.ilike.%${searchKw.trim()}%`)
           .limit(50);
       }
       const { data } = await q;
@@ -338,18 +569,19 @@ export default function TaitungAssociationPage() {
           </div>
         </div>
 
+        {/* 管理員專屬控制台 */}
         {canEdit && (
-          <section className="rounded-3xl bg-gradient-to-r from-amber-950/40 via-zinc-900 to-zinc-950 border border-amber-500/40 p-6 shadow-2xl space-y-4">
+          <section className="rounded-3xl bg-gradient-to-r from-amber-950/40 via-zinc-900 to-zinc-950 border border-amber-500/40 p-6 shadow-2xl space-y-6">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
                 <div className="text-xs font-black text-amber-400 uppercase tracking-wider">
                   3-TIER ASSOCIATION MANAGEMENT CONSOLE
                 </div>
                 <h2 className="text-lg sm:text-xl font-black text-white mt-1">
-                  🛠️ 臺東城鄉生活運動協會 — 公告檔案上傳、Excel/CSV 成績匯入與權限管理
+                  🛠️ 臺東城鄉生活運動協會 — 公告管理、Excel/CSV 防呆去重匯入與場次管理
                 </h2>
                 <p className="text-xs text-zinc-300 mt-0.5">
-                  支援直接選取電腦中的 Excel (.xlsx/.xls) 或 .csv 完賽成績檔一鍵解析匯入！
+                  已啟用「整批重複上傳防呆核對機制」：重複上傳同場賽事時，系統自動比對並只保留唯一且最完整的完賽紀錄。
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3 shrink-0">
@@ -358,7 +590,7 @@ export default function TaitungAssociationPage() {
                   onClick={() => setShowStaffModal(true)}
                   className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs sm:text-sm transition cursor-pointer"
                 >
-                  📄 編輯公告 ＆ 上傳檔案至公告區
+                  📄 發布公告 ＆ 上傳檔案至公告區
                 </button>
                 <button
                   type="button"
@@ -377,34 +609,66 @@ export default function TaitungAssociationPage() {
                 )}
               </div>
             </div>
+
+            {/* 🗂️ 新增：已上傳賽事場次完賽資料總覽 ＆ 網站管理者一鍵刪除整場資料 */}
+            <div className="rounded-2xl bg-zinc-950/90 border border-zinc-800 p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-black text-amber-400">
+                    🗂️ 已上傳之賽事場次完賽資料管理中心（共 {uploadedBatches.length} 個場次）
+                  </h3>
+                  <p className="text-[11px] text-zinc-400">
+                    在此檢視所有已匯入系統的賽事場次與完賽筆數；若整場資料誤傳，管理者可一鍵刪除該場次全部完賽紀錄。
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={loadUploadedRaceBatches}
+                  className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-bold text-zinc-300 cursor-pointer"
+                >
+                  🔄 重新整理場次
+                </button>
+              </div>
+
+              {loadingBatches ? (
+                <p className="text-xs text-zinc-400 py-4 text-center">統計資料庫場次中...</p>
+              ) : (
+                <div className="max-h-60 overflow-y-auto divide-y divide-zinc-900 border border-zinc-800/80 rounded-xl">
+                  {uploadedBatches.map((batch, i) => (
+                    <div
+                      key={`${batch.sport_type}-${batch.race_name}-${i}`}
+                      className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-zinc-900/50 transition"
+                    >
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                          batch.sport_type === "cycling"
+                            ? "bg-red-500/15 text-red-400 border border-red-500/30"
+                            : "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                        }`}>
+                          {batch.sport_type === "cycling" ? "🚴‍♂️ 公路單車" : "🏊‍♂️ 鐵人三項"}
+                        </span>
+                        <span className="text-sm font-extrabold text-white">{batch.race_name}</span>
+                        <span className="text-xs font-mono text-zinc-400">日期：{batch.race_date}</span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-xs font-mono font-bold">
+                          共 {batch.count} 筆完賽資料
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteEntireRaceBatch(batch)}
+                        className="px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600 hover:text-white border border-red-500/40 text-red-400 text-xs font-extrabold transition cursor-pointer shrink-0"
+                      >
+                        🗑️ 刪除此場次全部資料
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </section>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-7 space-y-4">
-            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white">
-              臺東城鄉生活運動協會
-            </h1>
-            <p className="text-lg sm:text-xl font-extrabold text-amber-400">
-              深耕東台灣耐力運動・打造活水湖與東海岸經典傳奇
-            </p>
-            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              本專區為「臺東城鄉生活運動協會」與「全球百鐵認證」共同建置之官方數位服務中心。完整收錄本會主辦之「普悠瑪鐵人三項」、「臺東超級鐵人」及「戀戀197自行車公路賽」最新賽事公告、秩序冊下載與歷年完賽成績資料庫。
-            </p>
-          </div>
-
-          <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-            <div className="rounded-2xl bg-zinc-900/80 border border-amber-500/20 p-5 text-center space-y-1">
-              <div className="text-3xl font-black text-amber-400">3 大</div>
-              <div className="text-xs text-zinc-400 font-bold">東台灣指標經典賽事</div>
-            </div>
-            <div className="rounded-2xl bg-zinc-900/80 border border-zinc-800 p-5 text-center space-y-1">
-              <div className="text-3xl font-black text-white">100%</div>
-              <div className="text-xs text-zinc-400 font-bold">成績直通百鐵認證</div>
-            </div>
-          </div>
-        </div>
-
+        {/* 協會官方置頂公告 & 秩序冊簡章下載（含權限控管之刪除公告按鈕） */}
         <section className="rounded-3xl bg-zinc-950/90 border border-zinc-800/90 p-6 sm:p-8 space-y-6 shadow-2xl">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
             <div>
@@ -412,6 +676,9 @@ export default function TaitungAssociationPage() {
                 <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
                 協會官方置頂公告 & 秩序冊簡章下載
               </h2>
+              <p className="text-xs text-zinc-400 mt-1">
+                顯示協會所有最新賽事公告（僅授權管理員可看到並操作右側「刪除公告」功能）
+              </p>
             </div>
             {canEdit && (
               <button
@@ -460,10 +727,10 @@ export default function TaitungAssociationPage() {
                   {canEdit && (
                     <button
                       type="button"
-                      onClick={() => setAnnouncements(announcements.filter((a) => a.id !== ann.id))}
-                      className="px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold transition cursor-pointer"
+                      onClick={() => handleDeleteAnnouncement(ann.id, ann.title)}
+                      className="px-3.5 py-2 rounded-xl bg-red-500/15 hover:bg-red-600 hover:text-white border border-red-500/40 text-red-400 text-xs font-extrabold transition cursor-pointer"
                     >
-                      刪除
+                      🗑️ 刪除公告
                     </button>
                   )}
                 </div>
@@ -474,6 +741,7 @@ export default function TaitungAssociationPage() {
 
       </div>
 
+      {/* Modal 1：發布公告 */}
       {showStaffModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 z-50">
           <div className="bg-zinc-950 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl">
@@ -505,11 +773,8 @@ export default function TaitungAssociationPage() {
                   type="file"
                   accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.png"
                   onChange={handleFileUploadChange}
-                  className="w-full rounded-xl bg-zinc-900 border border-dashed border-amber-500/50 px-4 py-3 text-xs text-zinc-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer"
+                  className="w-full rounded-xl bg-zinc-900 border border-dashed border-amber-500/50 px-4 py-3 text-xs text-zinc-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-black cursor-pointer"
                 />
-                {uploadedFileName && (
-                  <p className="text-xs text-emerald-400 font-bold pt-1">✅ 已選取檔案：{uploadedFileName}</p>
-                )}
               </div>
               <div className="pt-4 flex justify-end gap-3">
                 <button
@@ -521,7 +786,7 @@ export default function TaitungAssociationPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-500 text-black text-sm font-extrabold"
+                  className="px-5 py-2 rounded-xl bg-amber-500 text-black text-sm font-extrabold cursor-pointer"
                 >
                   確認發布
                 </button>
@@ -531,11 +796,12 @@ export default function TaitungAssociationPage() {
         </div>
       )}
 
+      {/* Modal 2：Excel / CSV 批次上傳（內建重複上傳核對防呆，只留一份最完整資料） */}
       {showCsvModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 z-50">
           <div className="bg-zinc-950 border border-zinc-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-              <h3 className="text-lg font-black text-white">📊 批次上傳 Excel / .csv 完賽成績檔</h3>
+              <h3 className="text-lg font-black text-white">📊 批次上傳 Excel (.xlsx/.xls) 或 .csv 完賽成績檔</h3>
               <button
                 type="button"
                 onClick={() => setShowCsvModal(false)}
@@ -548,7 +814,7 @@ export default function TaitungAssociationPage() {
             <form onSubmit={handleConfirmCsvImport} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-300">對應賽事名稱 *</label>
+                  <label className="text-xs font-bold text-zinc-300">對應賽事名稱 (選檔後自動帶入) *</label>
                   <input
                     type="text"
                     required
@@ -570,21 +836,40 @@ export default function TaitungAssociationPage() {
               </div>
 
               <div className="space-y-1.5">
+                <label className="text-xs font-bold text-zinc-300">賽事類別</label>
+                <select
+                  value={csvSportType}
+                  onChange={(e) => setCsvSportType(e.target.value as "triathlon" | "cycling")}
+                  className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-sm text-white font-bold"
+                >
+                  <option value="triathlon">🏊‍♂️ 鐵人三項成績匯入 (race_details_full)</option>
+                  <option value="cycling">🚴‍♂️ 公路單車百鐵馬成績匯入 (cycling_details_full)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-300">
-                  選擇 Excel (.xlsx/.xls) 或 .csv 檔案
+                  選擇電腦中的 Excel (.xlsx / .xls) 或 .csv 檔案（自動去重並只留最完整一筆）
                 </label>
                 <input
                   type="file"
                   accept=".csv,.xlsx,.xls"
                   onChange={handleExcelOrCsvSelect}
-                  className="w-full rounded-xl bg-zinc-900 border border-dashed border-emerald-500/50 px-4 py-3 text-xs text-zinc-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500 file:text-black hover:file:bg-emerald-400 cursor-pointer"
+                  className="w-full rounded-xl bg-zinc-900 border border-dashed border-emerald-500/50 px-4 py-3 text-xs text-zinc-300 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500 file:text-black cursor-pointer"
                 />
               </div>
 
               {csvPreviewRows.length > 0 && (
                 <div className="rounded-xl bg-zinc-900 border border-emerald-500/30 p-3 space-y-2">
                   <div className="text-xs text-emerald-400 font-extrabold">
-                    ✅ 已成功解析「{selectedFileName}」共 {csvPreviewRows.length} 筆選手成績！
+                    ✅ 防呆核對完成：「{selectedFileName}」原始讀取 {dedupStats.rawCount} 筆 ➔ 去重後保留最完整唯一紀錄共 {dedupStats.cleanCount} 筆！
+                  </div>
+                  <div className="text-[11px] text-zinc-300 font-mono space-y-1">
+                    {csvPreviewRows.slice(0, 3).map((r, i) => (
+                      <div key={i}>
+                        {i + 1}. 姓名：{r.athlete_name} ｜ 組別：{r.category} ｜ 時間：{r.finish_time}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -600,9 +885,9 @@ export default function TaitungAssociationPage() {
                 <button
                   type="submit"
                   disabled={importingCsv || csvPreviewRows.length === 0}
-                  className="px-5 py-2 rounded-xl bg-emerald-500 text-black text-sm font-extrabold cursor-pointer disabled:opacity-40"
+                  className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold cursor-pointer disabled:opacity-40"
                 >
-                  {importingCsv ? "正在寫入資料庫..." : `確認匯入成績 (${csvPreviewRows.length} 筆)`}
+                  {importingCsv ? "正在核對去重並寫入..." : `確認覆蓋匯入唯一完整成績 (${csvPreviewRows.length} 筆)`}
                 </button>
               </div>
             </form>
