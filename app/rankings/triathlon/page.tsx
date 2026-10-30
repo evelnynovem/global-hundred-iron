@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
-// 官方權威核定之基準名單（已修正校準：梁忠仁確定為五十鐵賞區間，防呆去重後不會暴衝至八十鐵）
+// 官方權威核定之鐵人三項基準名單（梁忠仁已校準為 50 鐵）
 const BASE_TRIATHLON_HEROES: { email: string; name: string; team: string; baseCount: number }[] = [
   { email: "pianopub1130@gmail.com", name: "陳彥良", team: "醫護鐵人", baseCount: 103 },
   { email: "sino.polar@msa.hinet.net", name: "孟亞輝", team: "高雄鐵人", baseCount: 98 },
@@ -14,8 +14,8 @@ const BASE_TRIATHLON_HEROES: { email: string; name: string; team: string; baseCo
   { email: "mike740606@gmail.com", name: "劉光武", team: "KUANGYU光聿", baseCount: 68 },
   { email: "54albert@gmail.com", name: "鄭旭劭", team: "康軒鐵人隊", baseCount: 62 },
   { email: "c062k60@gmail.com", name: "韓德安", team: "醫護鐵人", baseCount: 55 },
-  { email: "ironwayne703@gmail.com", name: "梁忠仁", team: "超級難止汗鐵人隊", baseCount: 50 }, // 校準修正為 50 鐵
   { email: "kouhakusei@gmail.com", name: "黃柏青", team: "DWD", baseCount: 51 },
+  { email: "ironwayne703@gmail.com", name: "梁忠仁", team: "超級難止汗鐵人隊", baseCount: 50 },
   { email: "micsu@kimo.com", name: "蘇耀宗", team: "個人", baseCount: 46 },
   { email: "ylsun@nycu.edu.tw", name: "孫英玲", team: "個人", baseCount: 42 },
   { email: "chiu05290529@gmail.com", name: "邱正賢", team: "個人", baseCount: 38 },
@@ -30,6 +30,7 @@ const BASE_TRIATHLON_HEROES: { email: string; name: string; team: string; baseCo
   { email: "evelny1985@gmail.com", name: "洪緯欣", team: "醫護鐵人", baseCount: 2 },
 ];
 
+// 官方核定之公路單車（百鐵馬）基準名單
 const BASE_CYCLING_HEROES: { email: string; name: string; team: string; baseCount: number }[] = [
   { email: "pianopub1130@gmail.com", name: "陳彥良", team: "醫護鐵人", baseCount: 53 },
   { email: "bx4ai@yahoo.com.tw", name: "曾亭彬", team: "台灣大腳ㄚ", baseCount: 49 },
@@ -93,15 +94,37 @@ function getAwardTitle(count: number, sport: "triathlon" | "cycling") {
   return `🎖️ 《初${suffix}賞》`;
 }
 
-// 日期標準化輔助函數
+// 標準化日期 YYYY-MM-DD
 function normalizeDateStr(raw: any): string {
-  if (!raw) return "";
-  const str = String(raw).trim().replace(/\//g, "-");
-  const parts = str.split("-");
-  if (parts.length === 3 && parts[0].length === 4) {
-    return `${parts[0]}-${parts[1].padStart(2, "0")}-${parts[2].padStart(2, "0")}`;
+  if (!raw || raw === "-" || raw === "NULL" || raw === "EMPTY") return "";
+  const str = String(raw).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  const slashParts = str.replace(/\//g, "-").split("-");
+  if (slashParts.length === 3 && slashParts[0].length === 4) {
+    return `${slashParts[0]}-${slashParts[1].padStart(2, "0")}-${slashParts[2].padStart(2, "0")}`;
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
   }
   return str;
+}
+
+// 判定一場鐵人賽是否同時符合 90km+ 百鐵馬認證資格（113K / 226K / 超鐵 / IRONMAN 70.3）
+function isQualifyingLongDistanceTriathlon(raceName: string, category: string): boolean {
+  const combined = `${raceName} ${category}`.toLowerCase();
+  return (
+    combined.includes("113") ||
+    combined.includes("226") ||
+    combined.includes("70.3") ||
+    combined.includes("超鐵") ||
+    combined.includes("半程超鐵") ||
+    combined.includes("全程超鐵") ||
+    combined.includes("ironman")
+  );
 }
 
 export default function RankingsPage() {
@@ -114,19 +137,29 @@ export default function RankingsPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    async function loadStrictRankings() {
+    // 支援若網址本身是 /rankings/cycling 自動切換至公路單車頁籤
+    if (typeof window !== "undefined" && window.location.pathname.includes("/cycling")) {
+      setActiveSport("cycling");
+    }
+  }, []);
+
+  useEffect(() => {
+    async function loadDualTrackStrictRankings() {
       setLoading(true);
       try {
         const baseList = activeSport === "triathlon" ? BASE_TRIATHLON_HEROES : BASE_CYCLING_HEROES;
-        
-        // 選手資料結構：使用 validDaySet 嚴格防止「同日多場」防呆違規
-        const heroMap = new Map<string, {
-          name: string;
-          team: string;
-          baseCount: number;
-          validDaySet: Set<string>;      // 嚴格記錄：已計入的有效參賽日期 (YYYY-MM-DD)
-          newRacesCount: number;         // 2026 以後經防呆驗證的新登錄場次
-        }>();
+
+        // 每個選手獨立維護 validDaySet，確保不論在「鐵人三項」或「公路單車(百鐵馬)」皆嚴格執行【一日同類運動最多 1 場】防呆！
+        const heroMap = new Map<
+          string,
+          {
+            name: string;
+            team: string;
+            baseCount: number;
+            validDaySet: Set<string>;
+            newRacesCount: number;
+          }
+        >();
 
         baseList.forEach((h) => {
           heroMap.set(h.name, {
@@ -138,14 +171,16 @@ export default function RankingsPage() {
           });
         });
 
-        const table = activeSport === "triathlon" ? "race_details_full" : "cycling_details_full";
-        const [pubRes, userRecRes, sessionRes] = await Promise.all([
-          supabase.from(table).select("*").limit(5000),
+        // 一次平行拉取：鐵人歷史表、單車歷史表、會員登錄表、登入狀態
+        const [triRes, cycRes, userRecRes, sessionRes] = await Promise.all([
+          supabase.from("race_details_full").select("*").limit(5000),
+          supabase.from("cycling_details_full").select("*").limit(5000),
           supabase.from("user_records").select("*"),
           supabase.auth.getSession(),
         ]);
 
-        const pubData = pubRes.data || [];
+        const triData = triRes.data || [];
+        const cycData = cycRes.data || [];
         const userRecs = userRecRes.data || [];
         const currentUser = sessionRes.data?.session?.user;
 
@@ -154,95 +189,143 @@ export default function RankingsPage() {
           "pianopub1130@gmail.com": { name: "陳彥良", team: "醫護鐵人" },
         };
 
-        // 1. 處理公開歷史資料庫（含未認領資料）
-        pubData.forEach((r: any) => {
-          const rawName = (r.athlete_name || r.name || "").trim();
-          if (!rawName || rawName === "EMPTY" || rawName === "NULL" || rawName === "選手") return;
-          const rTeam = (r.team || r.sport_team || "個人").trim();
-          const rDate = normalizeDateStr(r.race_date || r.match_date || "");
-
-          if (r.login_email && !emailToName[r.login_email]) {
-            emailToName[r.login_email] = { name: rawName, team: rTeam };
+        // 統一註冊場次的防呆函數（同日同運動類別絕對不重複累加）
+        const registerValidRace = (
+          rawName: string,
+          rTeam: string,
+          rDateRaw: string,
+          rRaceName: string
+        ) => {
+          const cleanName = (rawName || "").trim();
+          if (!cleanName || cleanName === "EMPTY" || cleanName === "NULL" || cleanName === "選手" || /^\d+$/.test(cleanName)) {
+            return;
           }
 
-          let hero = heroMap.get(rawName);
+          let hero = heroMap.get(cleanName);
           if (!hero) {
             hero = {
-              name: rawName,
-              team: rTeam,
+              name: cleanName,
+              team: rTeam || "個人",
               baseCount: 0,
               validDaySet: new Set<string>(),
               newRacesCount: 0,
             };
-            heroMap.set(rawName, hero);
+            heroMap.set(cleanName, hero);
           } else if (rTeam && rTeam !== "個人" && hero.team === "個人") {
             hero.team = rTeam;
           }
 
-          // 🛡️ 防呆核心：若有明確日期，且該日期已有一場該類賽事，自動忽略同日重複紀錄
-          if (rDate) {
-            if (!hero.validDaySet.has(rDate)) {
-              hero.validDaySet.add(rDate);
-              // 若為 2026/2027 新增賽事，進行有效累加
-              if (rDate.startsWith("2026") || rDate.startsWith("2027")) {
+          const stdDate = normalizeDateStr(rDateRaw);
+          if (stdDate) {
+            // 🛡️ 硬核防呆：該選手在該日期 (YYYY-MM-DD) 若已經有一場同類運動，直接略過不重複計數！
+            if (!hero.validDaySet.has(stdDate)) {
+              hero.validDaySet.add(stdDate);
+              if (stdDate.startsWith("2026") || stdDate.startsWith("2027")) {
                 hero.newRacesCount += 1;
               }
             }
           } else {
-            // 無日期者依賽事名稱做單次防呆去重
-            const fakeDateKey = `nodate-${(r.race_name || r.event_name || "").trim()}`;
-            if (!hero.validDaySet.has(fakeDateKey)) {
-              hero.validDaySet.add(fakeDateKey);
+            // 若早期歷史資料無日期，以「標準化賽事名稱」去重，同名賽事不重複灌水
+            const noDateKey = `nodate-${(rRaceName || "未知賽事").trim().toLowerCase()}`;
+            if (!hero.validDaySet.has(noDateKey)) {
+              hero.validDaySet.add(noDateKey);
             }
+          }
+        };
+
+        // 先建立信箱對應表
+        triData.forEach((r: any) => {
+          const n = (r.athlete_name || r.name || "").trim();
+          const t = (r.team || r.sport_team || "個人").trim();
+          if (r.login_email && n && !emailToName[r.login_email]) {
+            emailToName[r.login_email] = { name: n, team: t };
           }
         });
 
-        // 2. 聯集會員個人登錄 (user_records) 並進行同日防呆過濾
-        userRecs.forEach((ur: any) => {
-          const urSport = ur.sport_type === "cycling" ? "cycling" : "triathlon";
-          if (urSport !== activeSport) return;
+        if (activeSport === "triathlon") {
+          // ==========================================
+          // 🏊‍♂️ 模式 A：計算「鐵人三項百鐵排名」
+          // ==========================================
+          triData.forEach((r: any) => {
+            registerValidRace(
+              r.athlete_name || r.name,
+              r.team || r.sport_team || "個人",
+              r.race_date || r.match_date,
+              r.race_name || r.event_name
+            );
+          });
 
-          let targetName = "";
-          let targetTeam = "醫護鐵人";
-
-          if (currentUser && ur.user_id === currentUser.id) {
-            const email = (currentUser.email || "").toLowerCase();
-            const metaName = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
-            if (emailToName[email]) {
-              targetName = emailToName[email].name;
-              targetTeam = emailToName[email].team;
-            } else if (metaName === "Wei-hsin Hung" || email.includes("evelny")) {
-              targetName = "洪緯欣";
-            } else if (email.includes("pianopub") || metaName.includes("陳彥良")) {
-              targetName = "陳彥良";
-            } else if (metaName) {
-              targetName = metaName;
+          userRecs.forEach((ur: any) => {
+            if (ur.sport_type === "cycling") return;
+            let targetName = "洪緯欣";
+            let targetTeam = "醫護鐵人";
+            if (currentUser && ur.user_id === currentUser.id) {
+              const email = (currentUser.email || "").toLowerCase();
+              const metaName = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
+              if (emailToName[email]) {
+                targetName = emailToName[email].name;
+                targetTeam = emailToName[email].team;
+              } else if (email.includes("pianopub") || metaName.includes("陳彥良")) {
+                targetName = "陳彥良";
+              } else if (metaName && metaName !== "Wei-hsin Hung") {
+                targetName = metaName;
+              }
             }
-          }
+            registerValidRace(targetName, targetTeam, ur.match_date, ur.event_name);
+          });
+        } else {
+          // ==========================================
+          // 🚴‍♂️ 模式 B：計算「公路單車百鐵馬排名」（含 cycling_details_full ＋ 113K/226K 超鐵自動跨界滿足 90km+ 鐵馬規則）
+          // ==========================================
+          cycData.forEach((r: any) => {
+            registerValidRace(
+              r.athlete_name || r.name,
+              r.team || r.sport_team || "個人",
+              r.race_date || r.match_date,
+              r.race_name || r.event_name
+            );
+          });
 
-          if (!targetName) targetName = "洪緯欣";
+          // 跨界連動：若在鐵人賽完賽 113K / 226K 超鐵，自動滿足 90km+ 百鐵馬規則（且受單車同日防呆保護，同一天不會重複加兩次）
+          triData.forEach((r: any) => {
+            const rName = r.race_name || r.event_name || "";
+            const rCat = r.category || r.distance || "";
+            if (isQualifyingLongDistanceTriathlon(rName, rCat)) {
+              registerValidRace(
+                r.athlete_name || r.name,
+                r.team || r.sport_team || "個人",
+                r.race_date || r.match_date,
+                `${rName} (113/226超鐵90K+單車段)`
+              );
+            }
+          });
 
-          let hero = heroMap.get(targetName);
-          if (!hero) {
-            hero = {
-              name: targetName,
-              team: targetTeam,
-              baseCount: 0,
-              validDaySet: new Set<string>(),
-              newRacesCount: 0,
-            };
-            heroMap.set(targetName, hero);
-          }
+          userRecs.forEach((ur: any) => {
+            const isBike = ur.sport_type === "cycling";
+            const isLongTri =
+              ur.sport_type !== "cycling" &&
+              isQualifyingLongDistanceTriathlon(ur.event_name || "", ur.category || "");
+            if (!isBike && !isLongTri) return;
 
-          const matchDate = normalizeDateStr(ur.match_date || "");
-          // 🛡️ 防呆：同一天不可計入兩筆相同運動
-          if (matchDate && !hero.validDaySet.has(matchDate)) {
-            hero.validDaySet.add(matchDate);
-            hero.newRacesCount += 1;
-          }
-        });
+            let targetName = "洪緯欣";
+            let targetTeam = "醫護鐵人";
+            if (currentUser && ur.user_id === currentUser.id) {
+              const email = (currentUser.email || "").toLowerCase();
+              const metaName = currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
+              if (emailToName[email]) {
+                targetName = emailToName[email].name;
+                targetTeam = emailToName[email].team;
+              } else if (email.includes("pianopub") || metaName.includes("陳彥良")) {
+                targetName = "陳彥良";
+              } else if (metaName && metaName !== "Wei-hsin Hung") {
+                targetName = metaName;
+              }
+            }
+            registerValidRace(targetName, targetTeam, ur.match_date, ur.event_name);
+          });
+        }
 
-        // 3. 最終場次精算法：基準名單校準 + 驗證新場次，絕不暴衝
+        // 計算最終防呆後的場次並排序
         const finalHeroes = Array.from(heroMap.values())
           .map((item) => {
             const validCount = item.validDaySet.size;
@@ -262,13 +345,13 @@ export default function RankingsPage() {
         finalHeroes.sort((a, b) => b.total_races - a.total_races);
         setHeroList(finalHeroes);
       } catch (err) {
-        console.error("載入嚴謹去重英雄榜錯誤:", err);
+        console.error("載入雙軌防呆英雄榜錯誤:", err);
       } finally {
         setLoading(false);
       }
     }
 
-    loadStrictRankings();
+    loadDualTrackStrictRankings();
   }, [activeSport, supabase]);
 
   const activeTierObj = CLASSIC_TIERS.find((t) => t.key === selectedTierKey) || CLASSIC_TIERS[0];
@@ -283,10 +366,10 @@ export default function RankingsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+    <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-8">
         
-        {/* 頂部標題 */}
+        {/* 頂部標題與雙軌切換 */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-800 pb-6">
           <div>
             <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
@@ -296,7 +379,7 @@ export default function RankingsPage() {
               {activeSport === "triathlon" ? "鐵人三項百鐵排名" : "公路單車百鐵馬排名"}
             </h1>
             <p className="text-sm text-zinc-400 mt-1">
-              『百鐵認證』已啟用嚴格防呆去重機制：同日同類賽事僅計一場，113K+ 超鐵單車段獨立計入百鐵馬，確保紀錄公平權威。
+              已啟用雙軌同日防呆機制：同一天同運動類別僅計一場完賽；完賽 113K/226K 超鐵自動同步計入 90km+ 百鐵馬認證。
             </p>
           </div>
 
@@ -379,16 +462,16 @@ export default function RankingsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="輸入選手姓名（如：陳彥良、梁忠仁、孟亞輝、洪緯欣）或團隊檢索排名..."
+            placeholder="輸入選手姓名（如：陳彥良、梁忠仁、孟亞輝、曾亭彬）或團隊檢索排名..."
             className="flex-1 rounded-2xl bg-zinc-900 border border-amber-500/50 px-5 py-3.5 text-sm text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none"
           />
         </div>
 
-        {/* 排行榜表格 */}
+        {/* 排行榜主表 */}
         <section className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-black text-white">
-              {activeSport === "triathlon" ? "鐵人三項百鐵總排名" : "公路單車百鐵馬排名"}
+              {activeSport === "triathlon" ? "🏆 鐵人三項百鐵總排名" : "🚴‍♂️ 公路單車百鐵馬總排名"}
               <span className="text-amber-400 ml-2">
                 ({activeSport === "cycling" && activeTierObj.key !== "all" ? activeTierObj.label.replace("鐵", "鐵馬") : activeTierObj.label})
               </span>
@@ -399,7 +482,7 @@ export default function RankingsPage() {
           </div>
 
           {loading ? (
-            <p className="text-sm text-zinc-400 py-10 text-center animate-pulse">正在進行嚴格防呆與場次統計...</p>
+            <p className="text-sm text-zinc-400 py-10 text-center animate-pulse">正在執行三鐵與公路車雙軌同日防呆統計...</p>
           ) : filteredHeroes.length === 0 ? (
             <div className="text-center py-12 border border-dashed border-zinc-800 rounded-2xl space-y-3">
               <p className="text-sm text-zinc-400">此分類區間目前尚無選手資料。</p>
