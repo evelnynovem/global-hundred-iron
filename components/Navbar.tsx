@@ -80,8 +80,8 @@ export default function Navbar() {
                 <div className="text-base sm:text-lg font-black tracking-tight text-zinc-900">
                   全球百鐵認證
                 </div>
-                <div className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
-                  GLOBAL 100 TRIATHLON CERTIFICATION
+                <div className="text-[10px] font-extrabold tracking-wider text-red-600 uppercase">
+                  🚑 醫護鐵人 IRONMEDIC 創立統籌・GLOBAL 100
                 </div>
               </div>
             </>

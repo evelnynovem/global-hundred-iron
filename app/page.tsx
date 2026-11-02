@@ -110,49 +110,49 @@ export default function HomePage() {
   // 全球百鐵認證 G100TC 官方八大戰略贊助夥伴（已綁定真實官方外部連結）
   const g100Sponsors = [
     {
-      name: "醫護鐵人 IRONMEDIC", logo: "/images/sponsors/ironmedic.png", shortLogo: "IRONMEDIC",
+      name: "醫護鐵人 IRONMEDIC", logo: "/images/sponsors/ironmedic.svg", shortLogo: "IRONMEDIC",
       role: "主導統籌單位",
       desc: "全球首創運動安全暨百鐵認證統籌機構",
       url: "https://www.facebook.com/ironmedic.tw",
     },
     {
-      name: "美利達自行車 MERIDA", logo: "/images/sponsors/merida.png", shortLogo: "MERIDA",
+      name: "美利達自行車 MERIDA", logo: "/images/sponsors/merida.svg", shortLogo: "MERIDA",
       role: "國際領導單車品牌",
       desc: "全力支持台灣鐵人與百鐵馬耐力運動發展",
       url: "https://www.merida-bikes.com/zh-tw",
     },
     {
-      name: "SYB 昇陽自行車", logo: "/images/sponsors/syb.png", shortLogo: "SYB 昇陽",
+      name: "SYB 昇陽自行車", logo: "/images/sponsors/syb.svg", shortLogo: "SYB 昇陽",
       role: "頂級單車與三鐵戰袍夥伴",
       desc: "專業三鐵車、競速裝備與客製化百鐵戰袍",
       url: "https://www.syb-cycling.com/",
     },
     {
-      name: "邁克仕 AminoMax", logo: "/images/sponsors/aminomax.png", shortLogo: "aminoMax",
+      name: "邁克仕 AminoMax", logo: "/images/sponsors/aminomax.svg", shortLogo: "aminoMax",
       role: "官方指定運動補給",
       desc: "專業胺基酸、BCAA 與長距離耐力能量補給",
       url: "https://www.aminomax.com.tw/",
     },
     {
-      name: "肌樂 Mentholatum", logo: "/images/sponsors/mentholatum.png", shortLogo: "肌樂",
+      name: "肌樂 Mentholatum", logo: "/images/sponsors/mentholatum.svg", shortLogo: "肌樂",
       role: "官方運動防護夥伴",
       desc: "賽前熱身與賽後舒緩之運動噴劑領導品牌",
       url: "https://www.mentholatum.com.tw/",
     },
     {
-      name: "ZIV 專業運動眼鏡", logo: "/images/sponsors/ziv.png", shortLogo: "ZIV",
+      name: "ZIV 專業運動眼鏡", logo: "/images/sponsors/ziv.svg", shortLogo: "ZIV",
       role: "官方指定運動眼鏡",
       desc: "專為亞洲臉型設計之防風抗 UV 頂級光學鏡片",
       url: "https://www.ziv.com.tw/",
     },
     {
-      name: "SAEKO 專業泳鏡", logo: "/images/sponsors/saeko.png", shortLogo: "SAEKO",
+      name: "SAEKO 專業泳鏡", logo: "/images/sponsors/saeko.svg", shortLogo: "SAEKO",
       role: "官方指定開放水域泳鏡",
       desc: "台灣外銷全球之三鐵開放水域廣角防霧泳鏡",
       url: "https://www.saeko.com.tw/",
     },
     {
-      name: "NOVATEC 久裕興業", logo: "/images/sponsors/novatec.png", shortLogo: "NOVATEC",
+      name: "NOVATEC 久裕興業", logo: "/images/sponsors/novatec.svg", shortLogo: "NOVATEC",
       role: "官方指定高階輪組",
       desc: "國際頂尖碳纖維輪組與高順暢度花鼓技術",
       url: "https://www.novatecusa.net/",
@@ -223,7 +223,7 @@ export default function HomePage() {
               <div className="inline-block px-3.5 py-1 rounded-full bg-red-950/60 border border-red-800/50 text-red-400 text-xs font-bold tracking-widest uppercase">
                 {siteMode === "turaa"
                   ? "TAITUNG URBAN & RURAL ATHLETIC ASSOCIATION (TURAA)"
-                  : "GLOBAL 100 TRIATHLON CERTIFICATION"}
+                  : "FOUNDED BY IRONMEDIC 醫護鐵人創立統籌 ｜ GLOBAL 100 TRIATHLON CERTIFICATION"}
               </div>
               
               {siteMode === "turaa" ? (
@@ -401,7 +401,7 @@ export default function HomePage() {
               <div className="lg:col-span-4">
                 <div className="relative rounded-2xl overflow-hidden border border-amber-400/50 bg-zinc-950 p-4 text-center space-y-2 shadow-lg">
                   <img
-                    src="/images/aminomax-poster.jpg"
+                    src="/images/aminomax-poster.svg"
                     alt="邁克仕兌換活動海報"
                     onError={(e) => {
                       e.currentTarget.style.display = "none";

@@ -249,7 +249,7 @@ export default function AminoMaxPreOrderSection({
         <div className="lg:col-span-4">
           <div className="relative rounded-2xl overflow-hidden border border-amber-500/40 bg-gradient-to-br from-amber-500/20 via-red-950/40 to-zinc-950 p-5 text-center space-y-3 shadow-xl">
             <img
-              src="/images/aminomax-poster.jpg"
+              src="/images/aminomax-poster.svg"
               alt="邁克仕 AminoMax 參賽補給兌換海報"
               onError={(e) => {
                 e.currentTarget.style.display = "none";
