@@ -392,6 +392,84 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* 🎁 首頁新增：邁克仕 AminoMax × 全球百鐵認證 參賽補給預約兌換小海報橫幅（僅在百鐵總站顯示） */}
+        {siteMode !== "turaa" && (
+          <section className="rounded-3xl bg-gradient-to-r from-amber-950/60 via-zinc-900 to-red-950/50 border-2 border-amber-500/50 p-5 sm:p-6 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              
+              {/* 左側：小海報與商品樣式展示框 */}
+              <div className="lg:col-span-4">
+                <div className="relative rounded-2xl overflow-hidden border border-amber-400/50 bg-zinc-950 p-4 text-center space-y-2 shadow-lg">
+                  <img
+                    src="/images/aminomax-poster.jpg"
+                    alt="邁克仕兌換活動海報"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                    className="w-full h-36 object-cover rounded-xl mb-2"
+                  />
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded bg-amber-500 text-black text-[10px] font-black">
+                      官方指定補給海報
+                    </span>
+                    <span className="text-xs font-extrabold text-amber-400">aminoMax 邁克仕</span>
+                  </div>
+                  <div className="text-base sm:text-lg font-black text-white">
+                    ⚡ 能量膠・BCAA・電解質補給組
+                  </div>
+                  <div className="flex items-center justify-center gap-2 pt-1">
+                    <span className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-[11px] font-bold text-amber-300">
+                      📦 能量膠包
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 text-[11px] font-bold text-emerald-300">
+                      💊 BCAA / 電解質
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 右側：活動規則說明與立即勾選導流按鈕 */}
+              <div className="lg:col-span-8 space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-black animate-pulse">
+                    🔥 年度系列賽事專屬福利
+                  </span>
+                  <span className="text-xs font-bold text-amber-400">
+                    全球百鐵認證 × 邁克仕 AminoMax 參賽補給免費領取活動
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-white leading-snug">
+                  登入會員預先勾選參賽場次，比賽當天憑「號碼布」或「安全帽號碼貼」免費領取邁克仕補給！
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                  只要於<strong>各場系列賽事開賽前 1 個月（30天前）</strong>登入「全球百鐵認證會員中心」勾選您預計參加的未來賽事，我們將預先為您把邁克仕產品配發至該場次主辦單位。比賽當天現場出示<strong>號碼布（若該單車賽事無號碼布則憑「安全帽上的號碼貼」）</strong>，由工作人員在上面做記號後即可直接領取！
+                </p>
+                <div className="pt-1 flex flex-wrap items-center gap-3">
+                  <Link
+                    href="/profile#aminomax-preorder"
+                    className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs sm:text-sm transition shadow-lg shadow-amber-500/20"
+                  >
+                    👉 立即進入會員中心預先勾選未來參賽場次 →
+                  </Link>
+                  <Link
+                    href="/series"
+                    className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-xs sm:text-sm transition"
+                  >
+                    查看年度系列賽事清單
+                  </Link>
+                  <Link
+                    href="/legal/privacy"
+                    className="text-xs text-zinc-400 hover:text-amber-400 underline"
+                  >
+                    活動個資與共同行銷說明
+                  </Link>
+                </div>
+              </div>
+
+            </div>
+          </section>
+        )}
+
         {/* 四大功能導覽卡片 */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
           <Link

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
+import AminoMaxPreOrderSection from "@/components/AminoMaxPreOrderSection";
 
 interface UnifiedRecord {
   key: string;
@@ -749,6 +750,13 @@ export default function ProfilePage() {
             </form>
           </section>
         )}
+
+        {/* 🎁 邁克仕 AminoMax 未來系列賽事預先勾選與補給兌換專區 */}
+        <AminoMaxPreOrderSection
+          userEmail={user?.email || ""}
+          athleteName={profileForm.fullName}
+          sportTeam={profileForm.sportTeam}
+        />
 
         {/* 我的個人完賽履歷 */}
         <section className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
