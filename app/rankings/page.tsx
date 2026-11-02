@@ -522,7 +522,16 @@ export default function RankingsPage() {
                         )}
                       </td>
                       <td className="py-4 px-4 font-extrabold text-white text-base">{hero.athlete_name}</td>
-                      <td className="py-4 px-4 text-xs font-bold text-amber-400/90">{hero.team || "個人"}</td>
+                      <td className="py-4 px-4 text-xs font-bold text-amber-400/90">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span>{hero.team || "個人"}</span>
+                          {(hero.team || "").includes("醫護鐵人") && (
+                            <span className="px-2 py-0.5 rounded-full bg-red-600/20 border border-red-500/40 text-red-400 text-[10px] font-extrabold">
+                              🚑 醫護鐵人
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="py-4 px-4 font-mono font-black text-lg text-emerald-400">
                         {hero.total_races} <span className="text-xs font-normal text-zinc-400">場</span>
                       </td>

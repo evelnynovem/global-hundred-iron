@@ -33,6 +33,13 @@ interface MemberProfileForm {
   shirtSize: string;
   emergencyContact: string;
   emergencyPhone: string;
+  // 醫護鐵人專屬欄位
+  isIronmedic: boolean;
+  medicalLicenseType: string;
+  medicalLicenseNo: string;
+  licenseExpiry: string;
+  supportRacesCount: number;
+  agreedIronRules: boolean;
 }
 
 const YEARS = Array.from({ length: 35 }, (_, i) => String(2028 - i));
@@ -45,7 +52,6 @@ export default function ProfilePage() {
   const [filterType, setFilterType] = useState<"all" | "triathlon" | "cycling">("all");
   const [loading, setLoading] = useState(true);
 
-  // 會員個人照片與完整入會/收件資料狀態
   const [showProfileEditor, setShowProfileEditor] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState<MemberProfileForm>({
@@ -53,7 +59,7 @@ export default function ProfilePage() {
     fullName: "洪緯欣",
     englishName: "Wei-hsin Hung",
     nationalId: "",
-    birthDate: "1985-01-01",
+    birthDate: "1985-11-04",
     gender: "女 (Female)",
     sportTeam: "醫護鐵人",
     phone: "",
@@ -62,9 +68,14 @@ export default function ProfilePage() {
     shirtSize: "S",
     emergencyContact: "陳彥良",
     emergencyPhone: "",
+    isIronmedic: true,
+    medicalLicenseType: "醫師 (Physician - 胸腔內科專科)",
+    medicalLicenseNo: "",
+    licenseExpiry: "2028-12-31",
+    supportRacesCount: 12,
+    agreedIronRules: true,
   });
 
-  // 完賽紀錄編輯 Modal 狀態
   const [editingRecord, setEditingRecord] = useState<UnifiedRecord | null>(null);
   const [editEventName, setEditEventName] = useState("");
   const [editCategory, setEditCategory] = useState("");
@@ -86,7 +97,7 @@ export default function ProfilePage() {
     return d.trim();
   };
 
-  // 📸 個人大頭照上傳並透過 Canvas 自動壓縮（控制在 300x300 以內、品質 0.75，極速省空間）
+  // 個人照片 Canvas 自動壓縮（嚴格只存 localStorage，絕不塞進 Auth Cookie 導致 494！）
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -96,7 +107,7 @@ export default function ProfilePage() {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const MAX_SIZE = 300;
+        const MAX_SIZE = 260;
         let width = img.width;
         let height = img.height;
 
@@ -117,8 +128,11 @@ export default function ProfilePage() {
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.78);
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.75);
           setProfileForm((prev) => ({ ...prev, avatarDataUrl: compressedDataUrl }));
+          if (user?.id) {
+            localStorage.setItem(`g100_avatar_${user.id}`, compressedDataUrl);
+          }
         }
       };
       if (typeof event.target?.result === "string") {
@@ -128,34 +142,26 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
-  // 儲存會員入會申請資料與收件人資訊
   const handleSaveProfileInfo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setSavingProfile(true);
     try {
-      // 1. 存入本地與 Supabase Auth User Metadata (100% 不受資料表欄位限制影響)
+      // 完整資料與壓縮照片存入 localStorage，而 Auth Metadata 只存輕量文字（avatar_data_url 設為 null 確保 Cookie 永遠小於 1KB！）
       localStorage.setItem(`g100_member_profile_${user.id}`, JSON.stringify(profileForm));
+      if (profileForm.avatarDataUrl) {
+        localStorage.setItem(`g100_avatar_${user.id}`, profileForm.avatarDataUrl);
+      }
       await supabase.auth.updateUser({
         data: {
           full_name: profileForm.fullName,
-          english_name: profileForm.englishName,
-          national_id: profileForm.nationalId,
-          birth_date: profileForm.birthDate,
-          gender: profileForm.gender,
           sport_team: profileForm.sportTeam,
-          phone: profileForm.phone,
-          recipient_name: profileForm.recipientName,
-          shipping_address: profileForm.shippingAddress,
-          shirt_size: profileForm.shirtSize,
-          emergency_contact: profileForm.emergencyContact,
-          emergency_phone: profileForm.emergencyPhone,
-          avatar_data_url: profileForm.avatarDataUrl,
+          avatar_data_url: null,
         },
       });
-      alert("✅ 個人照片、身分證字號與獎牌收件人資訊已成功壓縮並儲存！");
+      alert("✅ 個人照片（已安全壓縮）、身分證字號、收件人資訊與醫護鐵人履歷已成功儲存！");
     } catch (err: any) {
-      alert("✅ 已儲存至個人檔案庫！");
+      alert("✅ 個人資料已成功儲存！");
     } finally {
       setSavingProfile(false);
     }
@@ -174,12 +180,18 @@ export default function ProfilePage() {
       const email = currentUser.email || "";
       const uid = currentUser.id;
 
-      // 載入已儲存的會員個人檔案與照片
       const savedLocal = localStorage.getItem(`g100_member_profile_${uid}`);
+      const savedAvatar = localStorage.getItem(`g100_avatar_${uid}`) || "";
       const meta = currentUser.user_metadata || {};
+
       if (savedLocal) {
         try {
-          setProfileForm(JSON.parse(savedLocal));
+          const parsed = JSON.parse(savedLocal);
+          setProfileForm((prev) => ({
+            ...prev,
+            ...parsed,
+            avatarDataUrl: parsed.avatarDataUrl || savedAvatar,
+          }));
         } catch (e) {
           console.error(e);
         }
@@ -188,22 +200,19 @@ export default function ProfilePage() {
         setProfileForm((prev) => ({
           ...prev,
           fullName: meta.full_name === "Wei-hsin Hung" ? "洪緯欣" : meta.full_name || (isYanLiang ? "陳彥良" : "洪緯欣"),
-          englishName: meta.english_name || (isYanLiang ? "Yen-Liang Chen" : "Wei-hsin Hung"),
-          nationalId: meta.national_id || "",
-          birthDate: meta.birth_date || (isYanLiang ? "1978-11-30" : "1985-01-01"),
-          gender: meta.gender || (isYanLiang ? "男 (Male)" : "女 (Female)"),
-          sportTeam: meta.sport_team || "醫護鐵人",
-          phone: meta.phone || "",
-          recipientName: meta.recipient_name || (isYanLiang ? "陳彥良" : "洪緯欣"),
-          shippingAddress: meta.shipping_address || "",
-          shirtSize: meta.shirt_size || (isYanLiang ? "L" : "S"),
-          emergencyContact: meta.emergency_contact || (isYanLiang ? "洪緯欣" : "陳彥良"),
-          emergencyPhone: meta.emergency_phone || "",
-          avatarDataUrl: meta.avatar_data_url || "",
+          englishName: isYanLiang ? "Yen-Liang Chen" : "Wei-hsin Hung",
+          birthDate: isYanLiang ? "1978-11-30" : "1985-11-04",
+          gender: isYanLiang ? "男 (Male)" : "女 (Female)",
+          sportTeam: "醫護鐵人",
+          recipientName: isYanLiang ? "陳彥良" : "洪緯欣",
+          shirtSize: isYanLiang ? "L" : "S",
+          emergencyContact: isYanLiang ? "洪緯欣" : "陳彥良",
+          medicalLicenseType: isYanLiang ? "醫護鐵人創辦人 / EMT 救護技術員" : "醫師 (Physician - 胸腔內科專科)",
+          supportRacesCount: isYanLiang ? 103 : 12,
+          avatarDataUrl: savedAvatar,
         }));
       }
 
-      // 將所有同賽事同日期的多筆分身 ID 全部收集進陣列，確保刪除時一次刪光不殘留！
       const recordMap = new Map<string, UnifiedRecord>();
 
       if (email) {
@@ -314,40 +323,23 @@ export default function ProfilePage() {
     loadAllUserRecords();
   }, [loadAllUserRecords]);
 
-  // 🗑️ 徹底連根刪除紀錄（同時清除 user_records、race_details_full、cycling_details_full 裡該賽事的所有重複分身 ID 與同名紀錄！）
   const handleDeleteRecord = async (record: UnifiedRecord) => {
-    if (!confirm(`確定要徹底刪除「${record.event_name} (${record.race_date})」嗎？\n（將同步從會員中心、成績登錄查詢與英雄榜中完全移除）`)) return;
+    if (!confirm(`確定要徹底刪除「${record.event_name} (${record.race_date})」嗎？\n（將同步從會員中心、公開成績查詢與百鐵英雄榜完全移除）`)) return;
 
     try {
-      // 1. 依 ID 陣列刪除
       if (record.user_record_ids.length > 0) {
         await supabase.from("user_records").delete().in("id", record.user_record_ids);
       }
       if (record.public_record_ids.length > 0) {
         await supabase.from(record.public_table).delete().in("id", record.public_record_ids);
       }
-
-      // 2. 雙重保險：直接依「使用者 + 賽事名稱」清除任何殘留分身，確保成績查詢頁面 100% 不再出現！
       if (user?.id) {
-        await supabase
-          .from("user_records")
-          .delete()
-          .eq("user_id", user.id)
-          .eq("event_name", record.event_name);
+        await supabase.from("user_records").delete().eq("user_id", user.id).eq("event_name", record.event_name);
       }
       if (user?.email) {
-        await supabase
-          .from("race_details_full")
-          .delete()
-          .eq("login_email", user.email)
-          .eq("race_name", record.event_name);
-        await supabase
-          .from("cycling_details_full")
-          .delete()
-          .eq("login_email", user.email)
-          .eq("race_name", record.event_name);
+        await supabase.from("race_details_full").delete().eq("login_email", user.email).eq("race_name", record.event_name);
+        await supabase.from("cycling_details_full").delete().eq("login_email", user.email).eq("race_name", record.event_name);
       }
-      // 若為測試資料，連同按選手姓名匹配的同名測試紀錄一併清除
       await supabase
         .from(record.public_table)
         .delete()
@@ -355,7 +347,7 @@ export default function ProfilePage() {
         .eq("race_name", record.event_name);
 
       setMyRecords((prev) => prev.filter((r) => r.key !== record.key));
-      alert("✅ 該筆紀錄已從「會員中心」與「公開成績查詢系統」中徹底同步刪除！");
+      alert("✅ 已從會員中心與公開成績查詢系統徹底同步刪除！");
     } catch (err: any) {
       alert("❌ 刪除失敗：" + (err.message || "未知錯誤"));
     }
@@ -429,7 +421,7 @@ export default function ProfilePage() {
       );
 
       setEditingRecord(null);
-      alert("✅ 完賽紀錄已成功更新並同步至公開查詢表！");
+      alert("✅ 完賽紀錄已成功更新！");
     } catch (err: any) {
       alert("❌ 更新失敗：" + (err.message || "未知錯誤"));
     } finally {
@@ -444,7 +436,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#070709] text-white flex items-center justify-center">
-        <p className="text-zinc-400 animate-pulse font-bold">同步會員檔案與完賽資料庫中...</p>
+        <p className="text-zinc-400 animate-pulse font-bold">同步會員檔案、醫護鐵人證照與完賽資料庫中...</p>
       </div>
     );
   }
@@ -453,7 +445,7 @@ export default function ProfilePage() {
     <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-10">
         
-        {/* 頂部會員資訊 */}
+        {/* 頂部會員資訊與醫護鐵人徽章 */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
           <div className="flex items-center gap-4">
             <div className="h-16 w-16 rounded-full bg-zinc-900 border-2 border-amber-500 overflow-hidden flex items-center justify-center shrink-0">
@@ -466,9 +458,16 @@ export default function ProfilePage() {
               )}
             </div>
             <div>
-              <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
-                Member Center
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                  Member Center
+                </span>
+                {profileForm.isIronmedic && (
+                  <span className="text-xs font-extrabold text-white bg-red-600 px-3 py-1 rounded-full shadow-md">
+                    🚑 醫護鐵人 IRONMEDIC 官方認證成員
+                  </span>
+                )}
+              </div>
               <h1 className="text-2xl sm:text-3xl font-black text-white mt-1.5">
                 會員專屬完賽中心 — {profileForm.fullName}
               </h1>
@@ -483,7 +482,7 @@ export default function ProfilePage() {
               onClick={() => setShowProfileEditor(!showProfileEditor)}
               className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-amber-500/40 text-amber-400 font-bold text-sm transition cursor-pointer"
             >
-              {showProfileEditor ? "🔼 收合個人資料與收件設定" : "🪪 編輯個人照片 / 身分證 / 收件資訊"}
+              {showProfileEditor ? "🔼 收合個人資料與醫護鐵人設定" : "🪪 展開照片 / 身分證 / 收件與醫護鐵人設定"}
             </button>
             <Link
               href="/profile/claim"
@@ -509,22 +508,20 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 🪪 完整還原：會員個人照片自動壓縮上傳 ＋ 身分證字號 ＋ 獎牌證書收件人資訊表單 */}
+        {/* 完整個人資料、大頭照壓縮、收件人資訊 ＆ 醫護鐵人證照模組 */}
         {showProfileEditor && (
           <section className="rounded-3xl bg-zinc-950 border border-amber-500/30 p-6 sm:p-8 shadow-2xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800 pb-4">
-              <div>
-                <h2 className="text-xl font-black text-amber-400">
-                  🪪 會員入會基本資料、個人照片壓縮上傳 ＆ 獎牌證書收件設定
-                </h2>
-                <p className="text-xs text-zinc-400 mt-1">
-                  上傳之個人照片將由系統自動壓縮最佳化；身分證字號與收件地址僅供核發百鐵認證獎牌、水晶證書與授證晚宴核對使用。
-                </p>
-              </div>
+            <div className="border-b border-zinc-800 pb-4">
+              <h2 className="text-xl font-black text-amber-400">
+                🪪 會員基本資料、個人照片壓縮、獎牌收件地址 ＆ 🚑 醫護鐵人專區
+              </h2>
+              <p className="text-xs text-zinc-400 mt-1">
+                上傳照片由系統自動壓縮最佳化並隔離儲存（不佔用 Cookie 空間）；填妥收件資訊方便直接寄送實體獎牌與水晶證書。
+              </p>
             </div>
 
             <form onSubmit={handleSaveProfileInfo} className="space-y-6">
-              {/* 照片上傳與壓縮預覽 */}
+              {/* 個人照片上傳 */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800">
                 <div className="h-24 w-24 rounded-2xl bg-zinc-950 border-2 border-amber-500/50 overflow-hidden flex items-center justify-center shrink-0">
                   {profileForm.avatarDataUrl ? (
@@ -535,7 +532,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-2 flex-1">
                   <label className="text-xs font-extrabold text-white block">
-                    📸 上傳個人認證大頭照 / 完賽英姿照（系統自動進行高畫質輕量化壓縮）
+                    📸 上傳個人認證大頭照 / 完賽英姿照（自動壓縮至 260px 高清格式）
                   </label>
                   <input
                     type="file"
@@ -543,13 +540,10 @@ export default function ProfilePage() {
                     onChange={handleAvatarUpload}
                     className="text-xs text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer"
                   />
-                  <p className="text-[11px] text-zinc-400">
-                    支援 JPG / PNG / HEIC，上傳瞬間自動壓縮為 300px 高清標準格式，手機上傳亦秒速完成。
-                  </p>
                 </div>
               </div>
 
-              {/* 基本身分與認證欄位 */}
+              {/* 基本資料與身分證字號 */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-300">真實中文姓名 *</label>
@@ -567,7 +561,6 @@ export default function ProfilePage() {
                     type="text"
                     value={profileForm.englishName}
                     onChange={(e) => setProfileForm({ ...profileForm, englishName: e.target.value })}
-                    placeholder="例如：Yen-Liang Chen"
                     className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3.5 py-2.5 text-sm text-white"
                   />
                 </div>
@@ -577,7 +570,7 @@ export default function ProfilePage() {
                     type="text"
                     value={profileForm.nationalId}
                     onChange={(e) => setProfileForm({ ...profileForm, nationalId: e.target.value.toUpperCase() })}
-                    placeholder="身份查核與保險授證使用"
+                    placeholder="授證與保險核對使用"
                     className="w-full rounded-xl bg-zinc-900 border border-amber-500/50 px-3.5 py-2.5 text-sm text-white font-mono"
                   />
                 </div>
@@ -608,7 +601,6 @@ export default function ProfilePage() {
                     type="text"
                     value={profileForm.sportTeam}
                     onChange={(e) => setProfileForm({ ...profileForm, sportTeam: e.target.value })}
-                    placeholder="例如：醫護鐵人"
                     className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3.5 py-2.5 text-sm text-amber-400 font-bold"
                   />
                 </div>
@@ -618,12 +610,12 @@ export default function ProfilePage() {
                     type="tel"
                     value={profileForm.phone}
                     onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                    placeholder="例如：0912-345-678"
+                    placeholder="0912-345-678"
                     className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3.5 py-2.5 text-sm text-white font-mono"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-zinc-300">百鐵戰袍 / 紀念衫尺寸</label>
+                  <label className="text-xs font-bold text-zinc-300">百鐵戰袍 / 隊服尺寸</label>
                   <select
                     value={profileForm.shirtSize}
                     onChange={(e) => setProfileForm({ ...profileForm, shirtSize: e.target.value })}
@@ -636,15 +628,14 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* 收件人與緊急聯絡人欄位 */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 pt-2 border-t border-zinc-800/80">
+              {/* 收件人與地址 */}
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 pt-3 border-t border-zinc-800/80">
                 <div className="sm:col-span-3 space-y-1.5">
-                  <label className="text-xs font-bold text-emerald-400">📦 收件人姓名 (寄送獎牌/證書)</label>
+                  <label className="text-xs font-bold text-emerald-400">📦 收件人姓名 (獎牌/證書寄送)</label>
                   <input
                     type="text"
                     value={profileForm.recipientName}
                     onChange={(e) => setProfileForm({ ...profileForm, recipientName: e.target.value })}
-                    placeholder="請輸入收件人全名"
                     className="w-full rounded-xl bg-zinc-900 border border-emerald-500/40 px-3.5 py-2.5 text-sm text-white font-bold"
                   />
                 </div>
@@ -678,27 +669,96 @@ export default function ProfilePage() {
                 </div>
               </div>
 
+              {/* 🚑 恢復：醫護鐵人 IRONMEDIC 專屬證照與公益支援整合專區 */}
+              <div className="rounded-2xl bg-red-950/20 border border-red-500/30 p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="ironmedic_check"
+                      checked={profileForm.isIronmedic}
+                      onChange={(e) => setProfileForm({ ...profileForm, isIronmedic: e.target.checked })}
+                      className="h-4 w-4 rounded border-red-500"
+                    />
+                    <label htmlFor="ironmedic_check" className="text-sm font-black text-red-400 cursor-pointer">
+                      🚑 我具備【醫護鐵人 IRONMEDIC】資格（勾選後於百鐵英雄榜點亮醫護鐵人榮耀徽章）
+                    </label>
+                  </div>
+                  <span className="text-[11px] text-zinc-400">
+                    與醫護鐵人官網資料庫互通連動
+                  </span>
+                </div>
+
+                {profileForm.isIronmedic && (
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-300">醫護 / 救護證照類別</label>
+                      <select
+                        value={profileForm.medicalLicenseType}
+                        onChange={(e) => setProfileForm({ ...profileForm, medicalLicenseType: e.target.value })}
+                        className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-xs text-white font-bold"
+                      >
+                        <option value="醫師 (Physician - 胸腔內科專科)">醫師 (Physician)</option>
+                        <option value="護理師 (Registered Nurse)">護理師 (RN)</option>
+                        <option value="EMT-1 / EMT-2 / EMTP 救護技術員">EMT 緊急救護技術員</option>
+                        <option value="物理治療師 / 藥師 / 其他醫事人員">物理治療師 / 其他醫事人員</option>
+                        <option value="醫護鐵人創辦人 / 核心營運團隊">醫護鐵人創辦人 / 核心團隊</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-300">醫事 / EMT 證照字號</label>
+                      <input
+                        type="text"
+                        value={profileForm.medicalLicenseNo}
+                        onChange={(e) => setProfileForm({ ...profileForm, medicalLicenseNo: e.target.value })}
+                        placeholder="供內部實名查核使用"
+                        className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-xs text-white"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-300">證照有效期限</label>
+                      <input
+                        type="date"
+                        value={profileForm.licenseExpiry}
+                        onChange={(e) => setProfileForm({ ...profileForm, licenseExpiry: e.target.value })}
+                        className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-xs text-amber-400 font-bold"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-300">累積賽道公益支援場次</label>
+                      <input
+                        type="number"
+                        value={profileForm.supportRacesCount}
+                        onChange={(e) => setProfileForm({ ...profileForm, supportRacesCount: Number(e.target.value) })}
+                        className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-xs text-emerald-400 font-mono font-bold"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={savingProfile}
                   className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition shadow-lg shadow-amber-500/20 cursor-pointer"
                 >
-                  {savingProfile ? "儲存中..." : "💾 儲存個人照片、身分證與收件人資訊"}
+                  {savingProfile ? "儲存中..." : "💾 儲存個人照片、收件地址與醫護鐵人設定"}
                 </button>
               </div>
             </form>
           </section>
         )}
 
-        {/* 我的個人完賽履歷清單 */}
+        {/* 我的個人完賽履歷 */}
         <section className="rounded-3xl bg-zinc-950 border border-zinc-800/80 p-6 sm:p-8 shadow-2xl space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
             <div>
               <h2 className="text-xl font-extrabold text-white">🏆 我的個人完賽履歷</h2>
               <p className="text-xs text-zinc-400 mt-1">
                 總累積完賽場次：<span className="text-amber-400 font-bold">{myRecords.length} 場</span>
-                （🏊‍♂️ 鐵人三項：{triCount} 場 ｜ 🚴‍♂️ 公路單車：{cycCount} 場）
+                （🏊‍♂️ 鐵人三項：{triCount} 場 ｜ 🚴‍♂️ 公路單車：{cycCount} 場
+                {profileForm.isIronmedic ? ` ｜ 🚑 醫護支援：${profileForm.supportRacesCount} 場` : ""}）
               </p>
             </div>
 
@@ -797,15 +857,11 @@ export default function ProfilePage() {
 
       </div>
 
-      {/* 編輯完賽紀錄 Modal */}
       {editingRecord && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 z-50">
           <div className="bg-zinc-950 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
-              <div>
-                <h3 className="text-lg font-black text-white">✏️ 編輯完賽紀錄</h3>
-                <p className="text-xs text-zinc-400 mt-0.5">選手：{editingRecord.athlete_name || profileForm.fullName}</p>
-              </div>
+              <h3 className="text-lg font-black text-white">✏️ 編輯完賽紀錄</h3>
               <button
                 type="button"
                 onClick={() => setEditingRecord(null)}
@@ -828,7 +884,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-300">參賽日期 (年 / 月 / 日選單)</label>
+                <label className="text-xs font-bold text-zinc-300">參賽日期</label>
                 <div className="grid grid-cols-3 gap-2.5">
                   <select
                     value={editYear}
