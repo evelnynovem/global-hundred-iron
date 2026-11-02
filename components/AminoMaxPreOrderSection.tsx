@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 
 export interface UpcomingSeriesRace {
@@ -178,7 +179,7 @@ export default function AminoMaxPreOrderSection({
     setSavedSuccess(false);
   };
 
-  const handleSavePreOrder = (e: React.FormEvent) => {
+  const handleSavePreOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreedMarketing) {
       alert("⚠️ 請先勾選同意個人資料提供予賽事主辦單位與全球百鐵認證同步統計與行銷使用。");
@@ -202,6 +203,17 @@ export default function AminoMaxPreOrderSection({
     globalList = globalList.filter((b) => b.email !== userEmail);
     globalList.push(userBookingData);
     localStorage.setItem("g100_aminomax_all_bookings", JSON.stringify(globalList));
+    try {
+      const supabase = createClient();
+      await supabase.from("association_announcements").delete().eq("tag", "AMINOMAX_BOOKING").eq("title", "BOOKING_" + userEmail);
+      await supabase.from("association_announcements").insert([{
+        title: "BOOKING_" + userEmail,
+        tag: "AMINOMAX_BOOKING",
+        date: new Date().toISOString().slice(0, 10),
+        is_pinned: false,
+        pdf_url: JSON.stringify(userBookingData)
+      }]);
+    } catch (e) { console.warn(e); }
     setAllGlobalBookings(globalList);
 
     setSavedSuccess(true);

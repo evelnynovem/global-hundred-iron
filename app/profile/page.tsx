@@ -444,7 +444,7 @@ export default function ProfilePage() {
 
   return (
     <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
-      <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-10">
+      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
         
         {/* 頂部會員資訊與醫護鐵人徽章 */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">

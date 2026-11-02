@@ -19,7 +19,7 @@ export default function AboutPage() {
 
   return (
     <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
-      <main className="max-w-5xl w-full mx-auto px-6 py-12 space-y-10">
+      <main className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
         
         {/* 頂部導言 */}
         <section className="rounded-3xl bg-gradient-to-br from-zinc-950 via-[#100a0c] to-zinc-950 border border-zinc-800 p-8 sm:p-10 shadow-2xl space-y-5">

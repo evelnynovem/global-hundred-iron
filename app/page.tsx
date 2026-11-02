@@ -23,6 +23,16 @@ export default function HomePage() {
   // 全部 4 張海報（全球百鐵母站顯示全部；城會模式僅顯示 isTuraa: true 的戀戀197與普悠瑪）
   const allSlides = [
     {
+      badge: "🔥 會員參賽免費領取",
+      badgeColor: "bg-amber-500 text-black",
+      title: "邁克仕 AminoMax × 百鐵參賽補給兌換",
+      desc: "開賽前30天登入會員預先勾選參賽場次，比賽當天憑號碼布或安全帽號碼貼做記號免費領取！",
+      link: "/profile#aminomax-preorder",
+      poster: "/images/aminomax-poster.jpg",
+      fallbackPoster: "/images/aminomax-poster.svg",
+      isTuraa: false,
+    },
+    {
       badge: "單車百鐵認證",
       badgeColor: "bg-red-600 text-white",
       title: "戀戀197自行車挑戰賽",
@@ -250,28 +260,28 @@ export default function HomePage() {
                   : "全球百鐵認證，為鐵人三項與單車選手保存每一次出發、完賽與突破。串聯全台指標結盟賽事，從初鐵到百鐵，累積屬於你的榮耀里程碑。"}
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
                 <Link
                   href="/rankings"
-                  className="px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition shadow-lg shadow-red-600/20 flex items-center gap-2"
+                  className="px-2.5 py-3 rounded-xl justify-center whitespace-nowrap text-xs sm:text-[13px] bg-red-600 hover:bg-red-500 text-white font-bold text-sm transition shadow-lg shadow-red-600/20 flex items-center gap-2"
                 >
                   🏆 百鐵英雄榜查詢
                 </Link>
                 <Link
                   href="/certifications/query"
-                  className="px-5 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-sm transition flex items-center gap-2"
+                  className="px-2.5 py-3 rounded-xl justify-center whitespace-nowrap text-xs sm:text-[13px] bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-sm transition flex items-center gap-2"
                 >
                   🔍 歷年完賽成績查詢
                 </Link>
                 <Link
                   href="/profile/new-record"
-                  className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition shadow-lg shadow-amber-500/20 flex items-center gap-2"
+                  className="px-2.5 py-3 rounded-xl justify-center whitespace-nowrap text-xs sm:text-[13px] bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition shadow-lg shadow-amber-500/20 flex items-center gap-2"
                 >
                   ✍️ 完賽榮譽登錄
                 </Link>
                 <Link
                   href="/profile/claim"
-                  className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-amber-500/40 text-amber-400 font-extrabold text-sm transition flex items-center gap-1.5"
+                  className="px-2.5 py-3 rounded-xl justify-center whitespace-nowrap text-xs sm:text-[13px] bg-zinc-900 hover:bg-zinc-800 border border-amber-500/40 text-amber-400 font-extrabold text-sm transition flex items-center gap-1.5"
                 >
                   📥 認領歷史紀錄
                 </Link>
@@ -343,6 +353,25 @@ export default function HomePage() {
 
           </div>
         </section>
+
+        {siteMode !== "turaa" && (
+          <section className="rounded-3xl bg-gradient-to-r from-amber-950/70 via-zinc-900 to-red-950/60 border-2 border-amber-500/60 p-5 sm:p-6 shadow-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+              <div className="lg:col-span-4">
+                <img src="/images/aminomax-poster.jpg" onError={(e)=>{if(!e.currentTarget.src.endsWith(".svg"))e.currentTarget.src="/images/aminomax-poster.svg"}} alt="邁克仕兌換海報" className="w-full h-44 object-cover rounded-2xl border border-amber-400/50" />
+              </div>
+              <div className="lg:col-span-8 space-y-2.5">
+                <span className="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-black">🔥 第一頁主打・會員免費兌換活動</span>
+                <h2 className="text-lg sm:text-2xl font-black text-white">開賽前 1 個月登入會員勾選未來參賽場次，當天憑「號碼布」或「安全帽號碼貼」免費領取邁克仕補給！</h2>
+                <p className="text-xs sm:text-sm text-zinc-300">於開賽前 30 天登入會員中心勾選預計參加之未來賽事，現場出示號碼布或單車安全帽號碼貼由工作人員做記號即可領取！</p>
+                <div className="pt-1 flex flex-wrap gap-2.5">
+                  <Link href="/profile#aminomax-preorder" className="px-5 py-2.5 rounded-xl bg-amber-500 text-black font-black text-xs sm:text-sm">👉 立即進入會員中心勾選未來參賽場次 →</Link>
+                  <Link href="/series" className="px-4 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-zinc-200 font-bold text-xs sm:text-sm">查看年度系列賽事</Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* 跨網互通之最新協會與賽事公告 */}
         <section className="rounded-2xl bg-zinc-900/70 border border-zinc-800/90 p-5 shadow-xl">
@@ -447,13 +476,13 @@ export default function HomePage() {
                 <div className="pt-1 flex flex-wrap items-center gap-3">
                   <Link
                     href="/profile#aminomax-preorder"
-                    className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs sm:text-sm transition shadow-lg shadow-amber-500/20"
+                    className="px-2.5 py-3 rounded-xl justify-center whitespace-nowrap text-xs sm:text-[13px] bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs sm:text-sm transition shadow-lg shadow-amber-500/20"
                   >
                     👉 立即進入會員中心預先勾選未來參賽場次 →
                   </Link>
                   <Link
                     href="/series"
-                    className="px-4 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-xs sm:text-sm transition"
+                    className="px-2.5 py-3 rounded-xl justify-center whitespace-nowrap text-xs sm:text-[13px] bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-xs sm:text-sm transition"
                   >
                     查看年度系列賽事清單
                   </Link>
