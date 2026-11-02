@@ -81,7 +81,7 @@ export default function Navbar() {
                   全球百鐵認證
                 </div>
                 <div className="text-[10px] font-extrabold tracking-wider text-red-600 uppercase">
-                  🚑 醫護鐵人 IRONMEDIC 創立統籌・🚑 醫護鐵人 IRONMEDIC 創立統籌・GLOBAL 100 TRIATHLON CERTIFICATION
+                  🚑 醫護鐵人 IRONMEDIC 創立統籌・🚑 醫護鐵人 IRONMEDIC 創立統籌・🚑 醫護鐵人 IRONMEDIC 創立統籌・GLOBAL 100 TRIATHLON CERTIFICATION
                 </div>
               </div>
             </>

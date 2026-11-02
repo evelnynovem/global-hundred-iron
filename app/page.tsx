@@ -219,7 +219,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+    <div translate="no" className="notranslate min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
       
       
 

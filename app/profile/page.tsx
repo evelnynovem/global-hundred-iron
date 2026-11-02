@@ -436,14 +436,14 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#070709] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#070709] overflow-x-hidden text-white flex items-center justify-center">
         <p className="text-zinc-400 animate-pulse font-bold">同步會員檔案、醫護鐵人證照與完賽資料庫中...</p>
       </div>
     );
   }
 
   return (
-    <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+    <div translate="no" className="notranslate min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
         
         {/* 頂部會員資訊與醫護鐵人徽章 */}
