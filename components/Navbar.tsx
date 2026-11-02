@@ -51,20 +51,20 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white text-zinc-900 border-b border-zinc-200 shadow-sm notranslate" translate="no">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 min-h-[60px] py-1.5 flex items-center justify-between gap-2">
+        <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           {isTuraaSite ? (
             <>
               <img
                 src="/images/turaa-logo.png"
                 alt="臺東縣城鄉生活運動協會"
-                className="h-11 w-11 object-contain rounded-lg bg-black p-0.5"
+                className="h-10 w-10 sm:h-11 sm:w-11 object-contain rounded-lg bg-black p-0.5 shrink-0"
               />
-              <div className="leading-tight">
-                <div className="text-base sm:text-lg font-black tracking-tight text-zinc-900">
+              <div className="leading-tight min-w-0">
+                <div className="text-sm sm:text-lg font-black tracking-tight text-zinc-900 truncate">
                   臺東縣城鄉生活運動協會
                 </div>
-                <div className="text-[10px] font-bold tracking-wider text-orange-600 uppercase">
+                <div className="text-[9px] sm:text-[10px] font-bold tracking-wider text-orange-600 uppercase truncate">
                   TAITUNG URBAN RURAL ATHLETIC ASSOCIATION
                 </div>
               </div>
@@ -74,29 +74,29 @@ export default function Navbar() {
               <img
                 src="/logo.png"
                 alt="全球百鐵認證"
-                className="h-10 w-10 object-contain rounded-full"
+                className="h-10 w-10 sm:h-11 sm:w-11 object-contain rounded-full shrink-0"
               />
-              <div className="leading-tight">
+              <div className="leading-tight min-w-0">
                 <div className="text-base sm:text-lg font-black tracking-tight text-zinc-900">
                   全球百鐵認證
                 </div>
-                <div className="text-[10px] font-extrabold tracking-wider text-red-600 uppercase">
-                  🚑 醫護鐵人 IRONMEDIC 創立統籌・🚑 醫護鐵人 IRONMEDIC 創立統籌・🚑 醫護鐵人 IRONMEDIC 創立統籌・GLOBAL 100 TRIATHLON CERTIFICATION
+                <div className="text-[8.5px] sm:text-[10px] font-extrabold tracking-wider text-red-600 uppercase leading-snug">
+                  FOUNDED BY IRONMEDIC 醫護鐵人創立統籌 ｜ GLOBAL 100 TRIATHLON CERTIFICATION
                 </div>
               </div>
             </>
           )}
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-5 text-sm font-bold">
+        <nav className="hidden xl:flex items-center gap-4 text-sm font-bold shrink-0">
           {activeLinks.map((item, idx) => (
             <Link
               key={idx}
               href={item.href}
               className={
                 item.highlight
-                  ? "text-orange-600 hover:text-orange-500 font-extrabold transition"
-                  : "text-zinc-700 hover:text-black transition"
+                  ? "text-orange-600 hover:text-orange-500 font-extrabold transition whitespace-nowrap"
+                  : "text-zinc-700 hover:text-black transition whitespace-nowrap"
               }
             >
               {item.label}
@@ -104,7 +104,7 @@ export default function Navbar() {
           ))}
           <Link
             href="/profile"
-            className="ml-2 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition shadow-sm"
+            className="ml-1 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition shadow-sm whitespace-nowrap"
           >
             {isTuraaSite ? "選手/管理中心" : "會員中心"}
           </Link>
@@ -113,7 +113,7 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="lg:hidden p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-sm"
+          className="xl:hidden p-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-sm shrink-0 cursor-pointer"
           aria-label="開啟選單"
         >
           {menuOpen ? "✕" : "☰"}
@@ -121,8 +121,8 @@ export default function Navbar() {
       </div>
 
       {menuOpen && (
-        <div className="lg:hidden bg-white border-b border-zinc-200 px-6 py-5 space-y-3 shadow-xl">
-          <div className="flex flex-col space-y-3 text-sm font-bold">
+        <div className="xl:hidden bg-white border-b border-zinc-200 px-5 py-4 space-y-3 shadow-xl">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm font-bold">
             {activeLinks.map((item, idx) => (
               <Link
                 key={idx}
@@ -130,21 +130,28 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className={
                   item.highlight
-                    ? "py-1.5 text-orange-600 font-extrabold"
-                    : "py-1.5 text-zinc-800 hover:text-black"
+                    ? "py-2 px-3 rounded-lg bg-orange-50 text-orange-600 font-extrabold"
+                    : "py-2 px-3 rounded-lg hover:bg-zinc-100 text-zinc-800"
                 }
               >
                 {item.label}
               </Link>
             ))}
           </div>
-          <div className="pt-2">
+          <div className="pt-2 flex gap-2">
             <Link
               href="/profile"
               onClick={() => setMenuOpen(false)}
-              className="block w-full py-3 rounded-xl bg-blue-600 text-white text-center font-extrabold text-sm shadow-md"
+              className="flex-1 py-3 rounded-xl bg-blue-600 text-white text-center font-extrabold text-sm shadow-md"
             >
               {isTuraaSite ? "選手/管理中心" : "會員中心"}
+            </Link>
+            <Link
+              href="/admin"
+              onClick={() => setMenuOpen(false)}
+              className="px-4 py-3 rounded-xl bg-zinc-900 text-amber-400 text-center font-extrabold text-xs shadow-md flex items-center justify-center"
+            >
+              👑 管理後台
             </Link>
           </div>
         </div>
