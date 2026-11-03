@@ -60,13 +60,13 @@ const DEFAULT_SPONSORS = [
     logoUrl: "/images/sponsors/ironmedic.png",
     role: "創立統籌單位",
     desc: "全球首創運動安全暨百鐵認證創立統籌機構",
-    url: "https://www.facebook.com/ironmedic.tw",
+    url: "https://www.ironmedic.biz/",
   },
   {
     id: "sp-merida",
     name: "美利達自行車 MERIDA",
     shortText: "MERIDA",
-    logoUrl: "/images/sponsors/merida.png",
+    logoUrl: "/images/sponsors/merida.svg",
     role: "國際領導單車品牌",
     desc: "全力支持台灣鐵人與百鐵馬耐力運動發展",
     url: "https://www.merida-bikes.com/zh-tw",
@@ -78,7 +78,7 @@ const DEFAULT_SPONSORS = [
     logoUrl: "/images/sponsors/syb.png",
     role: "頂級單車與三鐵戰袍夥伴",
     desc: "專業三鐵車、競速裝備與客製化百鐵戰袍",
-    url: "https://www.syb-cycling.com/",
+    url: "https://www.sycycles.com/",
   },
   {
     id: "sp-aminomax",
@@ -87,16 +87,16 @@ const DEFAULT_SPONSORS = [
     logoUrl: "/images/sponsors/aminomax.png",
     role: "官方指定運動補給",
     desc: "專業胺基酸、BCAA 與長距離耐力能量補給",
-    url: "https://www.aminomax.com.tw/",
+    url: "https://aminomax.com.tw/zh/",
   },
   {
     id: "sp-mentholatum",
     name: "肌樂 Mentholatum",
     shortText: "Mentholatum",
-    logoUrl: "/images/sponsors/mentholatum.png",
+    logoUrl: "/images/sponsors/mentholatum.svg",
     role: "官方運動防護夥伴",
     desc: "賽前熱身與賽後舒緩之運動噴劑領導品牌",
-    url: "https://www.mentholatum.com.tw/",
+    url: "https://www.zeropain.com.tw/",
   },
   {
     id: "sp-ziv",
@@ -157,7 +157,7 @@ export default function HomePage() {
 
   const loadDynamicAssetsAndColumns = useCallback(async () => {
     // 1. 載入管理員在網頁上傳的圖片覆蓋設定
-    const localImgs = localStorage.getItem("g100_custom_site_images");
+    const localImgs = localStorage.getItem("g100_custom_site_images_v3");
     if (localImgs) {
       try {
         setCustomImages(JSON.parse(localImgs));
@@ -165,14 +165,14 @@ export default function HomePage() {
     }
 
     // 2. 自動從兩個專欄資料池抓取最新一篇圖文摘要
-    const localMed = localStorage.getItem("g100_col_COL_SPORTS_MED");
+    const localMed = localStorage.getItem("g100_col_v3_MED");
     if (localMed) {
       try {
         const arr = JSON.parse(localMed);
         if (arr.length > 0) setLatestMedCol(arr[0]);
       } catch (e) {}
     }
-    const localCeleb = localStorage.getItem("g100_col_COL_CELEBRITY");
+    const localCeleb = localStorage.getItem("g100_col_v3_CELEB");
     if (localCeleb) {
       try {
         const arr = JSON.parse(localCeleb);
@@ -202,7 +202,7 @@ export default function HomePage() {
         });
         if (Object.keys(mergedImgs).length > 0) {
           setCustomImages((prev) => ({ ...prev, ...mergedImgs }));
-          localStorage.setItem("g100_custom_site_images", JSON.stringify(mergedImgs));
+          localStorage.setItem("g100_custom_site_images_v3", JSON.stringify(mergedImgs));
         }
 
         rows.forEach((r: any) => {
@@ -279,7 +279,7 @@ export default function HomePage() {
             const nextMap = { ...customImages, [slotKey]: dataUrl };
             setCustomImages(nextMap);
             setBrokenLogos((prev) => ({ ...prev, [slotKey]: false }));
-            localStorage.setItem("g100_custom_site_images", JSON.stringify(nextMap));
+            localStorage.setItem("g100_custom_site_images_v3", JSON.stringify(nextMap));
 
             try {
               await supabase.from("association_announcements").delete().eq("tag", "SITE_CUSTOM_IMAGES").eq("title", slotKey);
