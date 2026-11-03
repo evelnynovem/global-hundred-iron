@@ -186,7 +186,7 @@ export default function HomePage() {
         .from("association_announcements")
         .select("*")
         .in("tag", ["SITE_CUSTOM_IMAGES", "COL_SPORTS_MED", "COL_CELEBRITY"])
-        .order("date", { ascending: false });
+        .order("id", { ascending: false });
 
       if (rows && rows.length > 0) {
         const imgRow = rows.find((r: any) => r.tag === "SITE_CUSTOM_IMAGES");
@@ -499,7 +499,7 @@ export default function HomePage() {
                       }
                     }}
                     alt="邁克仕兌換活動海報"
-                    className="w-full max-h-48 sm:max-h-52 object-contain rounded-xl bg-black/40 mx-auto mb-1"
+                    className="w-full h-auto object-contain rounded-xl bg-black/40 mx-auto mb-1.5"
                   />
                   <div className="flex items-center justify-center gap-2">
                     <span className="px-2 py-0.5 rounded bg-amber-500 text-black text-[10px] font-black">
@@ -659,7 +659,15 @@ export default function HomePage() {
                         <img
                           src={currentLogoSrc}
                           alt={sp.name}
-                          onError={() => setBrokenLogos((prev) => ({ ...prev, [sp.id]: true }))}
+                          onError={(e) => {
+                            const t = e.currentTarget;
+                            const svgFallback = sp.logoUrl.replace(".png", ".svg");
+                            if (!t.src.endsWith(".svg")) {
+                              t.src = svgFallback;
+                            } else {
+                              setBrokenLogos((prev) => ({ ...prev, [sp.id]: true }));
+                            }
+                          }}
                           className="max-h-11 sm:max-h-12 max-w-[130px] sm:max-w-[150px] object-contain drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform"
                         />
                       ) : (
