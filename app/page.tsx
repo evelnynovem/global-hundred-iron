@@ -491,7 +491,7 @@ export default function HomePage() {
                     </button>
                   )}
                   <img
-                    src={customImages["aminomax-hero-poster"] || "/images/aminomax-poster.jpg"}
+                    src={customImages["aminomax-hero-poster"] || "/images/aminomax-poster.png"}
                     onError={(e) => {
                       const t = e.currentTarget;
                       if (!t.src.includes("data:image") && !t.src.endsWith("puyuma.jpg")) {
