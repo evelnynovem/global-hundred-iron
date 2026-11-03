@@ -23,7 +23,7 @@ const DEFAULT_CELEB_ARTICLES: ColumnArticle[] = [
     title: "最強賽事求婚＆單車婚禮：陳彥良的賽事求婚必勝攻略與鐵人故事",
     author: "單車誌 / 洪緯欣 醫師 × 陳彥良（醫護鐵人創辦人）",
     date: "2026-11-02",
-    coverUrl: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=900&q=80",
+    coverUrl: "/images/cycling-140.jpeg",
     summary: "如果說自行車賽事是一場與自我的對話，那麼愛情便是兩人共譜的長征。當精準的瓦數與功率計，遇上無法計算的浪漫火花與粉紅泡泡，我們看見單車不僅是移動工具，更是承載一生的信物與紅線。",
     content: "在臺東普悠瑪 113K 鐵人三項的終點線上，經歷了游泳、單車與長跑的極限洗禮後，一場策劃已久的賽事求婚驚喜登場！\n\n為什麼越來越多年輕與中壯年騎士選擇以「單車婚禮」與「終點線求婚」作為人生最重要的里程碑？本篇專欄前半段先帶您直擊現場籌備秘辛……",
     purchaseUrl: "https://www.books.com.tw/web/sys_serialtext/?item=0000005012",
@@ -63,6 +63,18 @@ export default function CelebrityColumnPage() {
   const storageTag = "COL_CELEBRITY";
 
   const loadArticles = useCallback(async () => {
+    let localSavedList: ColumnArticle[] = [];
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("g100_col_" + storageTag);
+      if (raw) {
+        try {
+          localSavedList = JSON.parse(raw);
+          if (localSavedList.length > 0) {
+            setArticles(localSavedList);
+          }
+        } catch (e) {}
+      }
+    }
     try {
       const { data: cloudRows } = await supabase
         .from("association_announcements")
@@ -85,7 +97,7 @@ export default function CelebrityColumnPage() {
           if (!list.some((x) => x.title === def.title)) list.push(def);
         });
 
-        if (list.length > 0) {
+        if (localSavedList.length === 0 && list.length > 0) {
           setArticles(list);
           localStorage.setItem("g100_col_" + storageTag, JSON.stringify(list));
         }

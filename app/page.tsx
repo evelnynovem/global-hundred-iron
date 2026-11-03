@@ -66,7 +66,7 @@ const DEFAULT_SPONSORS = [
     id: "sp-merida",
     name: "美利達自行車 MERIDA",
     shortText: "MERIDA",
-    logoUrl: "/images/sponsors/merida.svg",
+    logoUrl: "/images/sponsors/merida.png",
     role: "國際領導單車品牌",
     desc: "全力支持台灣鐵人與百鐵馬耐力運動發展",
     url: "https://www.merida-bikes.com/zh-tw",
@@ -93,7 +93,7 @@ const DEFAULT_SPONSORS = [
     id: "sp-mentholatum",
     name: "肌樂 Mentholatum",
     shortText: "Mentholatum",
-    logoUrl: "/images/sponsors/mentholatum.svg",
+    logoUrl: "/images/sponsors/mentholatum.png",
     role: "官方運動防護夥伴",
     desc: "賽前熱身與賽後舒緩之運動噴劑領導品牌",
     url: "https://www.zeropain.com.tw/",
@@ -141,7 +141,7 @@ export default function HomePage() {
     title: "長距離耐力賽事的心肺評估、熱傷害預防與精準補給策略",
     author: "洪緯欣 醫師（屏東榮總胸腔內科）× 陳彥良（醫護鐵人創辦人）",
     date: "2026-11-01",
-    coverUrl: "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=900&q=80",
+    coverUrl: "/images/cycling-140.jpeg",
     summary: "深入解析 113K/226K 超鐵與百K單車挑戰中常見之抽筋、低血鈉與高溫脫水風險，如何透過科學化配速與電解質補給安全完賽。",
   });
 
@@ -149,7 +149,7 @@ export default function HomePage() {
     title: "向前一步，就是解方：狂飆的鐵人與跨界藝人破風故事",
     author: "陳彥良、洪緯欣 × 跨界藝人與搖滾鐵人聯合專訪",
     date: "2026-11-02",
-    coverUrl: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=900&q=80",
+    coverUrl: "/images/cycling-140.jpeg",
     summary: "從舞台聚光燈走向東海岸活水湖與 197 縣道，看跨界藝人與百鐵推手們如何透過游泳、單車與跑步療癒焦慮、突破中年危機！",
   });
 
@@ -213,11 +213,11 @@ export default function HomePage() {
             const txt = (parsed.title + " " + (parsed.summary || "")).toLowerCase();
             const isCelebTopic = txt.includes("求婚") || txt.includes("單車婚禮") || txt.includes("藝人") || txt.includes("搖滾") || txt.includes("破風故事");
             if (isCelebTopic) {
-              setLatestCelebCol(parsed);
+              if (!localStorage.getItem("g100_col_v3_CELEB")) setLatestCelebCol(parsed);
             } else if (r.tag === "COL_SPORTS_MED") {
-              setLatestMedCol(parsed);
+              if (!localStorage.getItem("g100_col_v3_MED")) setLatestMedCol(parsed);
             } else {
-              setLatestCelebCol(parsed);
+              if (!localStorage.getItem("g100_col_v3_CELEB")) setLatestCelebCol(parsed);
             }
           } catch (e) {}
         });

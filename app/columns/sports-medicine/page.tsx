@@ -23,7 +23,7 @@ const DEFAULT_MED_ARTICLES: ColumnArticle[] = [
     title: "長距離耐力賽事的心肺評估、熱傷害預防與精準補給策略",
     author: "洪緯欣 醫師（屏東榮總胸腔內科）× 陳彥良（醫護鐵人創辦人）",
     date: "2026-11-01",
-    coverUrl: "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=900&q=80",
+    coverUrl: "/images/cycling-140.jpeg",
     summary: "深入解析 113K/226K 超鐵與百K單車挑戰中常見之抽筋、低血鈉與高溫脫水風險，如何透過科學化配速與電解質補給安全完賽。",
     content: "在長達 6 至 17 小時的 113K 或 226K 超級鐵人三項與百K自行車挑戰賽中，運動員面臨最大的生理挑戰往往不是單純的肌肉疲勞，而是體溫調節失衡（熱衰竭、中暑）與電解質失衡（低血鈉症）。\n\n【一、賽前心肺與呼吸系統評估】\n針對有氣喘、過敏性鼻炎或曾有運動性胸悶病史的耐力選手，建議賽前進行完整肺功能與運動心肺評估，並在開放水域游泳段做好防寒與暖身適應。",
     purchaseUrl: "https://www.books.com.tw/web/sys_serialtext/?item=0000005012",
@@ -63,6 +63,18 @@ export default function SportsMedicineColumnPage() {
   const storageTag = "COL_SPORTS_MED";
 
   const loadArticles = useCallback(async () => {
+    let localSavedList: ColumnArticle[] = [];
+    if (typeof window !== "undefined") {
+      const raw = localStorage.getItem("g100_col_" + storageTag);
+      if (raw) {
+        try {
+          localSavedList = JSON.parse(raw);
+          if (localSavedList.length > 0) {
+            setArticles(localSavedList);
+          }
+        } catch (e) {}
+      }
+    }
     try {
       const { data: cloudRows } = await supabase
         .from("association_announcements")
@@ -90,7 +102,7 @@ export default function SportsMedicineColumnPage() {
           if (!list.some((x) => x.title === def.title)) list.push(def);
         });
 
-        if (list.length > 0) {
+        if (localSavedList.length === 0 && list.length > 0) {
           setArticles(list);
           localStorage.setItem("g100_col_" + storageTag, JSON.stringify(list));
         }
