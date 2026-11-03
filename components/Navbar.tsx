@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isTuraaSite, setIsTuraaSite] = useState(false);
+  const [lang, setLang] = useState("zh-TW");
   const pathname = usePathname();
 
   useEffect(() => {
@@ -26,8 +27,39 @@ export default function Navbar() {
       } else {
         document.title = "全球百鐵認證 Global 100 Triathlon Certification";
       }
+
+      // 載入 0 額度多國語自動同步翻譯引擎
+      if (!document.getElementById("google-translate-script")) {
+        (window as any).googleTranslateElementInit = function () {
+          if ((window as any).google && (window as any).google.translate) {
+            new (window as any).google.translate.TranslateElement(
+              { pageLanguage: "zh-TW", includedLanguages: "zh-TW,en,ja,ko", autoDisplay: false },
+              "google_translate_element"
+            );
+          }
+        };
+        const s = document.createElement("script");
+        s.id = "google-translate-script";
+        s.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+        s.async = true;
+        document.body.appendChild(s);
+      }
     }
   }, [pathname]);
+
+  const handleLanguageChange = (targetLang: string) => {
+    setLang(targetLang);
+    if (typeof document !== "undefined") {
+      if (targetLang === "zh-TW") {
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=.${window.location.hostname}; path=/`;
+      } else {
+        document.cookie = `googtrans=/zh-TW/${targetLang}; path=/`;
+        document.cookie = `googtrans=/zh-TW/${targetLang}; domain=.${window.location.hostname}; path=/`;
+      }
+      window.location.reload();
+    }
+  };
 
   const g100Links = [
     { label: "台東城鄉生活運動協會", href: "/taitung-assoc", highlight: true },
@@ -35,6 +67,8 @@ export default function Navbar() {
     { label: "百鐵英雄榜", href: "/rankings" },
     { label: "成績登錄查詢", href: "/certifications/query" },
     { label: "完賽登錄", href: "/profile/new-record" },
+    { label: "運動醫學專欄", href: "/columns/sports-medicine" },
+    { label: "藝人騎乘專欄", href: "/columns/celebrity-sharing" },
     { label: "關於我們", href: "/about" },
     { label: "榮耀商城", href: "/shop" },
   ];
@@ -50,22 +84,25 @@ export default function Navbar() {
   const activeLinks = isTuraaSite ? turaaLinks : g100Links;
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white text-zinc-900 border-b border-zinc-200 shadow-sm notranslate" translate="no">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 min-h-[60px] py-1.5 flex items-center justify-between gap-2">
-        <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+    <header className="sticky top-0 z-50 w-full bg-white text-zinc-900 border-b border-zinc-200 shadow-sm">
+      <div id="google_translate_element" className="hidden" />
+      <div className="max-w-7xl mx-auto px-3 sm:px-5 min-h-[62px] py-1.5 flex items-center justify-between gap-2">
+        
+        {/* 左側 Logo 與上下並排之副標題（精巧不佔寬度，確保右側導覽選單 100% 完整顯示） */}
+        <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 shrink-0">
           {isTuraaSite ? (
             <>
               <img
                 src="/images/turaa-logo.png"
                 alt="臺東縣城鄉生活運動協會"
-                className="h-10 w-10 sm:h-11 sm:w-11 object-contain rounded-lg bg-black p-0.5 shrink-0"
+                className="h-10 w-10 object-contain rounded-lg bg-black p-0.5 shrink-0"
               />
-              <div className="leading-tight min-w-0">
-                <div className="text-sm sm:text-lg font-black tracking-tight text-zinc-900 truncate">
+              <div className="leading-tight">
+                <div className="text-sm sm:text-base font-black tracking-tight text-zinc-900">
                   臺東縣城鄉生活運動協會
                 </div>
-                <div className="text-[9px] sm:text-[10px] font-bold tracking-wider text-orange-600 uppercase truncate">
-                  TAITUNG URBAN RURAL ATHLETIC ASSOCIATION
+                <div className="text-[8.5px] font-bold tracking-wider text-orange-600 uppercase">
+                  TAITUNG URBAN RURAL ATHLETIC ASSOC.
                 </div>
               </div>
             </>
@@ -74,21 +111,25 @@ export default function Navbar() {
               <img
                 src="/logo.png"
                 alt="全球百鐵認證"
-                className="h-10 w-10 sm:h-11 sm:w-11 object-contain rounded-full shrink-0"
+                className="h-10 w-10 object-contain rounded-full shrink-0"
               />
-              <div className="leading-tight min-w-0">
-                <div className="text-base sm:text-lg font-black tracking-tight text-zinc-900">
+              <div className="leading-tight flex flex-col">
+                <span className="text-sm sm:text-base font-black tracking-tight text-zinc-900">
                   全球百鐵認證
-                </div>
-                <div className="text-[8.5px] sm:text-[10px] font-extrabold tracking-wider text-red-600 uppercase leading-snug">
-                  FOUNDED BY IRONMEDIC 醫護鐵人創立統籌 ｜ GLOBAL 100 TRIATHLON CERTIFICATION
-                </div>
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-extrabold tracking-wide text-red-600 uppercase leading-tight">
+                  FOUNDED BY IRONMEDIC 醫護鐵人創立統籌
+                </span>
+                <span className="text-[7.5px] sm:text-[8.5px] font-bold tracking-wider text-zinc-500 uppercase leading-tight">
+                  GLOBAL 100 TRIATHLON CERTIFICATION
+                </span>
               </div>
             </>
           )}
         </Link>
 
-        <nav className="hidden xl:flex items-center gap-4 text-sm font-bold shrink-0">
+        {/* 中間與右側：電腦版 100% 比例永遠顯示之導覽選單 (md:flex) */}
+        <nav className="hidden md:flex items-center gap-2.5 lg:gap-3.5 text-xs lg:text-[13px] font-bold flex-wrap justify-end">
           {activeLinks.map((item, idx) => (
             <Link
               key={idx}
@@ -102,27 +143,54 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
+
+          {/* 🌐 0 AI 額度消耗之多國語言即時同步切換器 */}
+          <select
+            value={lang}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+            aria-label="切換網站語言"
+            className="px-2 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 border border-zinc-300 text-zinc-800 text-[11px] font-extrabold cursor-pointer"
+          >
+            <option value="zh-TW">🌐 繁體中文</option>
+            <option value="en">🌐 English</option>
+            <option value="ja">🌐 日本語</option>
+            <option value="ko">🌐 한국어</option>
+          </select>
+
           <Link
             href="/profile"
-            className="ml-1 px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition shadow-sm whitespace-nowrap"
+            className="px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition shadow-sm whitespace-nowrap"
           >
             {isTuraaSite ? "選手/管理中心" : "會員中心"}
           </Link>
         </nav>
 
-        <button
-          type="button"
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="xl:hidden p-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-sm shrink-0 cursor-pointer"
-          aria-label="開啟選單"
-        >
-          {menuOpen ? "✕" : "☰"}
-        </button>
+        {/* 手機版漢堡按鈕 */}
+        <div className="flex md:hidden items-center gap-1.5">
+          <select
+            value={lang}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+            className="px-1.5 py-1 rounded-lg bg-zinc-100 border border-zinc-300 text-zinc-800 text-[11px] font-bold"
+          >
+            <option value="zh-TW">繁中</option>
+            <option value="en">EN</option>
+            <option value="ja">日本語</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-sm shrink-0 cursor-pointer"
+            aria-label="開啟選單"
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
+        </div>
       </div>
 
+      {/* 手機版展開選單 */}
       {menuOpen && (
-        <div className="xl:hidden bg-white border-b border-zinc-200 px-5 py-4 space-y-3 shadow-xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm font-bold">
+        <div className="md:hidden bg-white border-b border-zinc-200 px-5 py-4 space-y-3 shadow-xl">
+          <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm font-bold">
             {activeLinks.map((item, idx) => (
               <Link
                 key={idx}
@@ -142,14 +210,14 @@ export default function Navbar() {
             <Link
               href="/profile"
               onClick={() => setMenuOpen(false)}
-              className="flex-1 py-3 rounded-xl bg-blue-600 text-white text-center font-extrabold text-sm shadow-md"
+              className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-center font-extrabold text-xs shadow-md"
             >
               {isTuraaSite ? "選手/管理中心" : "會員中心"}
             </Link>
             <Link
               href="/admin"
               onClick={() => setMenuOpen(false)}
-              className="px-4 py-3 rounded-xl bg-zinc-900 text-amber-400 text-center font-extrabold text-xs shadow-md flex items-center justify-center"
+              className="px-4 py-2.5 rounded-xl bg-zinc-900 text-amber-400 text-center font-extrabold text-xs shadow-md"
             >
               👑 管理後台
             </Link>
