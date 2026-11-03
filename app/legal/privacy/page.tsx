@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
   };
 
   return (
-    <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-5xl w-full mx-auto px-6 py-12 space-y-10">
         
         <div className="border-b border-zinc-800 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

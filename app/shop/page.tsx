@@ -79,7 +79,7 @@ export default function ShopPage() {
   ];
 
   return (
-    <div translate="no" className="notranslate min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
       <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-14">
         
         {/* 標題區 */}

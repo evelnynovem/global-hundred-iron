@@ -277,7 +277,7 @@ export default function SeriesEventsPage() {
   });
 
   return (
-    <div translate="no" className="notranslate min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
         
         {/* 頂部標題與管理員直接編輯控制台 */}

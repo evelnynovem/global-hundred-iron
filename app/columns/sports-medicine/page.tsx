@@ -12,7 +12,9 @@ export interface ColumnArticle {
   date: string;
   coverUrl: string;
   summary: string;
-  content: string;
+  content: string; // 1/2 精華試閱內容
+  purchaseUrl?: string; // 單車誌購買連結（可自行編輯）
+  purchaseLabel?: string; // 購買按鈕文字
 }
 
 const DEFAULT_ARTICLES: ColumnArticle[] = [
@@ -23,7 +25,9 @@ const DEFAULT_ARTICLES: ColumnArticle[] = [
     "date": "2026-11-01",
     "coverUrl": "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=900&q=80",
     "summary": "深入解析 113K/226K 超鐵與百K單車挑戰中常見之抽筋、低血鈉與高溫脫水風險，如何透過科學化配速與電解質補給安全完賽。",
-    "content": "在長達 6 至 17 小時的 113K 或 226K 超級鐵人三項與百K自行車挑戰賽中，運動員面臨最大的生理挑戰往往不是單純的肌肉疲勞，而是體溫調節失衡（熱衰竭、中暑）與電解質失衡（低血鈉症）。\n\n【一、賽前心肺與呼吸系統評估】\n針對有氣喘、過敏性鼻炎或曾有運動性胸悶病史的耐力選手，建議賽前進行完整肺功能與運動心肺評估，並在開放水域游泳段做好防寒與暖身適應。\n\n【二、高溫賽道的精準水份與電解質策略】\n單純大量飲用純水反而會稀釋血鈉濃度。建議每小時依照排汗率補充 500-750ml 水份，並搭配高生物利用率之電解質膠囊與 BCAA 能量膠，於抽筋發生前提前建立防護網。"
+    "content": "在長達 6 至 17 小時的 113K 或 226K 超級鐵人三項與百K自行車挑戰賽中，運動員面臨最大的生理挑戰往往不是單純的肌肉疲勞，而是體溫調節失衡（熱衰竭、中暑）與電解質失衡（低血鈉症）。\n\n【一、賽前心肺與呼吸系統評估】\n針對有氣喘、過敏性鼻炎或曾有運動性胸悶病史的耐力選手，建議賽前進行完整肺功能與運動心肺評估，並在開放水域游泳段做好防寒與暖身適應。",
+    "purchaseUrl": "https://www.books.com.tw/web/sys_serialtext/?item=0000005012",
+    "purchaseLabel": "🛒 欲閱讀後半段完整專欄，請點此前往博客來購買《單車誌 Cycling Update》第140期冬季號 →"
   },
   {
     "id": "med-2",
@@ -32,7 +36,9 @@ const DEFAULT_ARTICLES: ColumnArticle[] = [
     "date": "2026-10-18",
     "coverUrl": "https://images.unsplash.com/photo-1519315901367-f34ff9154487?auto=format&fit=crop&w=900&q=80",
     "summary": "為什麼在泳池游得很好，一下活水湖或大海卻喘不過氣？胸腔內科醫師帶您剖析開放水域換氣節奏與游泳誘發性肺水腫（SIPE）。",
-    "content": "開放水域（Open Water）沒有池底黑線與池壁可扶，加上開賽時百人同時下水的肢體碰撞與水溫刺激，極易引發交感神經瞬間亢奮，導致過度換氣與恐慌。\n\n醫護鐵人團隊建議選手於下水前務必先潑水適應水溫，開賽前 200 公尺採取 80% 巡航配速，若感呼吸急促可立即改為蛙式或仰漂舉手示意，切勿硬撐。"
+    "content": "開放水域（Open Water）沒有池底黑線與池壁可扶，加上開賽時百人同時下水的肢體碰撞與水溫刺激，極易引發交感神經瞬間亢奮，導致過度換氣與恐慌。\n\n醫護鐵人團隊建議選手於下水前務必先潑水適應水溫，開賽前 200 公尺採取 80% 巡航配速。",
+    "purchaseUrl": "https://www.books.com.tw/web/sys_serialtext/?item=0000005012",
+    "purchaseLabel": "🛒 欲閱讀後半段完整專欄，請點此前往購買《單車誌 Cycling Update》當期雜誌 →"
   }
 ];
 
@@ -41,7 +47,6 @@ export default function ColumnPage() {
   const [selectedArticle, setSelectedArticle] = useState<ColumnArticle | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // 管理員網頁直接新增/編輯圖文 Modal
   const [showEditor, setShowEditor] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formTitle, setFormTitle] = useState("");
@@ -50,6 +55,8 @@ export default function ColumnPage() {
   const [formCover, setFormCover] = useState("");
   const [formSummary, setFormSummary] = useState("");
   const [formContent, setFormContent] = useState("");
+  const [formPurchaseUrl, setFormPurchaseUrl] = useState("https://www.books.com.tw/web/sys_serialtext/?item=0000005012");
+  const [formPurchaseLabel, setFormPurchaseLabel] = useState("🛒 欲閱讀後半段完整專欄，請點此前往購買《單車誌 Cycling Update》當期雜誌 →");
   const [saving, setSaving] = useState(false);
 
   const supabase = createClient();
@@ -57,11 +64,9 @@ export default function ColumnPage() {
 
   const loadArticles = useCallback(async () => {
     const localRaw = localStorage.getItem("g100_col_" + storageTag);
-    let merged = DEFAULT_ARTICLES;
     if (localRaw) {
       try {
-        merged = JSON.parse(localRaw);
-        setArticles(merged);
+        setArticles(JSON.parse(localRaw));
       } catch (e) {}
     }
 
@@ -105,7 +110,7 @@ export default function ColumnPage() {
     init();
   }, [supabase, loadArticles]);
 
-  // 網頁直接上傳專欄配圖並自動 Canvas 壓縮（完全免跑終端機！）
+  // 上傳直式雜誌封面或專欄配圖（保持完整原始比例，絕不裁切！）
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -114,19 +119,22 @@ export default function ColumnPage() {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const MAX_W = 800;
+        const MAX_DIM = 950;
         let w = img.width;
         let h = img.height;
-        if (w > MAX_W) {
-          h = Math.round((h * MAX_W) / w);
-          w = MAX_W;
+        if (w > h && w > MAX_DIM) {
+          h = Math.round((h * MAX_DIM) / w);
+          w = MAX_DIM;
+        } else if (h >= w && h > MAX_DIM) {
+          w = Math.round((w * MAX_DIM) / h);
+          h = MAX_DIM;
         }
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, w, h);
-          setFormCover(canvas.toDataURL("image/jpeg", 0.8));
+          setFormCover(canvas.toDataURL("image/jpeg", 0.85));
         }
       };
       if (typeof ev.target?.result === "string") img.src = ev.target.result;
@@ -142,6 +150,8 @@ export default function ColumnPage() {
     setFormCover("");
     setFormSummary("");
     setFormContent("");
+    setFormPurchaseUrl("https://www.books.com.tw/web/sys_serialtext/?item=0000005012");
+    setFormPurchaseLabel("🛒 欲閱讀後半段完整專欄，請點此前往購買《單車誌 Cycling Update》當期雜誌 →");
     setShowEditor(true);
   };
 
@@ -153,6 +163,8 @@ export default function ColumnPage() {
     setFormCover(art.coverUrl);
     setFormSummary(art.summary);
     setFormContent(art.content);
+    setFormPurchaseUrl(art.purchaseUrl || "https://www.books.com.tw/web/sys_serialtext/?item=0000005012");
+    setFormPurchaseLabel(art.purchaseLabel || "🛒 欲閱讀後半段完整專欄，請點此前往購買《單車誌 Cycling Update》當期雜誌 →");
     setShowEditor(true);
   };
 
@@ -167,6 +179,8 @@ export default function ColumnPage() {
       coverUrl: formCover || DEFAULT_ARTICLES[0].coverUrl,
       summary: formSummary.trim() || formContent.trim().slice(0, 95) + "...",
       content: formContent.trim(),
+      purchaseUrl: formPurchaseUrl.trim() || "https://www.cycling-update.info/",
+      purchaseLabel: formPurchaseLabel.trim() || "🛒 欲閱讀後半段完整專欄，請點此前往購買《單車誌 Cycling Update》當期雜誌 →",
     };
 
     const updated = editingId
@@ -192,7 +206,7 @@ export default function ColumnPage() {
 
     setSaving(false);
     setShowEditor(false);
-    alert("✅ 專欄文章與配圖已發布！首頁下方的專欄區塊已自動同步抓取最新圖文摘要！");
+    alert("✅ 專欄圖文與單車誌購買連結已儲存！首頁已同步更新最新封面與摘要！");
   };
 
   const handleDeleteArticle = async (id: string, title: string) => {
@@ -218,7 +232,7 @@ export default function ColumnPage() {
               📚 單車誌醫護鐵人運動醫學專欄
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1.5 max-w-2xl">
-              由屏東榮總胸腔內科洪緯欣醫師、醫護鐵人創辦人陳彥良與專業醫療團隊共同執筆，提供耐力運動員最權威的運動醫學與安全補給指南。
+              由屏東榮總胸腔內科洪緯欣醫師、醫護鐵人創辦人陳彥良與專業醫療團隊共同執筆。為保護《單車誌》期刊銷售，線上提供 1/2 精華試閱，完整內容歡迎點擊下方購書連結支持實體雜誌！
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 shrink-0">
@@ -228,7 +242,7 @@ export default function ColumnPage() {
                 onClick={openNewModal}
                 className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs sm:text-sm transition cursor-pointer shadow-lg"
               >
-                ✍️ 新增專欄圖文（首頁自動同步抓取最新一篇）
+                ✍️ 新增專欄圖文 ＆ 設定單車誌購買連結
               </button>
             )}
             <Link
@@ -240,80 +254,112 @@ export default function ColumnPage() {
           </div>
         </div>
 
-        {/* 專欄文章列表 */}
+        {/* 專欄文章列表：採用直式雜誌封面友善設計 (object-contain 不裁切任何封面邊角！) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {articles.map((art, index) => (
-            <article
-              key={art.id}
-              className="rounded-3xl bg-zinc-950 border border-zinc-800/90 hover:border-amber-500/50 overflow-hidden flex flex-col justify-between shadow-2xl transition group"
-            >
-              <div>
-                <div className="relative h-56 w-full bg-zinc-900 overflow-hidden">
-                  <img
-                    src={art.coverUrl}
-                    alt={art.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {index === 0 && (
-                    <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-red-600 text-white text-[11px] font-black shadow">
-                      🔥 最新發布（首頁同步展示中）
+          {articles.map((art, index) => {
+            const isExpanded = selectedArticle?.id === art.id;
+            const buyUrl = art.purchaseUrl || "https://www.books.com.tw/web/sys_serialtext/?item=0000005012";
+            const buyText = art.purchaseLabel || "🛒 欲閱讀後半段完整專欄，請點此前往購買《單車誌 Cycling Update》當期雜誌 →";
+
+            return (
+              <article
+                key={art.id}
+                className="rounded-3xl bg-zinc-950 border border-zinc-800/90 hover:border-amber-500/50 overflow-hidden flex flex-col justify-between shadow-2xl transition group"
+              >
+                <div>
+                  {/* 封面展示框：改用 object-contain 與深色質感背景，直式《單車誌》封面 100% 完整顯示不裁切！ */}
+                  <div className="relative h-80 sm:h-96 w-full bg-gradient-to-b from-zinc-900 via-zinc-950 to-black flex items-center justify-center p-3 border-b border-zinc-800/80">
+                    <img
+                      src={art.coverUrl}
+                      alt={art.title}
+                      className="max-h-full max-w-full object-contain rounded-lg shadow-2xl group-hover:scale-[1.02] transition-transform duration-500"
+                    />
+                    {index === 0 && (
+                      <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-red-600 text-white text-[11px] font-black shadow-lg">
+                        🔥 最新發布（首頁同步展示中）
+                      </span>
+                    )}
+                    <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded bg-black/85 border border-zinc-700 text-zinc-300 font-mono text-xs">
+                      {art.date}
                     </span>
-                  )}
-                  <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded bg-black/80 text-zinc-300 font-mono text-xs">
-                    {art.date}
-                  </span>
-                </div>
-
-                <div className="p-6 space-y-3">
-                  <div className="text-xs font-bold text-amber-400">撰文 / 專訪：{art.author}</div>
-                  <h2 className="text-lg sm:text-xl font-black text-white leading-snug">{art.title}</h2>
-                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
-                    {selectedArticle?.id === art.id ? art.content : art.summary}
-                  </p>
-                </div>
-              </div>
-
-              <div className="px-6 pb-6 pt-2 flex items-center justify-between border-t border-zinc-900">
-                <button
-                  type="button"
-                  onClick={() => setSelectedArticle(selectedArticle?.id === art.id ? null : art)}
-                  className="text-xs font-extrabold text-amber-400 hover:text-amber-300 cursor-pointer"
-                >
-                  {selectedArticle?.id === art.id ? "🔼 收合完整文章" : "📖 展開閱讀完整全文 →"}
-                </button>
-
-                {isAdmin && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => openEditModal(art)}
-                      className="px-3 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-black text-xs font-extrabold transition cursor-pointer"
-                    >
-                      ✏️ 編輯圖文
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteArticle(art.id, art.title)}
-                      className="px-2.5 py-1 rounded-lg bg-red-500/15 hover:bg-red-600 text-red-400 hover:text-white text-xs font-bold transition cursor-pointer"
-                    >
-                      刪除
-                    </button>
                   </div>
-                )}
-              </div>
-            </article>
-          ))}
+
+                  <div className="p-6 space-y-3">
+                    <div className="text-xs font-bold text-amber-400">撰文 / 專訪：{art.author}</div>
+                    <h2 className="text-lg sm:text-xl font-black text-white leading-snug">{art.title}</h2>
+                    
+                    {!isExpanded ? (
+                      <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                        {art.summary}
+                      </p>
+                    ) : (
+                      <div className="space-y-4 pt-2">
+                        <div className="p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800 text-xs sm:text-sm text-zinc-200 leading-relaxed whitespace-pre-line">
+                          <div className="text-[11px] font-extrabold text-amber-400 mb-2">
+                            📖 【線上精華試閱版（前 1/2 內容）】
+                          </div>
+                          {art.content}
+                          <div className="mt-4 pt-3 border-t border-dashed border-zinc-700 text-zinc-400 text-xs italic">
+                            ……（為保護《單車誌 Cycling Update》期刊著作權與銷售，線上僅公開 1/2 精華篇幅，完整深度解析與實戰圖表請見當期實體／電子雜誌）
+                          </div>
+                        </div>
+
+                        {/* 🛒 展開後顯示之《單車誌》專屬購買導流按鈕 */}
+                        <a
+                          href={buyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:from-amber-400 hover:to-red-500 text-black font-black text-xs sm:text-sm text-center shadow-xl transition"
+                        >
+                          {buyText}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="px-6 pb-6 pt-3 flex items-center justify-between border-t border-zinc-900">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedArticle(isExpanded ? null : art)}
+                    className="text-xs font-extrabold text-amber-400 hover:text-amber-300 cursor-pointer"
+                  >
+                    {isExpanded ? "🔼 收合試閱內容" : "📖 展開閱讀完整全文 (1/2 精華試閱 ＆ 購買連結) →"}
+                  </button>
+
+                  {isAdmin && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(art)}
+                        className="px-3 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-black text-xs font-extrabold transition cursor-pointer"
+                      >
+                        ✏️ 編輯圖文與購買連結
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteArticle(art.id, art.title)}
+                        className="px-2.5 py-1 rounded-lg bg-red-500/15 hover:bg-red-600 text-red-400 hover:text-white text-xs font-bold transition cursor-pointer"
+                      >
+                        刪除
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </div>
 
       </div>
 
-      {/* 管理員網頁端直接上傳圖片與編輯文章 Modal */}
+      {/* 管理員編輯器 Modal：含「單車誌購買連結」自訂欄位 */}
       {showEditor && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center px-4 z-50">
           <div className="bg-zinc-950 border border-amber-500/50 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <h3 className="text-lg font-black text-white">
-                {editingId ? "✏️ 編輯專欄圖文" : "✍️ 新增專欄圖文（發布後自動同步至首頁）"}
+                {editingId ? "✏️ 編輯專欄圖文與單車誌購買連結" : "✍️ 新增專欄圖文（完整保留雜誌封面比例）"}
               </h3>
               <button onClick={() => setShowEditor(false)} className="text-zinc-400 hover:text-white font-bold cursor-pointer">✕</button>
             </div>
@@ -354,7 +400,7 @@ export default function ColumnPage() {
 
               <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-2">
                 <label className="text-xs font-extrabold text-amber-400 block">
-                  📷 直接從電腦/手機選擇專欄配圖上傳（自動壓縮免跑終端機，或貼上圖片網址）
+                  📷 上傳《單車誌》直式雜誌封面或專欄配圖（自動完整保留直式封面比例，絕不裁切！）
                 </label>
                 <input
                   type="file"
@@ -362,20 +408,15 @@ export default function ColumnPage() {
                   onChange={handleImageUpload}
                   className="text-xs text-zinc-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-extrabold file:bg-amber-500 file:text-black cursor-pointer"
                 />
-                <input
-                  type="text"
-                  value={formCover}
-                  onChange={(e) => setFormCover(e.target.value)}
-                  placeholder="或直接貼上圖片網址 /images/..."
-                  className="w-full rounded-xl bg-zinc-950 border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 mt-2"
-                />
                 {formCover && (
-                  <img src={formCover} alt="Preview" className="h-36 w-full object-cover rounded-xl border border-zinc-700 mt-2" />
+                  <div className="h-48 w-full bg-zinc-950 rounded-xl border border-zinc-700 flex items-center justify-center p-2 mt-2">
+                    <img src={formCover} alt="Preview" className="max-h-full max-w-full object-contain" />
+                  </div>
                 )}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-300">首頁圖文摘要（顯示於首頁專欄卡片，約 50~100 字）*</label>
+                <label className="text-xs font-bold text-zinc-300">首頁圖文摘要（顯示於首頁專欄卡片）*</label>
                 <textarea
                   rows={2}
                   required
@@ -386,9 +427,11 @@ export default function ColumnPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-zinc-300">專欄完整內文 *</label>
+                <label className="text-xs font-bold text-emerald-400">
+                  📖 線上 1/2 精華試閱內文（為顧及《單車誌》銷售，請填入前 1/2 精彩內容，展開後下方將自動附上購買按鈕）*
+                </label>
                 <textarea
-                  rows={6}
+                  rows={5}
                   required
                   value={formContent}
                   onChange={(e) => setFormContent(e.target.value)}
@@ -396,10 +439,38 @@ export default function ColumnPage() {
                 />
               </div>
 
+              {/* 🛒 單車誌指定販售網址設定欄位 */}
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 space-y-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-extrabold text-amber-400 block">
+                    🛒 《單車誌》指定購買連結網址（如博客來、單車誌官網或誠品購書連結）*
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    value={formPurchaseUrl}
+                    onChange={(e) => setFormPurchaseUrl(e.target.value)}
+                    placeholder="https://www.books.com.tw/..."
+                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3.5 py-2 text-xs text-white font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-zinc-300 block">
+                    購買導流按鈕文字（可自行修改期數名稱，例如：購買《單車誌》第140期冬季號）
+                  </label>
+                  <input
+                    type="text"
+                    value={formPurchaseLabel}
+                    onChange={(e) => setFormPurchaseLabel(e.target.value)}
+                    className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3.5 py-2 text-xs text-amber-300 font-bold"
+                  />
+                </div>
+              </div>
+
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setShowEditor(false)} className="px-4 py-2 rounded-xl bg-zinc-900 text-zinc-300 text-xs font-bold">取消</button>
                 <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-xl bg-amber-500 text-black text-xs sm:text-sm font-black cursor-pointer">
-                  {saving ? "儲存發布中..." : "💾 確認發布並同步更新至首頁"}
+                  {saving ? "儲存發布中..." : "💾 確認儲存並同步更新至首頁"}
                 </button>
               </div>
             </form>

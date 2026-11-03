@@ -499,7 +499,7 @@ export default function HomePage() {
                       }
                     }}
                     alt="邁克仕兌換活動海報"
-                    className="w-full h-28 sm:h-32 object-cover rounded-xl mb-1"
+                    className="w-full max-h-48 sm:max-h-52 object-contain rounded-xl bg-black/40 mx-auto mb-1"
                   />
                   <div className="flex items-center justify-center gap-2">
                     <span className="px-2 py-0.5 rounded bg-amber-500 text-black text-[10px] font-black">
@@ -707,11 +707,11 @@ export default function HomePage() {
             {/* 專欄卡片 1：自動抓取「單車誌醫護鐵人運動醫學專欄」最新一篇文章與配圖 */}
             <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-emerald-500/50 overflow-hidden flex flex-col justify-between transition group">
               <div>
-                <div className="relative h-44 w-full bg-zinc-900 overflow-hidden">
+                <div className="relative h-64 sm:h-72 w-full bg-gradient-to-b from-zinc-900 to-black flex items-center justify-center p-2.5 overflow-hidden border-b border-zinc-800/80">
                   <img
                     src={latestMedCol.coverUrl}
                     alt={latestMedCol.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="max-h-full max-w-full object-contain rounded-lg shadow-xl group-hover:scale-105 transition-transform duration-500"
                   />
                   <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-500 text-black shadow">
                     單車誌醫護鐵人運動醫學專欄
@@ -750,11 +750,11 @@ export default function HomePage() {
             {/* 專欄卡片 2：自動抓取「全球百鐵認證藝人騎乘經驗分享專欄」最新一篇文章與配圖 */}
             <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-amber-500/50 overflow-hidden flex flex-col justify-between transition group">
               <div>
-                <div className="relative h-44 w-full bg-zinc-900 overflow-hidden">
+                <div className="relative h-64 sm:h-72 w-full bg-gradient-to-b from-zinc-900 to-black flex items-center justify-center p-2.5 overflow-hidden border-b border-zinc-800/80">
                   <img
                     src={latestCelebCol.coverUrl}
                     alt={latestCelebCol.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="max-h-full max-w-full object-contain rounded-lg shadow-xl group-hover:scale-105 transition-transform duration-500"
                   />
                   <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-extrabold bg-amber-500 text-black shadow">
                     全球百鐵認證藝人騎乘經驗分享專欄

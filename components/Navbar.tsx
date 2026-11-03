@@ -28,19 +28,31 @@ export default function Navbar() {
         document.title = "全球百鐵認證 Global 100 Triathlon Certification";
       }
 
-      // 載入 0 額度多國語自動同步翻譯引擎
+      // 讀取目前 Cookie 中的語言狀態
+      const match = document.cookie.match(/googtrans=\/zh-TW\/([a-zA-Z-]+)/);
+      if (match && match[1]) {
+        setLang(match[1]);
+      } else {
+        setLang("zh-TW");
+      }
+
+      // 載入 Google Cloud 網頁即時翻譯元件
       if (!document.getElementById("google-translate-script")) {
         (window as any).googleTranslateElementInit = function () {
           if ((window as any).google && (window as any).google.translate) {
             new (window as any).google.translate.TranslateElement(
-              { pageLanguage: "zh-TW", includedLanguages: "zh-TW,en,ja,ko", autoDisplay: false },
+              {
+                pageLanguage: "zh-TW",
+                includedLanguages: "zh-TW,en,ja,ko",
+                autoDisplay: false,
+              },
               "google_translate_element"
             );
           }
         };
         const s = document.createElement("script");
         s.id = "google-translate-script";
-        s.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+        s.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
         s.async = true;
         document.body.appendChild(s);
       }
@@ -49,21 +61,33 @@ export default function Navbar() {
 
   const handleLanguageChange = (targetLang: string) => {
     setLang(targetLang);
-    if (typeof document !== "undefined") {
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
+      const host = window.location.hostname;
       if (targetLang === "zh-TW") {
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=.${window.location.hostname}; path=/`;
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${host}; path=/;`;
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${host}; path=/;`;
       } else {
-        document.cookie = `googtrans=/zh-TW/${targetLang}; path=/`;
-        document.cookie = `googtrans=/zh-TW/${targetLang}; domain=.${window.location.hostname}; path=/`;
+        document.cookie = `googtrans=/zh-TW/${targetLang}; path=/;`;
+        document.cookie = `googtrans=/zh-TW/${targetLang}; domain=${host}; path=/;`;
+        document.cookie = `googtrans=/zh-TW/${targetLang}; domain=.${host}; path=/;`;
       }
-      window.location.reload();
+
+      // 優先直接觸發 Google 隱藏下拉選單，若未載入完成則自動重整頁面套用 Cookie
+      const combo = document.querySelector(".goog-te-combo") as HTMLSelectElement;
+      if (combo) {
+        combo.value = targetLang === "zh-TW" ? "" : targetLang;
+        combo.dispatchEvent(new Event("change"));
+        if (targetLang === "zh-TW") window.location.reload();
+      } else {
+        window.location.reload();
+      }
     }
   };
 
+  // 已移除「台東城鄉生活運動協會」，維持全球百鐵認證對所有加盟主辦單位之中立性
   const g100Links = [
-    { label: "台東城鄉生活運動協會", href: "/taitung-assoc", highlight: true },
-    { label: "系列賽事", href: "/series" },
+    { label: "系列賽事", href: "/series", highlight: true },
     { label: "百鐵英雄榜", href: "/rankings" },
     { label: "成績登錄查詢", href: "/certifications/query" },
     { label: "完賽登錄", href: "/profile/new-record" },
@@ -85,10 +109,9 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white text-zinc-900 border-b border-zinc-200 shadow-sm">
-      <div id="google_translate_element" className="hidden" />
+      <div id="google_translate_element" className="fixed -top-96 left-0 opacity-0 pointer-events-none" />
       <div className="max-w-7xl mx-auto px-3 sm:px-5 min-h-[62px] py-1.5 flex items-center justify-between gap-2">
         
-        {/* 左側 Logo 與上下並排之副標題（精巧不佔寬度，確保右側導覽選單 100% 完整顯示） */}
         <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2.5 shrink-0">
           {isTuraaSite ? (
             <>
@@ -128,8 +151,7 @@ export default function Navbar() {
           )}
         </Link>
 
-        {/* 中間與右側：電腦版 100% 比例永遠顯示之導覽選單 (md:flex) */}
-        <nav className="hidden md:flex items-center gap-2.5 lg:gap-3.5 text-xs lg:text-[13px] font-bold flex-wrap justify-end">
+        <nav className="hidden md:flex items-center gap-3 lg:gap-4 text-xs lg:text-[13px] font-bold flex-wrap justify-end">
           {activeLinks.map((item, idx) => (
             <Link
               key={idx}
@@ -144,12 +166,11 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* 🌐 0 AI 額度消耗之多國語言即時同步切換器 */}
           <select
             value={lang}
             onChange={(e) => handleLanguageChange(e.target.value)}
             aria-label="切換網站語言"
-            className="px-2 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 border border-zinc-300 text-zinc-800 text-[11px] font-extrabold cursor-pointer"
+            className="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 border border-zinc-300 text-zinc-800 text-xs font-extrabold cursor-pointer"
           >
             <option value="zh-TW">🌐 繁體中文</option>
             <option value="en">🌐 English</option>
@@ -159,13 +180,12 @@ export default function Navbar() {
 
           <Link
             href="/profile"
-            className="px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition shadow-sm whitespace-nowrap"
+            className="px-4 py-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold transition shadow-sm whitespace-nowrap"
           >
             {isTuraaSite ? "選手/管理中心" : "會員中心"}
           </Link>
         </nav>
 
-        {/* 手機版漢堡按鈕 */}
         <div className="flex md:hidden items-center gap-1.5">
           <select
             value={lang}
@@ -175,6 +195,7 @@ export default function Navbar() {
             <option value="zh-TW">繁中</option>
             <option value="en">EN</option>
             <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
           </select>
           <button
             type="button"
@@ -187,7 +208,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* 手機版展開選單 */}
       {menuOpen && (
         <div className="md:hidden bg-white border-b border-zinc-200 px-5 py-4 space-y-3 shadow-xl">
           <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm font-bold">
