@@ -189,30 +189,38 @@ export default function HomePage() {
         .order("id", { ascending: false });
 
       if (rows && rows.length > 0) {
-        const imgRow = rows.find((r: any) => r.tag === "SITE_CUSTOM_IMAGES");
-        if (imgRow?.pdf_url) {
-          try {
-            const parsedImgs = JSON.parse(imgRow.pdf_url);
-            setCustomImages(parsedImgs);
-            localStorage.setItem("g100_custom_site_images", JSON.stringify(parsedImgs));
-          } catch (e) {}
+        const mergedImgs: Record<string, string> = {};
+        rows.filter((r: any) => r.tag === "SITE_CUSTOM_IMAGES").forEach((r: any) => {
+          if (!r.pdf_url) return;
+          if (r.pdf_url.startsWith("data:image") && r.title) {
+            mergedImgs[r.title] = r.pdf_url;
+          } else {
+            try {
+              Object.assign(mergedImgs, JSON.parse(r.pdf_url));
+            } catch (e) {}
+          }
+        });
+        if (Object.keys(mergedImgs).length > 0) {
+          setCustomImages((prev) => ({ ...prev, ...mergedImgs }));
+          localStorage.setItem("g100_custom_site_images", JSON.stringify(mergedImgs));
         }
 
-        const medRow = rows.find((r: any) => r.tag === "COL_SPORTS_MED");
-        if (medRow?.pdf_url) {
+        rows.forEach((r: any) => {
           try {
-            const parsedMed = JSON.parse(medRow.pdf_url);
-            if (parsedMed.title) setLatestMedCol(parsedMed);
+            if (r.tag !== "COL_SPORTS_MED" && r.tag !== "COL_CELEBRITY") return;
+            const parsed = JSON.parse(r.pdf_url || "{}");
+            if (!parsed.title) return;
+            const txt = (parsed.title + " " + (parsed.summary || "")).toLowerCase();
+            const isCelebTopic = txt.includes("求婚") || txt.includes("單車婚禮") || txt.includes("藝人") || txt.includes("搖滾") || txt.includes("破風故事");
+            if (isCelebTopic) {
+              setLatestCelebCol(parsed);
+            } else if (r.tag === "COL_SPORTS_MED") {
+              setLatestMedCol(parsed);
+            } else {
+              setLatestCelebCol(parsed);
+            }
           } catch (e) {}
-        }
-
-        const celebRow = rows.find((r: any) => r.tag === "COL_CELEBRITY");
-        if (celebRow?.pdf_url) {
-          try {
-            const parsedCeleb = JSON.parse(celebRow.pdf_url);
-            if (parsedCeleb.title) setLatestCelebCol(parsedCeleb);
-          } catch (e) {}
-        }
+        });
       }
     } catch (err) {
       console.warn(err);
@@ -274,14 +282,14 @@ export default function HomePage() {
             localStorage.setItem("g100_custom_site_images", JSON.stringify(nextMap));
 
             try {
-              await supabase.from("association_announcements").delete().eq("tag", "SITE_CUSTOM_IMAGES");
+              await supabase.from("association_announcements").delete().eq("tag", "SITE_CUSTOM_IMAGES").eq("title", slotKey);
               await supabase.from("association_announcements").insert([
                 {
-                  title: "SITE_CUSTOM_IMAGES",
+                  title: slotKey,
                   tag: "SITE_CUSTOM_IMAGES",
                   date: new Date().toISOString().slice(0, 10),
                   is_pinned: false,
-                  pdf_url: JSON.stringify(nextMap),
+                  pdf_url: dataUrl,
                 },
               ]);
             } catch (err) {}

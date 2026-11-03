@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import AminoMaxPreOrderSection from "@/components/AminoMaxPreOrderSection";
+import MilestoneCertificateAndPerks from "@/components/MilestoneCertificateAndPerks";
 
 interface UnifiedRecord {
   key: string;
@@ -150,6 +151,19 @@ export default function ProfilePage() {
     try {
       // 完整資料與壓縮照片存入 localStorage，而 Auth Metadata 只存輕量文字（avatar_data_url 設為 null 確保 Cookie 永遠小於 1KB！）
       localStorage.setItem(`g100_member_profile_${user.id}`, JSON.stringify(profileForm));
+      // PROF_AVATAR_SYNC
+      await supabase.from('association_announcements').delete().eq('tag', 'MEMBER_PROFILE_SYNC').eq('title', 'PROF_' + user.id);
+      await supabase.from('association_announcements').insert([{ title: 'PROF_' + user.id, tag: 'MEMBER_PROFILE_SYNC', date: new Date().toISOString().slice(0, 10), is_pinned: false, pdf_url: JSON.stringify(profileForm) }]);
+      try {
+        await supabase.from("association_announcements").delete().eq("tag", "MEMBER_PROFILE_SYNC").eq("title", "MEMBER_PROFILE_SYNC_" + user.id);
+        await supabase.from("association_announcements").insert([{
+          title: "MEMBER_PROFILE_SYNC_" + user.id,
+          tag: "MEMBER_PROFILE_SYNC",
+          date: new Date().toISOString().slice(0, 10),
+          is_pinned: false,
+          pdf_url: JSON.stringify(profileForm)
+        }]);
+      } catch (syncErr) { console.warn(syncErr); }
       if (profileForm.avatarDataUrl) {
         localStorage.setItem(`g100_avatar_${user.id}`, profileForm.avatarDataUrl);
       }
@@ -181,7 +195,14 @@ export default function ProfilePage() {
       const email = currentUser.email || "";
       const uid = currentUser.id;
 
-      const savedLocal = localStorage.getItem(`g100_member_profile_${uid}`);
+      let savedLocal = localStorage.getItem(`g100_member_profile_${uid}`);
+      try {
+        const { data: cloudProf } = await supabase.from("association_announcements").select("*").eq("tag", "MEMBER_PROFILE_SYNC").eq("title", "MEMBER_PROFILE_SYNC_" + uid).maybeSingle();
+        if (cloudProf?.pdf_url) {
+          savedLocal = cloudProf.pdf_url;
+          localStorage.setItem(`g100_member_profile_${uid}`, savedLocal);
+        }
+      } catch (e) {}
       const savedAvatar = localStorage.getItem(`g100_avatar_${uid}`) || "";
       const meta = currentUser.user_metadata || {};
 
@@ -750,6 +771,14 @@ export default function ProfilePage() {
             </form>
           </section>
         )}
+
+        {/* 🏆 階段賞別完賽證書自動產出器（含防AI浮水印＆LINE Pay無浮水印下載）＋ 達成賞別商品加價購 */}
+        <MilestoneCertificateAndPerks
+          athleteName={profileForm.fullName}
+          triCount={triCount}
+          cycCount={cycCount}
+          latestDate={myRecords[0]?.race_date}
+        />
 
         {/* 🎁 邁克仕 AminoMax 未來系列賽事預先勾選與補給兌換專區 */}
         <AminoMaxPreOrderSection
