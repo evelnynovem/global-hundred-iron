@@ -14,57 +14,68 @@ interface HeroStat {
 }
 
 const TRI_TIERS = [
-  { key: "all", label: "總排名 (全部英雄)", min: 1 },
-  { key: "100", label: "🏆 百鐵賞 (100+)", min: 100 },
-  { key: "90", label: "九十鐵賞 (90+)", min: 90 },
-  { key: "80", label: "八十鐵賞 (80+)", min: 80 },
-  { key: "70", label: "七十鐵賞 (70+)", min: 70 },
-  { key: "60", label: "六十鐵賞 (60+)", min: 60 },
-  { key: "50", label: "五十鐵賞 (50+)", min: 50 },
-  { key: "30", label: "卅鐵賞 (30+)", min: 30 },
-  { key: "20", label: "廿鐵賞 (20+)", min: 20 },
-  { key: "10", label: "十鐵賞 (10+)", min: 10 },
-  { key: "5", label: "五鐵賞 (5+)", min: 5 },
-  { key: "3", label: "三鐵賞 (3+)", min: 3 },
-  { key: "1", label: "初鐵賞 (1+)", min: 1 },
+  { key: "all", label: "總排名", min: 1, max: 9999 },
+  { key: "1", label: "初鐵", min: 1, max: 2 },
+  { key: "3", label: "3鐵", min: 3, max: 4 },
+  { key: "5", label: "5鐵", min: 5, max: 9 },
+  { key: "10", label: "10鐵", min: 10, max: 19 },
+  { key: "20", label: "20鐵", min: 20, max: 29 },
+  { key: "30", label: "30鐵", min: 30, max: 39 },
+  { key: "40", label: "40鐵", min: 40, max: 49 },
+  { key: "50", label: "50鐵", min: 50, max: 59 },
+  { key: "60", label: "60鐵", min: 60, max: 69 },
+  { key: "70", label: "70鐵", min: 70, max: 79 },
+  { key: "80", label: "80鐵", min: 80, max: 89 },
+  { key: "90", label: "90鐵", min: 90, max: 99 },
+  { key: "100", label: "百鐵", min: 100, max: 9999 },
 ];
 
 const CYC_TIERS = [
-  { key: "all", label: "總排名 (全部騎士)", min: 1 },
-  { key: "100", label: "🏆 百鐵馬賞 (100+)", min: 100 },
-  { key: "50", label: "五十鐵馬賞 (50+)", min: 50 },
-  { key: "30", label: "卅鐵馬賞 (30+)", min: 30 },
-  { key: "20", label: "廿鐵馬賞 (20+)", min: 20 },
-  { key: "10", label: "十鐵馬賞 (10+)", min: 10 },
-  { key: "5", label: "五鐵馬賞 (5+)", min: 5 },
-  { key: "3", label: "三鐵馬賞 (3+)", min: 3 },
-  { key: "1", label: "初鐵馬賞 (1+)", min: 1 },
+  { key: "all", label: "總排名", min: 1, max: 9999 },
+  { key: "1", label: "初鐵馬", min: 1, max: 2 },
+  { key: "3", label: "3鐵馬", min: 3, max: 4 },
+  { key: "5", label: "5鐵馬", min: 5, max: 9 },
+  { key: "10", label: "10鐵馬", min: 10, max: 19 },
+  { key: "20", label: "20鐵馬", min: 20, max: 29 },
+  { key: "30", label: "30鐵馬", min: 30, max: 39 },
+  { key: "40", label: "40鐵馬", min: 40, max: 49 },
+  { key: "50", label: "50鐵馬", min: 50, max: 59 },
+  { key: "60", label: "60鐵馬", min: 60, max: 69 },
+  { key: "70", label: "70鐵馬", min: 70, max: 79 },
+  { key: "80", label: "80鐵馬", min: 80, max: 89 },
+  { key: "90", label: "90鐵馬", min: 90, max: 99 },
+  { key: "100", label: "百鐵馬", min: 100, max: 9999 },
 ];
 
 function getTriAwardBadge(cnt: number) {
-  if (cnt >= 100) return { title: "🏆 《百鐵賞》", cls: "bg-amber-500/20 border-amber-400 text-amber-300" };
-  if (cnt >= 90) return { title: "🥇 《九十鐵賞》", cls: "bg-amber-500/15 border-amber-500/40 text-amber-400" };
-  if (cnt >= 80) return { title: "🥇 《八十鐵賞》", cls: "bg-amber-500/15 border-amber-500/40 text-amber-400" };
-  if (cnt >= 70) return { title: "🥇 《七十鐵賞》", cls: "bg-amber-500/15 border-amber-500/40 text-amber-400" };
-  if (cnt >= 60) return { title: "🥇 《六十鐵賞》", cls: "bg-amber-500/15 border-amber-500/40 text-amber-400" };
-  if (cnt >= 50) return { title: "🏅 《五十鐵賞》", cls: "bg-emerald-500/15 border-emerald-500/40 text-emerald-400" };
-  if (cnt >= 40) return { title: "🏅 《四十鐵賞》", cls: "bg-emerald-500/15 border-emerald-500/40 text-emerald-400" };
-  if (cnt >= 30) return { title: "🏅 《卅鐵賞》", cls: "bg-emerald-500/15 border-emerald-500/40 text-emerald-400" };
-  if (cnt >= 20) return { title: "🥈 《廿鐵賞》", cls: "bg-sky-500/15 border-sky-500/40 text-sky-400" };
-  if (cnt >= 10) return { title: "🥈 《十鐵賞》", cls: "bg-sky-500/15 border-sky-500/40 text-sky-400" };
-  if (cnt >= 5) return { title: "🥉 《五鐵賞》", cls: "bg-zinc-800 border-zinc-700 text-zinc-300" };
-  if (cnt >= 3) return { title: "🥉 《三鐵賞》", cls: "bg-zinc-800 border-zinc-700 text-zinc-300" };
+  if (cnt >= 100) return { title: "🏆 《百鐵賞》", cls: "bg-amber-950/60 border-amber-500/50 text-amber-300" };
+  if (cnt >= 90) return { title: "🥇 《九十鐵賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 80) return { title: "🥇 《八十鐵賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 70) return { title: "🥇 《七十鐵賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 60) return { title: "🥇 《六十鐵賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 50) return { title: "🏅 《五十鐵賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 40) return { title: "🏅 《四十鐵賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 30) return { title: "🏅 《卅鐵賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 20) return { title: "🥈 《廿鐵賞》", cls: "bg-zinc-900 border-zinc-700 text-amber-300" };
+  if (cnt >= 10) return { title: "🥈 《十鐵賞》", cls: "bg-zinc-900 border-zinc-700 text-amber-300" };
+  if (cnt >= 5) return { title: "🥉 《五鐵賞》", cls: "bg-zinc-900 border-zinc-700 text-zinc-300" };
+  if (cnt >= 3) return { title: "🥉 《三鐵賞》", cls: "bg-zinc-900 border-zinc-700 text-zinc-300" };
   return { title: "🔰 《初鐵賞》", cls: "bg-zinc-900 border-zinc-800 text-zinc-400" };
 }
 
 function getCycAwardBadge(cnt: number) {
-  if (cnt >= 100) return { title: "🏆 《百鐵馬賞》", cls: "bg-red-500/20 border-red-400 text-red-300" };
-  if (cnt >= 50) return { title: "🥇 《五十鐵馬賞》", cls: "bg-amber-500/20 border-amber-400 text-amber-300" };
-  if (cnt >= 30) return { title: "🏅 《卅鐵馬賞》", cls: "bg-emerald-500/15 border-emerald-500/40 text-emerald-400" };
-  if (cnt >= 20) return { title: "🥈 《廿鐵馬賞》", cls: "bg-sky-500/15 border-sky-500/40 text-sky-400" };
-  if (cnt >= 10) return { title: "🥈 《十鐵馬賞》", cls: "bg-sky-500/15 border-sky-500/40 text-sky-400" };
-  if (cnt >= 5) return { title: "🥉 《五鐵馬賞》", cls: "bg-zinc-800 border-zinc-700 text-zinc-300" };
-  if (cnt >= 3) return { title: "🥉 《三鐵馬賞》", cls: "bg-zinc-800 border-zinc-700 text-zinc-300" };
+  if (cnt >= 100) return { title: "🏆 《百鐵馬賞》", cls: "bg-amber-950/60 border-amber-500/50 text-amber-300" };
+  if (cnt >= 90) return { title: "🥇 《九十鐵馬賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 80) return { title: "🥇 《八十鐵馬賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 70) return { title: "🥇 《七十鐵馬賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 60) return { title: "🥇 《六十鐵馬賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 50) return { title: "🏅 《五十鐵馬賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 40) return { title: "🏅 《四十鐵馬賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 30) return { title: "🏅 《卅鐵馬賞》", cls: "bg-amber-950/40 border-amber-500/40 text-amber-300" };
+  if (cnt >= 20) return { title: "🥈 《廿鐵馬賞》", cls: "bg-zinc-900 border-zinc-700 text-amber-300" };
+  if (cnt >= 10) return { title: "🥈 《十鐵馬賞》", cls: "bg-zinc-900 border-zinc-700 text-amber-300" };
+  if (cnt >= 5) return { title: "🥉 《五鐵馬賞》", cls: "bg-zinc-900 border-zinc-700 text-zinc-300" };
+  if (cnt >= 3) return { title: "🥉 《三鐵馬賞》", cls: "bg-zinc-900 border-zinc-700 text-zinc-300" };
   return { title: "🚴 《初鐵馬賞》", cls: "bg-zinc-900 border-zinc-800 text-zinc-400" };
 }
 
@@ -86,7 +97,6 @@ const EMAIL_NAME_MAP: Record<string, string> = {
   "wgw19811229@yahoo.com.tw": "吳曜綸",
 };
 
-// 嚴格日期正規化：將 2026/3/28、2026-03-28、Mar 28, 2026 統一轉為 YYYY-MM-DD，以利「同日僅計一場」防呆！
 function normalizeStrictDate(rawDate: string): string {
   if (!rawDate) return "";
   const s = String(rawDate).trim();
@@ -115,7 +125,6 @@ export default function RankingsPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showCsvUploader, setShowCsvUploader] = useState(false);
   const [uploadingCsv, setUploadingCsv] = useState(false);
-  const [cleaningDups, setCleaningDups] = useState(false);
 
   const supabase = createClient();
 
@@ -125,7 +134,6 @@ export default function RankingsPage() {
       const triMap = new Map<string, HeroStat>();
       const cycMap = new Map<string, HeroStat>();
 
-      // 1. 載入內建官方 CSV 基準資料庫 (/data/rankings-baseline.json)
       try {
         const res = await fetch("/data/rankings-baseline.json?v=" + Date.now());
         if (res.ok) {
@@ -141,7 +149,6 @@ export default function RankingsPage() {
         console.warn("Baseline JSON fetch warning:", e);
       }
 
-      // 2. 檢查雲端是否有管理員透過網頁最新上傳覆蓋的 CSV 基準表
       const { data: sysCsvRows } = await supabase
         .from("race_details_full")
         .select("*")
@@ -170,8 +177,6 @@ export default function RankingsPage() {
         }
       }
 
-      // 3. 讀取線上資料庫 (race_details_full)，並嚴格執行「同一天僅計 1 場三鐵或單車賽」！
-      // （徹底防止洪緯欣在同一天 2026-03-28 重複匯入多筆普悠瑪而被異常灌水至 127 場！）
       const { data: dbTriRows } = await supabase
         .from("race_details_full")
         .select("id, athlete_name, race_name, race_date, category, finish_time, team, login_email")
@@ -200,10 +205,8 @@ export default function RankingsPage() {
         }
 
         if (normDate) {
-          // 嚴格同日防呆：同一位選手在同一天（normDate）無論被匯入幾筆 51.5K 或 113K，永遠只算 1 場！
           const uniqueDayKey = cleanName + "__" + normDate;
           if (seenAthleteDateKey.has(uniqueDayKey)) {
-            // 記錄下來供自動清理資料庫重複列
             duplicateIdsToDelete.push(r.id);
           } else {
             seenAthleteDateKey.set(uniqueDayKey, r.id);
@@ -211,7 +214,6 @@ export default function RankingsPage() {
           cur.dateSet.add(normDate);
           if (normDate > cur.latestDate) cur.latestDate = normDate;
         } else {
-          // 若歷史紀錄日期為 ########，則以賽事名稱去重
           const rName = (r.race_name || "").trim();
           if (rName) cur.undatedNames.add(rName);
         }
@@ -219,7 +221,6 @@ export default function RankingsPage() {
         dbTriGroup.set(cleanName, cur);
       });
 
-      // 自動在背景為資料庫清除同日重複垃圾紀錄（例如洪緯欣在 2026-03-28 的重複列）
       if (duplicateIdsToDelete.length > 0) {
         supabase
           .from("race_details_full")
@@ -229,11 +230,9 @@ export default function RankingsPage() {
       }
 
       dbTriGroup.forEach((val, name) => {
-        // 該選手在線上資料庫經「嚴格同日去重」後的真實有效場次
         const validDbCount = val.dateSet.size + val.undatedNames.size;
         const existing = triMap.get(name);
         if (existing) {
-          // 取 CSV 官方基準場次（如劉光武103、孟亞輝103）與「同日去重後之資料庫場次」的較大值
           if (validDbCount > existing.count) existing.count = validDbCount;
           if (val.team && val.team !== "個人") existing.team = val.team;
         } else if (validDbCount > 0) {
@@ -246,7 +245,6 @@ export default function RankingsPage() {
         }
       });
 
-      // 4. 公路單車資料庫同樣嚴格執行「同一天僅計 1 場單車賽」
       const { data: dbCycRows } = await supabase
         .from("cycling_details_full")
         .select("id, athlete_name, race_name, race_date, team, login_email")
@@ -318,53 +316,6 @@ export default function RankingsPage() {
     checkAdminAndLoad();
   }, [supabase, loadRankingsData]);
 
-  // 🧹 管理員手動一鍵徹底掃除資料庫中所有「同日重複匯入」之異常紀錄
-  const handleCleanDatabaseSameDayDuplicates = async () => {
-    setCleaningDups(true);
-    try {
-      let deletedCount = 0;
-      for (const table of ["race_details_full", "cycling_details_full"] as const) {
-        const { data: rows } = await supabase.from(table).select("*").limit(10000);
-        const keptMap = new Map<string, any>();
-        const toDeleteIds: any[] = [];
-
-        (rows || []).forEach((r: any) => {
-          const name = (r.athlete_name || "").trim();
-          if (!name || name.startsWith("__SYS_")) return;
-          const normDate = normalizeStrictDate(r.race_date || "");
-          if (!normDate) return;
-          const key = name.toLowerCase() + "__" + normDate;
-          if (!keptMap.has(key)) {
-            keptMap.set(key, r);
-          } else {
-            const prev = keptMap.get(key);
-            const prevScore = (prev.finish_time && prev.finish_time !== "完賽" ? 2 : 0) + (prev.race_name?.length || 0);
-            const curScore = (r.finish_time && r.finish_time !== "完賽" ? 2 : 0) + (r.race_name?.length || 0);
-            if (curScore > prevScore) {
-              toDeleteIds.push(prev.id);
-              keptMap.set(key, r);
-            } else {
-              toDeleteIds.push(r.id);
-            }
-          }
-        });
-
-        for (let i = 0; i < toDeleteIds.length; i += 50) {
-          const chunk = toDeleteIds.slice(i, i + 50);
-          await supabase.from(table).delete().in("id", chunk);
-        }
-        deletedCount += toDeleteIds.length;
-      }
-      await loadRankingsData();
-      alert("✅ 已徹底清除資料庫中 " + deletedCount + " 筆「同一天重複參賽」的不合理異常紀錄（同一天僅保留最完整之 1 場紀錄）！");
-    } catch (e: any) {
-      alert("清理完成！");
-    } finally {
-      setCleaningDups(false);
-    }
-  };
-
-  // 📥 管理員在網頁上直接選擇【百鐵英雄榜 .csv】或【公路單車百鐵馬英雄榜 .csv】一鍵匯入更新並同步全站！
   const handleCsvUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetType: "tri" | "cyc") => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -432,7 +383,7 @@ export default function RankingsPage() {
       ]);
 
       await loadRankingsData();
-      alert("✅ CSV 英雄榜資料已成功更新上雲端！共計更新 " + parsedList.length + " 位認證英雄，電腦與手機版已同步生效！");
+      alert("✅ CSV 英雄榜資料已成功更新上雲端！共計更新 " + parsedList.length + " 位認證英雄！");
     } catch (err: any) {
       alert("CSV 匯入錯誤：" + (err?.message || "未知錯誤"));
     } finally {
@@ -442,10 +393,10 @@ export default function RankingsPage() {
 
   const activeList = activeSport === "triathlon" ? triHeroes : cycHeroes;
   const activeTierList = activeSport === "triathlon" ? TRI_TIERS : CYC_TIERS;
-  const minCountRequired = activeTier === "all" ? 1 : Number(activeTier);
+  const currentTierObj = activeTierList.find((t) => t.key === activeTier) || activeTierList[0];
 
   const filteredHeroes = activeList.filter((h) => {
-    if (h.count < minCountRequired) return false;
+    if (h.count < currentTierObj.min || h.count > currentTierObj.max) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.trim().toLowerCase();
     return h.name.toLowerCase().includes(q) || (h.team || "").toLowerCase().includes(q);
@@ -455,66 +406,67 @@ export default function RankingsPage() {
     <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between overflow-x-hidden">
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
         
-        {/* 頂部標題與管理員 CSV 一鍵匯入按鈕 */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
-          <div>
-            <span className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-extrabold uppercase">
-              GLOBAL 100 OFFICIAL HALL OF FAME
+        {/* 100% 還原您原本喜愛的標題與右上角切換卡片設計 (image_4311d8.jpg) */}
+        <section className="rounded-3xl bg-zinc-950/90 border border-zinc-800/80 p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-2xl">
+          <div className="space-y-2.5 max-w-2xl">
+            <span className="inline-block px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] font-extrabold uppercase tracking-wider">
+              GLOBAL 100 TRIATHLON CERTIFICATION LEADERBOARD
             </span>
-            <h1 className="text-2xl sm:text-4xl font-black text-white mt-3">
-              🏆 全球百鐵認證 ＆ 百鐵馬英雄榜
+            <h1 className="text-2xl sm:text-4xl font-black text-white">
+              {activeSport === "triathlon" ? "鐵人三項百鐵排名" : "公路單車百鐵馬排名"}
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              已啟用嚴格同日防呆機制（同一天參賽兩場以上 90K 單車或鐵人三項僅計 1 場有效完賽），並完整收錄鄭旭劭 134 場、陳彥良 105 場、劉光武 103 場、孟亞輝 103 場、曾亭彬 100 場等百鐵英雄。
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              已啟用雙軌同日防呆機制：同一天同運動類別僅計一場完賽；完賽 113K/226K 超鐵自動同步計入 90km+ 百鐵馬認證。
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            {isAdmin && (
-              <>
-                <button
-                  type="button"
-                  onClick={handleCleanDatabaseSameDayDuplicates}
-                  disabled={cleaningDups}
-                  className="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs transition cursor-pointer shadow-lg"
-                >
-                  {cleaningDups ? "清理同日重複中..." : "🧹 一鍵清理同日重複異常紀錄"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCsvUploader(!showCsvUploader)}
-                  className="px-3.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs transition cursor-pointer shadow-lg"
-                >
-                  📥 上傳更新 .csv 英雄榜
-                </button>
-              </>
-            )}
-            <Link
-              href="/certifications/query"
-              className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-xs font-bold"
-            >
-              🔍 前往歷年完賽成績明細查詢 →
-            </Link>
-          </div>
-        </div>
-
-        {/* 👑 管理員專屬：網頁直接上傳兩個 .csv 更新面板 */}
-        {isAdmin && showCsvUploader && (
-          <section className="rounded-3xl bg-zinc-950 border-2 border-emerald-500/50 p-5 sm:p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <div>
-                <h2 className="text-base sm:text-lg font-black text-emerald-400">
-                  👑 管理員專用：直接上傳更新【百鐵英雄榜 .csv】與【公路單車百鐵馬英雄榜 .csv】
-                </h2>
-                <p className="text-xs text-zinc-400 mt-0.5">
-                  支援直接上傳「百鐵英雄榜 - raw data.csv」或「公路單車百鐵馬英雄榜 - 完成公路單車賽事數分析表.csv」，系統將自動解析並同步至電腦與手機版！
-                </p>
-              </div>
-              <button onClick={() => setShowCsvUploader(false)} className="text-zinc-400 hover:text-white font-bold cursor-pointer">✕</button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            <div className="p-1.5 rounded-2xl bg-zinc-900 border border-zinc-800 grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveSport("triathlon");
+                  setActiveTier("all");
+                }}
+                className={"px-5 py-3 rounded-xl font-black text-xs sm:text-sm transition cursor-pointer text-center leading-snug " + (activeSport === "triathlon" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white")}
+              >
+                🏊‍♂️ 鐵人三項百鐵排名
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveSport("cycling");
+                  setActiveTier("all");
+                }}
+                className={"px-5 py-3 rounded-xl font-black text-xs sm:text-sm transition cursor-pointer text-center leading-snug " + (activeSport === "cycling" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white")}
+              >
+                🚴‍♂️ 公路單車百鐵馬排名
+              </button>
             </div>
 
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setShowCsvUploader(!showCsvUploader)}
+                className="px-4 py-3 rounded-2xl bg-red-700 hover:bg-red-600 text-white font-black text-xs transition cursor-pointer shadow-lg"
+              >
+                📥 上傳更新 .csv
+              </button>
+            )}
+          </div>
+        </section>
+
+        {/* 管理員 CSV 上傳面板（僅點擊上傳按鈕時展開） */}
+        {isAdmin && showCsvUploader && (
+          <section className="rounded-3xl bg-zinc-950 border-2 border-red-600/50 p-5 sm:p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <h2 className="text-base font-black text-amber-400">
+                👑 管理員專用：直接上傳更新【百鐵英雄榜 .csv】與【公路單車百鐵馬英雄榜 .csv】
+              </h2>
+              <button onClick={() => setShowCsvUploader(false)} className="text-zinc-400 hover:text-white font-bold cursor-pointer">✕</button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-zinc-900/80 border border-amber-500/40 space-y-2">
+              <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2">
                 <label className="text-xs font-extrabold text-amber-400 block">
                   🏊‍♂️ 1. 上傳更新【鐵人三項・百鐵英雄榜 (.csv / .xlsx)】
                 </label>
@@ -523,12 +475,11 @@ export default function RankingsPage() {
                   accept=".csv,.xlsx,.xls"
                   disabled={uploadingCsv}
                   onChange={(e) => handleCsvUpload(e, "tri")}
-                  className="text-xs text-zinc-300 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-amber-500 file:text-black cursor-pointer"
+                  className="text-xs text-zinc-300 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-red-700 file:text-white cursor-pointer"
                 />
               </div>
-
-              <div className="p-4 rounded-2xl bg-zinc-900/80 border border-red-500/40 space-y-2">
-                <label className="text-xs font-extrabold text-red-400 block">
+              <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-2">
+                <label className="text-xs font-extrabold text-amber-400 block">
                   🚴‍♂️ 2. 上傳更新【公路單車・百鐵馬英雄榜 (.csv / .xlsx)】
                 </label>
                 <input
@@ -536,51 +487,51 @@ export default function RankingsPage() {
                   accept=".csv,.xlsx,.xls"
                   disabled={uploadingCsv}
                   onChange={(e) => handleCsvUpload(e, "cyc")}
-                  className="text-xs text-zinc-300 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-red-600 file:text-white cursor-pointer"
+                  className="text-xs text-zinc-300 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-red-700 file:text-white cursor-pointer"
                 />
               </div>
             </div>
           </section>
         )}
 
-        {/* 雙軌切換：鐵人三項 vs 公路單車百鐵馬 */}
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveSport("triathlon");
-              setActiveTier("all");
-            }}
-            className={"py-3.5 px-4 rounded-2xl font-black text-xs sm:text-base transition cursor-pointer flex items-center justify-center gap-2 " + (activeSport === "triathlon" ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20" : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800")}
+        {/* 🎯 100% 原汁原味還原您最喜歡的「紅底白字 ＋ 金色人數徽章 ＋ 點選時亮起金橘白框」階級按鈕列 (image_35ee95.png) */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link
+            href="/certifications/query"
+            className="px-4 py-2.5 rounded-xl bg-[#4a1212] hover:bg-[#5c1717] border border-red-900/70 text-white font-extrabold text-xs sm:text-sm transition flex items-center gap-1.5 shadow-md"
           >
-            <span>🏊‍♂️</span>
-            <span>鐵人三項百鐵英雄榜 ({triHeroes.length} 人)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setActiveSport("cycling");
-              setActiveTier("all");
-            }}
-            className={"py-3.5 px-4 rounded-2xl font-black text-xs sm:text-base transition cursor-pointer flex items-center justify-center gap-2 " + (activeSport === "cycling" ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800")}
-          >
-            <span>🚴‍♂️</span>
-            <span>公路單車百鐵馬英雄榜 ({cycHeroes.length} 人)</span>
-          </button>
-        </div>
+            <span>🔍</span>
+            <span>賽事登錄資料查詢</span>
+          </Link>
 
-        {/* 賞別階級篩選列 */}
-        <div className="flex flex-wrap items-center gap-2">
-          {activeTierList.map((tier) => (
-            <button
-              key={tier.key}
-              type="button"
-              onClick={() => setActiveTier(tier.key)}
-              className={"px-3 py-1.5 rounded-xl text-xs font-extrabold transition cursor-pointer " + (activeTier === tier.key ? "bg-white text-black shadow" : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800")}
-            >
-              {tier.label}
-            </button>
-          ))}
+          {activeTierList.map((tier) => {
+            const tierCount = activeList.filter((h) => h.count >= tier.min && h.count <= tier.max).length;
+            const isSelected = activeTier === tier.key;
+
+            return (
+              <button
+                key={tier.key}
+                type="button"
+                onClick={() => setActiveTier(tier.key)}
+                className={
+                  isSelected
+                    ? "px-4 py-2.5 rounded-xl bg-amber-500 text-black border-2 border-white font-black text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 shadow-lg"
+                    : "px-4 py-2.5 rounded-xl bg-[#b91c1c] hover:bg-[#dc2626] text-white font-extrabold text-xs sm:text-sm transition cursor-pointer flex items-center gap-2 shadow-md"
+                }
+              >
+                <span>{tier.label}</span>
+                <span
+                  className={
+                    isSelected
+                      ? "px-1.5 py-0.5 rounded bg-black/20 text-black font-mono text-[11px] font-black"
+                      : "px-1.5 py-0.5 rounded bg-black/45 text-amber-300 font-mono text-[11px] font-extrabold"
+                  }
+                >
+                  {tierCount}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* 搜尋列 */}
@@ -589,18 +540,18 @@ export default function RankingsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="輸入選手姓名（如：鄭旭劭、陳彥良、劉光武、孟亞輝、曾亭彬）或團隊檢索排名..."
-            className="flex-1 rounded-2xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-sm text-white focus:border-amber-500 outline-none"
+            placeholder="輸入選手姓名（如：陳彥良、梁忠仁、孟亞輝、曾亭彬）或團隊檢索排名..."
+            className="flex-1 rounded-2xl bg-zinc-950 border border-zinc-800 px-4 py-3.5 text-sm text-white focus:border-amber-500 outline-none"
           />
         </div>
 
         {/* 排行榜主表 */}
-        <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-4 sm:p-6 shadow-2xl space-y-4">
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-5 sm:p-7 shadow-2xl space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
             <h2 className="text-lg sm:text-xl font-black text-white">
               {activeSport === "triathlon" ? "🏆 鐵人三項百鐵總排名" : "🚴‍♂️ 公路單車百鐵馬總排名"}
-              <span className="text-amber-400 ml-2">
-                （{activeTierList.find((t) => t.key === activeTier)?.label}）
+              <span className="text-amber-400 ml-1.5">
+                ({currentTierObj.label})
               </span>
             </h2>
             <span className="text-xs font-bold text-amber-400">
@@ -652,7 +603,7 @@ export default function RankingsPage() {
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span>{hero.team || "個人"}</span>
                             {isIronmedic && (
-                              <span className="px-2 py-0.5 rounded-full bg-red-600/20 border border-red-500/40 text-red-400 text-[10px] font-extrabold">
+                              <span className="px-2 py-0.5 rounded-full bg-red-950/80 border border-red-800/60 text-red-300 text-[10px] font-extrabold">
                                 🚑 醫護鐵人
                               </span>
                             )}
@@ -672,7 +623,7 @@ export default function RankingsPage() {
                         <td className="py-4 px-4 text-right whitespace-nowrap">
                           <Link
                             href={"/certifications/query?q=" + encodeURIComponent(hero.name)}
-                            className="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold transition"
+                            className="px-3.5 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold transition"
                           >
                             查看完賽明細 →
                           </Link>
