@@ -1,0 +1,3312 @@
+{
+  "triathlon": [
+    {
+      "name": "鄭旭劭",
+      "count": 134,
+      "team": "康軒鐵人隊",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "劉光武",
+      "count": 103,
+      "team": "KUANGYU光聿",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "孟亞輝",
+      "count": 103,
+      "team": "高雄鐵人",
+      "latestDate": "2024-02-25"
+    },
+    {
+      "name": "陳彥良",
+      "count": 103,
+      "team": "醫護鐵人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "曾亭彬",
+      "count": 100,
+      "team": "台灣大腳ㄚ",
+      "latestDate": "Mar 21, 2026"
+    },
+    {
+      "name": "韓德安",
+      "count": 85,
+      "team": "醫護鐵人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "黃柏青",
+      "count": 84,
+      "team": "DWD",
+      "latestDate": "Dec 7, 2025"
+    },
+    {
+      "name": "蘇耀宗",
+      "count": 71,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "黃偉靈",
+      "count": 54,
+      "team": "個人",
+      "latestDate": "2024-08-17"
+    },
+    {
+      "name": "梁忠仁",
+      "count": 51,
+      "team": "超級難止汗鐵人隊",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "林揚智",
+      "count": 44,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "呂正宇",
+      "count": 42,
+      "team": "台積電鐵人幫",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "羅義清",
+      "count": 40,
+      "team": "醫護鐵人",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "葉永南",
+      "count": 40,
+      "team": "個人",
+      "latestDate": "2024-07-28"
+    },
+    {
+      "name": "蘇啟釗",
+      "count": 36,
+      "team": "TRBB",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "陳威仲",
+      "count": 36,
+      "team": "個人",
+      "latestDate": "2026-03-14"
+    },
+    {
+      "name": "許航紹",
+      "count": 34,
+      "team": "醫護鐵人",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "陳葦達",
+      "count": 32,
+      "team": "個人",
+      "latestDate": "2025-05-29"
+    },
+    {
+      "name": "吳秋萍",
+      "count": 31,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "曾國誌",
+      "count": 31,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "黃堉畯",
+      "count": 31,
+      "team": "紅斑馬",
+      "latestDate": "2025-03-30"
+    },
+    {
+      "name": "呂榤晉",
+      "count": 30,
+      "team": "醫護鐵人",
+      "latestDate": "2024-3-23"
+    },
+    {
+      "name": "林昱辰",
+      "count": 30,
+      "team": "個人",
+      "latestDate": "2024-12-01"
+    },
+    {
+      "name": "孫英玲",
+      "count": 29,
+      "team": "個人",
+      "latestDate": "2026-04-12"
+    },
+    {
+      "name": "潘柳青",
+      "count": 29,
+      "team": "個人",
+      "latestDate": "2022-10-15"
+    },
+    {
+      "name": "陳一華",
+      "count": 29,
+      "team": "陳一華",
+      "latestDate": "2024-12-01"
+    },
+    {
+      "name": "盧雨軒",
+      "count": 28,
+      "team": "個人",
+      "latestDate": "2024-05-18"
+    },
+    {
+      "name": "郭進明",
+      "count": 27,
+      "team": "吉米哥",
+      "latestDate": "2025-03-29"
+    },
+    {
+      "name": "黃英棋",
+      "count": 26,
+      "team": "個人",
+      "latestDate": "2024-07-28"
+    },
+    {
+      "name": "凃凱傑",
+      "count": 25,
+      "team": "TRBB",
+      "latestDate": "2024-03-24"
+    },
+    {
+      "name": "劉靜葳",
+      "count": 25,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "葉奕豪",
+      "count": 25,
+      "team": "鐵打的魚",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "邱正賢",
+      "count": 23,
+      "team": "個人",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "蔡智豪",
+      "count": 22,
+      "team": "醫護鐵人",
+      "latestDate": "2024-05-18"
+    },
+    {
+      "name": "吳麒明",
+      "count": 21,
+      "team": "崇越鐵人",
+      "latestDate": "2025-05-24"
+    },
+    {
+      "name": "孫一弘",
+      "count": 20,
+      "team": "個人",
+      "latestDate": "2025-12-07"
+    },
+    {
+      "name": "簡清山",
+      "count": 20,
+      "team": "三鐵研究生",
+      "latestDate": "2026-04-12"
+    },
+    {
+      "name": "蔡淙緯",
+      "count": 20,
+      "team": "醫護鐵人",
+      "latestDate": "2024-5-19"
+    },
+    {
+      "name": "陳逸文",
+      "count": 20,
+      "team": "醫護鐵人",
+      "latestDate": "2024-02-25"
+    },
+    {
+      "name": "高福麟",
+      "count": 20,
+      "team": "TMAN",
+      "latestDate": "2025-04-13"
+    },
+    {
+      "name": "曹志瑋",
+      "count": 19,
+      "team": "個人",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "王志隆",
+      "count": 19,
+      "team": "王志隆",
+      "latestDate": "2026-04-12"
+    },
+    {
+      "name": "邱建達",
+      "count": 19,
+      "team": "個人",
+      "latestDate": "2024-08-20"
+    },
+    {
+      "name": "王楚易",
+      "count": 16,
+      "team": "個人",
+      "latestDate": "2025-10-19"
+    },
+    {
+      "name": "左仲宏",
+      "count": 15,
+      "team": "光寶科技",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "彭銘德",
+      "count": 15,
+      "team": "個人",
+      "latestDate": "2024-05-26"
+    },
+    {
+      "name": "施淑萍",
+      "count": 15,
+      "team": "台南鐵人隊",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "潘美如",
+      "count": 15,
+      "team": "個人",
+      "latestDate": "2024-03-24"
+    },
+    {
+      "name": "陳丹鳳",
+      "count": 15,
+      "team": "個人",
+      "latestDate": "2024-05-18"
+    },
+    {
+      "name": "劉祖寧",
+      "count": 13,
+      "team": "個人",
+      "latestDate": "2024-03-09"
+    },
+    {
+      "name": "古宜平",
+      "count": 13,
+      "team": "TRBB",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "嚴浩銘",
+      "count": 13,
+      "team": "步輪不累鐵人團",
+      "latestDate": "2022-04-23"
+    },
+    {
+      "name": "姜義鉦",
+      "count": 13,
+      "team": "TRBB 鐵人拔巴",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "詹惠萍",
+      "count": 13,
+      "team": "個人",
+      "latestDate": "2024-04-28"
+    },
+    {
+      "name": "黃文林",
+      "count": 13,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "向克敦",
+      "count": 12,
+      "team": "個人",
+      "latestDate": "2025-03-30"
+    },
+    {
+      "name": "戴文俊",
+      "count": 12,
+      "team": "RUN希望路跑團",
+      "latestDate": "2026-03-29"
+    },
+    {
+      "name": "李泰穎",
+      "count": 12,
+      "team": "鐵人把拔",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "林宗緯",
+      "count": 12,
+      "team": "個人",
+      "latestDate": "2023-04-09"
+    },
+    {
+      "name": "蔡永棠",
+      "count": 12,
+      "team": "崇越鐵人",
+      "latestDate": "2025-05-25"
+    },
+    {
+      "name": "詹仲凡",
+      "count": 12,
+      "team": "鐵牛運功散",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "黃浚平",
+      "count": 12,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "侯旺池",
+      "count": 11,
+      "team": "丸鐵",
+      "latestDate": "2024-07-28"
+    },
+    {
+      "name": "吳義正",
+      "count": 11,
+      "team": "TRBB",
+      "latestDate": "2024-03-09"
+    },
+    {
+      "name": "曾鈺森",
+      "count": 11,
+      "team": "個人",
+      "latestDate": "2024-05-20"
+    },
+    {
+      "name": "洪士茗",
+      "count": 11,
+      "team": "個人",
+      "latestDate": "2024-05-19"
+    },
+    {
+      "name": "董珮珊",
+      "count": 11,
+      "team": "醫護鐵人",
+      "latestDate": "2024-03-25"
+    },
+    {
+      "name": "蘇財有",
+      "count": 11,
+      "team": "小強鐵人隊",
+      "latestDate": "2024-09-13"
+    },
+    {
+      "name": "郭韋隆",
+      "count": 11,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "陳宣佑",
+      "count": 11,
+      "team": "醫護鐵人",
+      "latestDate": "2022-10-16"
+    },
+    {
+      "name": "陳重吉",
+      "count": 11,
+      "team": "個人",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "徐崇富",
+      "count": 10,
+      "team": "徐崇富",
+      "latestDate": "Oct 20, 2018"
+    },
+    {
+      "name": "李孟華",
+      "count": 10,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "王心恬",
+      "count": 10,
+      "team": "個人",
+      "latestDate": "2023-04-23"
+    },
+    {
+      "name": "謝獲光",
+      "count": 10,
+      "team": "個人",
+      "latestDate": "Mar 14, 2026"
+    },
+    {
+      "name": "趙士豪",
+      "count": 10,
+      "team": "個人",
+      "latestDate": "2024-05-12"
+    },
+    {
+      "name": "楊文滙",
+      "count": 9,
+      "team": "個人",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "袁宜如",
+      "count": 9,
+      "team": "個人",
+      "latestDate": "2023-05-14"
+    },
+    {
+      "name": "陳谷銘",
+      "count": 9,
+      "team": "Feebees赤足襪鞋",
+      "latestDate": "2024-05-12"
+    },
+    {
+      "name": "張閔雄",
+      "count": 8,
+      "team": "個人",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "楊景嘉",
+      "count": 8,
+      "team": "個人",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "沈公宇",
+      "count": 8,
+      "team": "小強鐵人隊",
+      "latestDate": "2026-05-24"
+    },
+    {
+      "name": "鄧紹華",
+      "count": 8,
+      "team": "DVTT",
+      "latestDate": "2026-04-12"
+    },
+    {
+      "name": "鄭秀棉",
+      "count": 8,
+      "team": "台南鐵人隊",
+      "latestDate": "2025-03-15"
+    },
+    {
+      "name": "張立群",
+      "count": 7,
+      "team": "個人",
+      "latestDate": "2023-04-22"
+    },
+    {
+      "name": "彭敬之",
+      "count": 7,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "戴唯恩",
+      "count": 7,
+      "team": "個人",
+      "latestDate": "2023-10-29"
+    },
+    {
+      "name": "李怡賢",
+      "count": 7,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "葉雅婷",
+      "count": 7,
+      "team": "個人",
+      "latestDate": "2026-04-25"
+    },
+    {
+      "name": "董家錦 Jeremy Tung",
+      "count": 7,
+      "team": "個人",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "薛順仁",
+      "count": 7,
+      "team": "Big Boy Club",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "蘇彥仲",
+      "count": 7,
+      "team": "個人",
+      "latestDate": "2026-03-28"
+    },
+    {
+      "name": "謝昀叡",
+      "count": 7,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "賴梓櫻",
+      "count": 7,
+      "team": "賴梓櫻",
+      "latestDate": "2025-11-02"
+    },
+    {
+      "name": "陳家平",
+      "count": 7,
+      "team": "嘉義鐵人",
+      "latestDate": "2024-04-28"
+    },
+    {
+      "name": "周亦蓮",
+      "count": 6,
+      "team": "Elaine",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "張嘉凱",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "2025-04-27"
+    },
+    {
+      "name": "朱如蘭",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "2025-03-29"
+    },
+    {
+      "name": "李浚瑀",
+      "count": 6,
+      "team": "蟹肉腳鐵人糰",
+      "latestDate": "2025-12-07"
+    },
+    {
+      "name": "林二",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "林子淇",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "Oct 3, 2015"
+    },
+    {
+      "name": "林虔輝",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "2025-04-19"
+    },
+    {
+      "name": "王煥文",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "Nov 2, 2025"
+    },
+    {
+      "name": "蔡玉婷",
+      "count": 6,
+      "team": "群創光電三鐵社",
+      "latestDate": "2024-3-24"
+    },
+    {
+      "name": "賴鴻裕",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "鄭偉明",
+      "count": 6,
+      "team": "要命（燿明）鐵人難止 汗",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "鍾毅",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "Sep 8, 2024"
+    },
+    {
+      "name": "陳世杰",
+      "count": 6,
+      "team": "個人",
+      "latestDate": "Mar 29, 2026"
+    },
+    {
+      "name": "高泉元",
+      "count": 6,
+      "team": "愛戀鐵",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "何品豪",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2025-12-07"
+    },
+    {
+      "name": "吳曜綸",
+      "count": 5,
+      "team": "曜綸",
+      "latestDate": "2026-10-19"
+    },
+    {
+      "name": "吳百翊",
+      "count": 5,
+      "team": "小郭",
+      "latestDate": "2025-11-01"
+    },
+    {
+      "name": "張栢瑜",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "張繼元",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2025-12-07"
+    },
+    {
+      "name": "曾至謙",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "林均諺",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2024-12-01"
+    },
+    {
+      "name": "楊佳倫",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2025-03-22"
+    },
+    {
+      "name": "楊錦原",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "王仲凱",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2024-04-28"
+    },
+    {
+      "name": "王宗維",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "王建延",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2017-03-12"
+    },
+    {
+      "name": "程仲銘",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2025-03-30"
+    },
+    {
+      "name": "蘇芸萱",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2025-09-06"
+    },
+    {
+      "name": "謝炳煌",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2024-05-12"
+    },
+    {
+      "name": "錢韋安",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2024-05-12"
+    },
+    {
+      "name": "陳世賢",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2022-04-23"
+    },
+    {
+      "name": "陳建成",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "陳政彥",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2024-12-01"
+    },
+    {
+      "name": "黃德發",
+      "count": 5,
+      "team": "美洲豹鐵人隊",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "黃淑苑",
+      "count": 5,
+      "team": "個人",
+      "latestDate": "2024-03-10"
+    },
+    {
+      "name": "Chan Yee Man",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2026-03-29"
+    },
+    {
+      "name": "劉旭燿",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2026-03-28"
+    },
+    {
+      "name": "吳永吉",
+      "count": 4,
+      "team": "董事長樂團",
+      "latestDate": "2024-03-09"
+    },
+    {
+      "name": "周子淵",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2026-03-28"
+    },
+    {
+      "name": "孫瑛紋",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2026-03-29"
+    },
+    {
+      "name": "張志豪",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2019-11-02"
+    },
+    {
+      "name": "張智翔",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "張祚誠",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "曾世璿",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "Nov 16, 2025"
+    },
+    {
+      "name": "曾兆翔",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "Jul 28, 2024"
+    },
+    {
+      "name": "林于喨",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "林晉安",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "潘煒哲",
+      "count": 4,
+      "team": "康軒鐵人",
+      "latestDate": "2025-10-18"
+    },
+    {
+      "name": "謝宗舉",
+      "count": 4,
+      "team": "光聿工作室",
+      "latestDate": "2023-10-29"
+    },
+    {
+      "name": "郭名峰",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2024-05-19"
+    },
+    {
+      "name": "鄭再添",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "2023-12-03"
+    },
+    {
+      "name": "陳佳治",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "Mar 14, 2026"
+    },
+    {
+      "name": "黃俊傑",
+      "count": 4,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "劉伊玲",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "Mar 14, 2026"
+    },
+    {
+      "name": "劉品成",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "劉涵芸",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "Mar 30, 2025"
+    },
+    {
+      "name": "呂震竑",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2026-02-28"
+    },
+    {
+      "name": "周子汧",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "張家銘",
+      "count": 3,
+      "team": "張家銘",
+      "latestDate": "2025-03-30"
+    },
+    {
+      "name": "張志遠",
+      "count": 3,
+      "team": "台大EMBA鐵人隊",
+      "latestDate": "2016-10-15"
+    },
+    {
+      "name": "張洺豪",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2023-10-29"
+    },
+    {
+      "name": "杜文祥",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2024-03-09"
+    },
+    {
+      "name": "林振銘",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "楊依林",
+      "count": 3,
+      "team": "STC",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "楊孟元",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2024-04-28"
+    },
+    {
+      "name": "潘國榮",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "Apr 28, 2024"
+    },
+    {
+      "name": "王泓",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2025-10-18"
+    },
+    {
+      "name": "蔡志雄",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "蕭明正",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2025-03-30"
+    },
+    {
+      "name": "詹秉昇",
+      "count": 3,
+      "team": "崇越鐵人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "郭彥廷",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2024-12-01"
+    },
+    {
+      "name": "陳亦鵬",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2025-11-02"
+    },
+    {
+      "name": "陳怡霖",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2024-03-09"
+    },
+    {
+      "name": "陳興祐",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2026-04-25"
+    },
+    {
+      "name": "黃宣文",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2024-03-09"
+    },
+    {
+      "name": "黃永茂",
+      "count": 3,
+      "team": "個人",
+      "latestDate": "2025-11-16"
+    },
+    {
+      "name": "黃美翠",
+      "count": 3,
+      "team": "草山FUN跑團",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "凃智展",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2026-04-12"
+    },
+    {
+      "name": "劉心瑀",
+      "count": 2,
+      "team": "醫護鐵人",
+      "latestDate": "2022-3-6"
+    },
+    {
+      "name": "劉格臺",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2009-04-18"
+    },
+    {
+      "name": "劉至軒",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2026-04-26"
+    },
+    {
+      "name": "卓峻澤",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "吳勝宗",
+      "count": 2,
+      "team": "無",
+      "latestDate": "2013-10-06"
+    },
+    {
+      "name": "吳萬疄",
+      "count": 2,
+      "team": "JBR",
+      "latestDate": "2024-05-12"
+    },
+    {
+      "name": "呂偉峯",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "呂文宏",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-04-28"
+    },
+    {
+      "name": "呂東泰",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2012-11-03"
+    },
+    {
+      "name": "呂縩正",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-05-19"
+    },
+    {
+      "name": "周邑濃",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "尤正旺",
+      "count": 2,
+      "team": "醫護鐵人",
+      "latestDate": "2020-10-31"
+    },
+    {
+      "name": "康宏佑",
+      "count": 2,
+      "team": "微笑鐵人",
+      "latestDate": "2023-10-30"
+    },
+    {
+      "name": "廖柏欽",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "Apr 26, 2025"
+    },
+    {
+      "name": "張乃云",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2025-10-18"
+    },
+    {
+      "name": "張俊穎",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "張吉龍",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2013-06-02"
+    },
+    {
+      "name": "張怡潔",
+      "count": 2,
+      "team": "董事長三鐵團",
+      "latestDate": "2024-03-09"
+    },
+    {
+      "name": "張書綺",
+      "count": 2,
+      "team": "醫護鐵人",
+      "latestDate": "2020-9-19"
+    },
+    {
+      "name": "張裕東",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2020-10-18"
+    },
+    {
+      "name": "李宇哲",
+      "count": 2,
+      "team": "花蓮中正",
+      "latestDate": "2025-03-30"
+    },
+    {
+      "name": "李念儒",
+      "count": 2,
+      "team": "三鐵小弱弱",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "李自強",
+      "count": 2,
+      "team": "酒鬼鐵人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "林佳瀛",
+      "count": 2,
+      "team": "嘉義市鐵人三項協會",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "林冠妍",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "林秉褘",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "林育秀",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-04-28"
+    },
+    {
+      "name": "柯建興",
+      "count": 2,
+      "team": "愛運動動無礙",
+      "latestDate": "Nov 2, 2025"
+    },
+    {
+      "name": "楊守澄",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "Mar 30, 2025"
+    },
+    {
+      "name": "楊澤夫",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2023-09-17"
+    },
+    {
+      "name": "江健智",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "江申塏",
+      "count": 2,
+      "team": "焦耳",
+      "latestDate": "Mar 29, 2026"
+    },
+    {
+      "name": "沈鉛三",
+      "count": 2,
+      "team": "大腳丫長跑協會",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "洪緯欣",
+      "count": 2,
+      "team": "醫護鐵人",
+      "latestDate": "2021-3-27"
+    },
+    {
+      "name": "程兆祺",
+      "count": 2,
+      "team": "董事三鐵團",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "葉家瑋",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "Apr 27, 2024"
+    },
+    {
+      "name": "葉琮凱",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2025-03-09"
+    },
+    {
+      "name": "蔡承翰",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "蘇品睿",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "蘇志榮",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2018-07-15"
+    },
+    {
+      "name": "許瑞青",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-12-01"
+    },
+    {
+      "name": "謝琮諺",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2023-09-17"
+    },
+    {
+      "name": "趙寓宏",
+      "count": 2,
+      "team": "醫護鐵人",
+      "latestDate": "2023-3-18"
+    },
+    {
+      "name": "趙康皓",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2014-07-26"
+    },
+    {
+      "name": "連俊宏",
+      "count": 2,
+      "team": "董事長三鐵團",
+      "latestDate": "2024-03-10"
+    },
+    {
+      "name": "邱建豪",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-09-08"
+    },
+    {
+      "name": "鄭心彤",
+      "count": 2,
+      "team": "心彤",
+      "latestDate": "2021-04-24"
+    },
+    {
+      "name": "鄭文斌",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "鄭韋佑",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "釧南雁",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2026-11-01"
+    },
+    {
+      "name": "陳勇叡",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "陳盈文",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2025-03-29"
+    },
+    {
+      "name": "陳鼎勳",
+      "count": 2,
+      "team": "鐵人教父",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "黃哈維",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2025-12-07"
+    },
+    {
+      "name": "黃芝綺",
+      "count": 2,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "Beck Chang",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "Chih-Van",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "何曉雯",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "凌嘉萱",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Dec 1, 2024"
+    },
+    {
+      "name": "劉光宇",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "劉勝傑",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "劉勝緯",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2025-04-27"
+    },
+    {
+      "name": "劉宏容",
+      "count": 1,
+      "team": "台灣鐵香蕉",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "劉庭佑",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-03-24"
+    },
+    {
+      "name": "古季詮",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2025-03-09"
+    },
+    {
+      "name": "吳必榮",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-04-28"
+    },
+    {
+      "name": "呂明嬿",
+      "count": 1,
+      "team": "明嬿",
+      "latestDate": "2026-10-19"
+    },
+    {
+      "name": "呂紹彰",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2027-10-17"
+    },
+    {
+      "name": "周宇謙",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-03-29"
+    },
+    {
+      "name": "岳祥文",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "干文國",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2025-12-07"
+    },
+    {
+      "name": "廖珙志",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "張偉定",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-03-28"
+    },
+    {
+      "name": "張志煜",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-05-18"
+    },
+    {
+      "name": "張玟廣",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-17"
+    },
+    {
+      "name": "張立宏",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "張翔鈞",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-05-26"
+    },
+    {
+      "name": "彭炫之",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "彭羽聖",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "徐浚哲",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Apr 23, 2023"
+    },
+    {
+      "name": "徐維中",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 29, 2026"
+    },
+    {
+      "name": "方柏樺",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "施忞保",
+      "count": 1,
+      "team": "伊果鐵人",
+      "latestDate": "2023-06-18"
+    },
+    {
+      "name": "李一秉",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "李世全",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Apr 26, 2025"
+    },
+    {
+      "name": "李佳蓉",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-04-28"
+    },
+    {
+      "name": "李晟豪",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-04-21"
+    },
+    {
+      "name": "李為喬",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-03-28"
+    },
+    {
+      "name": "李瑛",
+      "count": 1,
+      "team": "醫護鐵人",
+      "latestDate": "2020-11-14"
+    },
+    {
+      "name": "李連村",
+      "count": 1,
+      "team": "醫護鐵人",
+      "latestDate": "2023-9-16"
+    },
+    {
+      "name": "李金諺",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "李鎮安",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "林俊成",
+      "count": 1,
+      "team": "中鋼鐵人隊",
+      "latestDate": "2026-03-28"
+    },
+    {
+      "name": "林哲緯",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-05-12"
+    },
+    {
+      "name": "林宏",
+      "count": 1,
+      "team": "五埃鐵人隊",
+      "latestDate": "2023-12-03"
+    },
+    {
+      "name": "林宏達",
+      "count": 1,
+      "team": "美洲豹鐵人隊",
+      "latestDate": "2025-03-29"
+    },
+    {
+      "name": "林家亨",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2025-03-30"
+    },
+    {
+      "name": "林展鶴",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "林文信",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "林竹泉",
+      "count": 1,
+      "team": "台灣大腳丫",
+      "latestDate": "2024-10-06"
+    },
+    {
+      "name": "林育正",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-03-28"
+    },
+    {
+      "name": "林郁政",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2025-04-26"
+    },
+    {
+      "name": "梁玲瑛",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "洪維辰",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 29, 2026"
+    },
+    {
+      "name": "王宗民",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "王悅珉",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-05-19"
+    },
+    {
+      "name": "王昊汶",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2025-04-27"
+    },
+    {
+      "name": "王竣榆",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-04-07"
+    },
+    {
+      "name": "程子齊",
+      "count": 1,
+      "team": "洄瀾大春鴨",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "羅健成",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-03-14"
+    },
+    {
+      "name": "莊君毅",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-05-19"
+    },
+    {
+      "name": "莊憲紘",
+      "count": 1,
+      "team": "有藝思國際娛樂",
+      "latestDate": "2019-03-24"
+    },
+    {
+      "name": "華紹宇",
+      "count": 1,
+      "team": "醫護鐵人",
+      "latestDate": "2020-9-19"
+    },
+    {
+      "name": "蔡沛霖",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-17"
+    },
+    {
+      "name": "蔡盈輝",
+      "count": 1,
+      "team": "三鶯鐵人北七幫",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "蔡青成",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "蔣",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "許伯誠",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-05-19"
+    },
+    {
+      "name": "許安慶",
+      "count": 1,
+      "team": "醫護鐵人",
+      "latestDate": "2020-10-18"
+    },
+    {
+      "name": "許承揚",
+      "count": 1,
+      "team": "醫護鐵人",
+      "latestDate": "2022-9-18"
+    },
+    {
+      "name": "許錦緯",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "詹明哲",
+      "count": 1,
+      "team": "美洲豹鐵人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "詹智翔",
+      "count": 1,
+      "team": "林口鐵人",
+      "latestDate": "2024-09-22"
+    },
+    {
+      "name": "詹皓鈞",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2018-10-21"
+    },
+    {
+      "name": "謝雅婷",
+      "count": 1,
+      "team": "台南鐵人隊",
+      "latestDate": "2024-12-01"
+    },
+    {
+      "name": "賴俊圻",
+      "count": 1,
+      "team": "易冠圻首三鐵",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "趙漢璋",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Apr 25, 2021"
+    },
+    {
+      "name": "郭家銘",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-05-10"
+    },
+    {
+      "name": "郭尚蓁",
+      "count": 1,
+      "team": "TRBB",
+      "latestDate": "2024-03-24"
+    },
+    {
+      "name": "鄭皓宇",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-03-24"
+    },
+    {
+      "name": "鄭茗孺",
+      "count": 1,
+      "team": "鐵人鑄造所",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "鍾延徽",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-03-23"
+    },
+    {
+      "name": "鍾興達",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 14, 2026"
+    },
+    {
+      "name": "陳俊宏",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-10-19"
+    },
+    {
+      "name": "陳俊羽",
+      "count": 1,
+      "team": "瘋騎雲泳",
+      "latestDate": "Apr 26, 2025"
+    },
+    {
+      "name": "陳冠伶",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 29, 2026"
+    },
+    {
+      "name": "陳岱均",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2023-04-23"
+    },
+    {
+      "name": "陳志忠",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "陳昭延",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Nov 16, 2025"
+    },
+    {
+      "name": "陳柏均",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-10-18"
+    },
+    {
+      "name": "陳淑梅",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "Mar 28, 2026"
+    },
+    {
+      "name": "陳琮明",
+      "count": 1,
+      "team": "問問青春還有多少年",
+      "latestDate": "2026-03-29"
+    },
+    {
+      "name": "陳皇龍",
+      "count": 1,
+      "team": "醫護鐵人",
+      "latestDate": "2023-4-23"
+    },
+    {
+      "name": "顏宛平",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2020-10-18"
+    },
+    {
+      "name": "顧沐清",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2018-06-24"
+    },
+    {
+      "name": "馮勝賢",
+      "count": 1,
+      "team": "閃亮之星歡樂三鉄",
+      "latestDate": "2022-03-06"
+    },
+    {
+      "name": "馮輝鐘",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-04-27"
+    },
+    {
+      "name": "高詩婷",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2026-03-29"
+    },
+    {
+      "name": "魏君帆",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2023-10-29"
+    },
+    {
+      "name": "黃友錄",
+      "count": 1,
+      "team": "DWD",
+      "latestDate": "2026-03-28"
+    },
+    {
+      "name": "黃志偉",
+      "count": 1,
+      "team": "個人",
+      "latestDate": "2024-12-01"
+    },
+    {
+      "name": "黃聖傑",
+      "count": 1,
+      "team": "EDCS",
+      "latestDate": "2024-10-19"
+    }
+  ],
+  "cycling": [
+    {
+      "name": "陳彥良",
+      "count": 53,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "曾亭彬",
+      "count": 49,
+      "team": "台灣大腳ㄚ"
+    },
+    {
+      "name": "黃偉靈",
+      "count": 45,
+      "team": "個人"
+    },
+    {
+      "name": "劉光武",
+      "count": 35,
+      "team": "KUANGYU光聿"
+    },
+    {
+      "name": "鄭旭劭",
+      "count": 28,
+      "team": "康軒鐵人隊"
+    },
+    {
+      "name": "韓德安",
+      "count": 28,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "黃柏青",
+      "count": 22,
+      "team": "DWD"
+    },
+    {
+      "name": "孟亞輝",
+      "count": 21,
+      "team": "高雄鐵人"
+    },
+    {
+      "name": "蘇耀宗",
+      "count": 20,
+      "team": "個人"
+    },
+    {
+      "name": "梁忠仁",
+      "count": 20,
+      "team": "超級難止汗鐵人隊"
+    },
+    {
+      "name": "孫英玲",
+      "count": 19,
+      "team": "個人"
+    },
+    {
+      "name": "邱正賢",
+      "count": 19,
+      "team": "個人"
+    },
+    {
+      "name": "吳麒明",
+      "count": 14,
+      "team": "崇越鐵人"
+    },
+    {
+      "name": "林昱辰",
+      "count": 14,
+      "team": "個人"
+    },
+    {
+      "name": "許航紹",
+      "count": 14,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "潘柳青",
+      "count": 13,
+      "team": "個人"
+    },
+    {
+      "name": "黃英棋",
+      "count": 13,
+      "team": "個人"
+    },
+    {
+      "name": "羅義清",
+      "count": 12,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "王志隆",
+      "count": 12,
+      "team": "王志隆"
+    },
+    {
+      "name": "簡清山",
+      "count": 12,
+      "team": "三鐵研究生"
+    },
+    {
+      "name": "黃浚平",
+      "count": 12,
+      "team": "個人"
+    },
+    {
+      "name": "呂榤晉",
+      "count": 10,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "黃堉畯",
+      "count": 10,
+      "team": "紅斑馬"
+    },
+    {
+      "name": "陳丹鳳",
+      "count": 10,
+      "team": "個人"
+    },
+    {
+      "name": "曹志瑋",
+      "count": 9,
+      "team": "個人"
+    },
+    {
+      "name": "孫一弘",
+      "count": 9,
+      "team": "個人"
+    },
+    {
+      "name": "郭進明",
+      "count": 9,
+      "team": "吉米哥"
+    },
+    {
+      "name": "左仲宏",
+      "count": 8,
+      "team": "光寶科技"
+    },
+    {
+      "name": "潘美如",
+      "count": 8,
+      "team": "個人"
+    },
+    {
+      "name": "蔡淙緯",
+      "count": 8,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "蔡永棠",
+      "count": 8,
+      "team": "崇越鐵人"
+    },
+    {
+      "name": "彭銘德",
+      "count": 8,
+      "team": "個人"
+    },
+    {
+      "name": "陳重吉",
+      "count": 8,
+      "team": "個人"
+    },
+    {
+      "name": "蔡智豪",
+      "count": 8,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "薛順仁",
+      "count": 7,
+      "team": "Big Boy Club"
+    },
+    {
+      "name": "趙士豪",
+      "count": 7,
+      "team": "個人"
+    },
+    {
+      "name": "詹惠萍",
+      "count": 7,
+      "team": "個人"
+    },
+    {
+      "name": "古宜平",
+      "count": 7,
+      "team": "TRBB"
+    },
+    {
+      "name": "陳威仲",
+      "count": 7,
+      "team": "個人"
+    },
+    {
+      "name": "林宗緯",
+      "count": 7,
+      "team": "個人"
+    },
+    {
+      "name": "郭韋隆",
+      "count": 7,
+      "team": "個人"
+    },
+    {
+      "name": "董珮珊",
+      "count": 6,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "袁宜如",
+      "count": 6,
+      "team": "個人"
+    },
+    {
+      "name": "李怡賢",
+      "count": 6,
+      "team": "個人"
+    },
+    {
+      "name": "嚴浩銘",
+      "count": 6,
+      "team": "步輪不累鐵人團"
+    },
+    {
+      "name": "劉祖寧",
+      "count": 6,
+      "team": "個人"
+    },
+    {
+      "name": "黃文林",
+      "count": 6,
+      "team": "個人"
+    },
+    {
+      "name": "張清盛",
+      "count": 6,
+      "team": "個人"
+    },
+    {
+      "name": "盧雨軒",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "吳秋萍",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "張閔雄",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "蘇財有",
+      "count": 5,
+      "team": "小強鐵人隊"
+    },
+    {
+      "name": "陳建成",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "張立群",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "陳谷銘",
+      "count": 5,
+      "team": "Feebees赤足襪鞋"
+    },
+    {
+      "name": "邱建達",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "劉靜葳",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "曾鈺森",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "戴唯恩",
+      "count": 5,
+      "team": "個人"
+    },
+    {
+      "name": "李泰穎",
+      "count": 5,
+      "team": "鐵人把拔"
+    },
+    {
+      "name": "侯旺池",
+      "count": 4,
+      "team": "丸鐵"
+    },
+    {
+      "name": "葉永南",
+      "count": 4,
+      "team": "solo"
+    },
+    {
+      "name": "簡昱愷",
+      "count": 4,
+      "team": "個人"
+    },
+    {
+      "name": "彭敬之",
+      "count": 4,
+      "team": "個人"
+    },
+    {
+      "name": "楊佳倫",
+      "count": 4,
+      "team": "個人"
+    },
+    {
+      "name": "吳永吉",
+      "count": 4,
+      "team": "董事長樂團"
+    },
+    {
+      "name": "吳義正",
+      "count": 4,
+      "team": "TRBB"
+    },
+    {
+      "name": "董家錦 Jeremy Tung",
+      "count": 4,
+      "team": "個人"
+    },
+    {
+      "name": "陳維繽",
+      "count": 3,
+      "team": "天龍特攻隊"
+    },
+    {
+      "name": "詹子佳",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "曾至謙",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "王仲凱",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "陳家平",
+      "count": 3,
+      "team": "嘉義鐵人"
+    },
+    {
+      "name": "賴鴻裕",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "黃宣文",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "詹秉昇",
+      "count": 3,
+      "team": "崇越鐵人"
+    },
+    {
+      "name": "林揚智",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "王愛秀",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "陳宣佑",
+      "count": 3,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "何秉諺",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "張洺豪",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "張智翔",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "陳睿洋",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "蔡",
+      "count": 3,
+      "team": "個人"
+    },
+    {
+      "name": "彭輝華",
+      "count": 2,
+      "team": "瑞昫RUSHER"
+    },
+    {
+      "name": "林益新",
+      "count": 2,
+      "team": "瑞昫RUSHER"
+    },
+    {
+      "name": "張偉定",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "林彥宇",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "李國輝",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "袁家駿",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "陳勇叡",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "黃楷崴",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "潘煒哲",
+      "count": 2,
+      "team": "康軒鐵人"
+    },
+    {
+      "name": "蕭聖儒",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "陳秋華",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "張祚誠",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "游勝帆",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "蘇啟釗",
+      "count": 2,
+      "team": "TRBB"
+    },
+    {
+      "name": "張俊穎",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "馬群昱",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "林宏",
+      "count": 2,
+      "team": "五埃鐵人隊"
+    },
+    {
+      "name": "郭名峰",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "釧南雁",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "李孟華",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "謝琮諺",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "蘇品睿",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "陳子文",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "周晏霆",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "施淑萍",
+      "count": 2,
+      "team": "台南鐵人隊"
+    },
+    {
+      "name": "卓峻澤",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "蔡玉婷",
+      "count": 2,
+      "team": "群創光電三鐵社"
+    },
+    {
+      "name": "許侑純",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "黃淑苑",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "游秋銘",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "康宏佑",
+      "count": 2,
+      "team": "微笑鐵人"
+    },
+    {
+      "name": "趙寓宏",
+      "count": 2,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "高泉元",
+      "count": 2,
+      "team": "愛戀鐵"
+    },
+    {
+      "name": "連俊宏",
+      "count": 2,
+      "team": "董事長三鐵團"
+    },
+    {
+      "name": "鄭昱菘",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "黃煜明",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "Lin",
+      "count": 2,
+      "team": "Wistron"
+    },
+    {
+      "name": "陳逸憲",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "楊依林",
+      "count": 2,
+      "team": "瘋騎雲泳"
+    },
+    {
+      "name": "陳志祥",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "鄧紹華",
+      "count": 2,
+      "team": "DVTT"
+    },
+    {
+      "name": "陳世賢",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "趙祥志",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "王心恬",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "謝欣佑",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "林明煒",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "吳瑜文",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "鄭文斌",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "黃孟玄",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "劉詠涵",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "鄭偉驥",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "徐嘉良",
+      "count": 2,
+      "team": "個人"
+    },
+    {
+      "name": "林佳怡",
+      "count": 1,
+      "team": "瑞昫RUSHER"
+    },
+    {
+      "name": "林世聰",
+      "count": 1,
+      "team": "瑞昫RUSHER"
+    },
+    {
+      "name": "黃美翠",
+      "count": 1,
+      "team": "TRBB"
+    },
+    {
+      "name": "李",
+      "count": 1,
+      "team": "騎的完"
+    },
+    {
+      "name": "蔡秉泓",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "許雅婷",
+      "count": 1,
+      "team": "洪胖胖家族"
+    },
+    {
+      "name": "洪舜港",
+      "count": 1,
+      "team": "洪胖胖家族"
+    },
+    {
+      "name": "游勝帆（壯豐工業有限公司）",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "謝宗舉",
+      "count": 1,
+      "team": "光聿工作室"
+    },
+    {
+      "name": "賴梓櫻",
+      "count": 1,
+      "team": "賴梓櫻"
+    },
+    {
+      "name": "洪煒則",
+      "count": 1,
+      "team": "雲林放爛團"
+    },
+    {
+      "name": "彭紹成",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "江素美",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "張翔傑",
+      "count": 1,
+      "team": "張翔傑"
+    },
+    {
+      "name": "鄭又威",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "施致瑋",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "王愛美",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "小艾吟",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "蕭艾吟",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "吳昌祐",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "黃家溱",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "葉奕豪",
+      "count": 1,
+      "team": "鐵打的魚"
+    },
+    {
+      "name": "周恩弘",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "彭彥翰",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "楊子儀",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "Megan",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "林宜燊",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "林竹泉",
+      "count": 1,
+      "team": "台灣大腳丫"
+    },
+    {
+      "name": "劉",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "鄭偉明",
+      "count": 1,
+      "team": "要命（燿明）鐵人難止 汗"
+    },
+    {
+      "name": "王智文",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "李芳欣",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "江健智",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "沈囿含",
+      "count": 1,
+      "team": "瘋騎雲泳"
+    },
+    {
+      "name": "蔡宗翰",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "葉雅婷",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳榮華",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "宋奕儒",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "郭苙豐",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "劉明忠",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "吳紹華",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "謝炳煌",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "詹智翔",
+      "count": 1,
+      "team": "林口鐵人"
+    },
+    {
+      "name": "黃家怡",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "鄭佳玲",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳皇政",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "張棟正",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "洪士茗",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "林政錡",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "施忞保",
+      "count": 1,
+      "team": "伊果鐵人"
+    },
+    {
+      "name": "羅健維",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "吳滄緯",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳啟宏",
+      "count": 1,
+      "team": "新手上路"
+    },
+    {
+      "name": "鍾延徽",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳羣元",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "王宗民",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "吳必榮",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "林哲緯",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陸冠輝",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "鄭茗孺",
+      "count": 1,
+      "team": "鐵人鑄造所"
+    },
+    {
+      "name": "劉格臺",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "鄭伯良",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "廖珙志",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "楊炳文",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "鄭再添",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "周寬瑜",
+      "count": 1,
+      "team": "普隆貢"
+    },
+    {
+      "name": "林澤勳",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "高宇玄",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "張喬翔",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "邱致瑋",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "劉光祐",
+      "count": 1,
+      "team": "PASS車隊"
+    },
+    {
+      "name": "許錦緯",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "劉心瑀",
+      "count": 1,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "張怡潔",
+      "count": 1,
+      "team": "董事長三鐵團"
+    },
+    {
+      "name": "蕭鋒裕",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "莊憲紘",
+      "count": 1,
+      "team": "有藝思國際娛樂"
+    },
+    {
+      "name": "楊雨璇",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "楊守澄",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "張志煜",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "黃聖傑",
+      "count": 1,
+      "team": "EDCS"
+    },
+    {
+      "name": "張志遠",
+      "count": 1,
+      "team": "台大EMBA鐵人隊"
+    },
+    {
+      "name": "尤正旺",
+      "count": 1,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "李均韋",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "周 恩宇",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "黃芝綺",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "馮輝鐘",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "石名傑",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "吳忠益",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "馮勝賢",
+      "count": 1,
+      "team": "閃亮之星歡樂三鉄"
+    },
+    {
+      "name": "江喻強",
+      "count": 1,
+      "team": "先不大戰隊"
+    },
+    {
+      "name": "陳鼎勳",
+      "count": 1,
+      "team": "鐵人教父"
+    },
+    {
+      "name": "許家誠",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳怡霖",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "沈裕宸",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "梁瀚名",
+      "count": 1,
+      "team": "Npc"
+    },
+    {
+      "name": "李瑛",
+      "count": 1,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "德皓王",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "簡嘉嵩",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳欣伶",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "李偉齊",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "Chia-Sheng Liu",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "歐信良",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "黃慶廻",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "林己翔",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "杜方棋",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳英聖",
+      "count": 1,
+      "team": "鐵腿騎跡"
+    },
+    {
+      "name": "陳逸文",
+      "count": 1,
+      "team": "醫護鐵人"
+    },
+    {
+      "name": "高培華",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "杜文祥",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "黃明旺",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "林虔輝",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "張",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "Chiang",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "張志豪",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "Beck Chang",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳憲雄",
+      "count": 1,
+      "team": "蘭陽百k"
+    },
+    {
+      "name": "李政諺",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "liu",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "魏君帆",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "卓彥傑",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "王建延",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "歐俊昇",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "蔡盈輝",
+      "count": 1,
+      "team": "三鶯鐵人北七幫"
+    },
+    {
+      "name": "游景翔",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "謝宜庭",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "徐",
+      "count": 1,
+      "team": "漫漫騎"
+    },
+    {
+      "name": "黃允成",
+      "count": 1,
+      "team": "小阿咩"
+    },
+    {
+      "name": "黃宇民",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "張立宏",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "巫婷涵",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "張群聖",
+      "count": 1,
+      "team": "個人"
+    },
+    {
+      "name": "陳樹林",
+      "count": 1,
+      "team": "天龍特攻隊"
+    },
+    {
+      "name": "高福麟",
+      "count": 1,
+      "team": "TMAN"
+    },
+    {
+      "name": "簡澤睿",
+      "count": 1,
+      "team": "DG8"
+    }
+  ],
+  "updatedAt": "2026-11-04"
+}

@@ -91,8 +91,7 @@ export default function Navbar() {
     { label: "百鐵英雄榜", href: "/rankings" },
     { label: "成績登錄查詢", href: "/certifications/query" },
     { label: "完賽登錄", href: "/profile/new-record" },
-    { label: "運動醫學專欄", href: "/columns/sports-medicine" },
-    { label: "藝人騎乘專欄", href: "/columns/celebrity-sharing" },
+    { label: "單車專欄", href: "/columns" },
     { label: "關於我們", href: "/about" },
     { label: "榮耀商城", href: "/shop" },
   ];

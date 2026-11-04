@@ -157,6 +157,18 @@ export default function HomePage() {
 
   const loadDynamicAssetsAndColumns = useCallback(async () => {
     // 1. 載入管理員在網頁上傳的圖片覆蓋設定
+        try {
+      const { data: sysSyncRows } = await supabase.from("race_details_full").select("*").in("athlete_name", ["__SYS_COLUMN_SYNC__", "__SYS_IMAGE_SYNC__"]).order("id", { ascending: false });
+      if (sysSyncRows && sysSyncRows.length > 0) {
+        const medRow = sysSyncRows.find((r: any) => r.athlete_name === "__SYS_COLUMN_SYNC__" && r.race_name === "COL_MED_JSON");
+        if (medRow?.team) { try { const arr = JSON.parse(medRow.team); if (arr.length > 0) setLatestMedCol(arr[0]); } catch (e) {} }
+        const celebRow = sysSyncRows.find((r: any) => r.athlete_name === "__SYS_COLUMN_SYNC__" && r.race_name === "COL_CELEB_JSON");
+        if (celebRow?.team) { try { const arr = JSON.parse(celebRow.team); if (arr.length > 0) setLatestCelebCol(arr[0]); } catch (e) {} }
+        const imgMap: Record<string, string> = {};
+        sysSyncRows.filter((r: any) => r.athlete_name === "__SYS_IMAGE_SYNC__").forEach((r: any) => { if (r.race_name && r.team) imgMap[r.race_name] = r.team; });
+        if (Object.keys(imgMap).length > 0) setCustomImages((prev) => ({ ...prev, ...imgMap }));
+      }
+    } catch (e) {}
     const localImgs = localStorage.getItem("g100_custom_site_images_v3");
     if (localImgs) {
       try {
@@ -165,14 +177,14 @@ export default function HomePage() {
     }
 
     // 2. 自動從兩個專欄資料池抓取最新一篇圖文摘要
-    const localMed = localStorage.getItem("g100_col_v3_MED");
+    const localMed = localStorage.getItem("g100_unified_col_MED") || localStorage.getItem("g100_col_v3_MED");
     if (localMed) {
       try {
         const arr = JSON.parse(localMed);
         if (arr.length > 0) setLatestMedCol(arr[0]);
       } catch (e) {}
     }
-    const localCeleb = localStorage.getItem("g100_col_v3_CELEB");
+    const localCeleb = localStorage.getItem("g100_unified_col_CELEB") || localStorage.getItem("g100_col_v3_CELEB");
     if (localCeleb) {
       try {
         const arr = JSON.parse(localCeleb);
@@ -709,10 +721,10 @@ export default function HomePage() {
               </h2>
             </div>
             <div className="flex items-center gap-3 shrink-0">
-              <Link href="/columns/sports-medicine" className="text-xs font-bold text-emerald-400 hover:underline">
+              <Link href="/columns#med-section" className="text-xs font-bold text-emerald-400 hover:underline">
                 運動醫學專欄 →
               </Link>
-              <Link href="/columns/celebrity-sharing" className="text-xs font-bold text-amber-400 hover:underline">
+              <Link href="/columns#celeb-section" className="text-xs font-bold text-amber-400 hover:underline">
                 藝人騎乘專欄 →
               </Link>
             </div>
@@ -747,14 +759,14 @@ export default function HomePage() {
               </div>
               <div className="px-5 pb-5 pt-2 flex items-center justify-between border-t border-zinc-800/70">
                 <Link
-                  href="/columns/sports-medicine"
+                  href="/columns#med-section"
                   className="text-xs font-extrabold text-white hover:text-emerald-400 transition inline-flex items-center gap-1"
                 >
                   前往閱讀完整專欄 →
                 </Link>
                 {isAdmin && (
                   <Link
-                    href="/columns/sports-medicine"
+                    href="/columns#med-section"
                     className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 text-[11px] font-bold hover:bg-emerald-500 hover:text-black transition"
                   >
                     ✍️ 進入專欄頁面編輯圖文
@@ -790,14 +802,14 @@ export default function HomePage() {
               </div>
               <div className="px-5 pb-5 pt-2 flex items-center justify-between border-t border-zinc-800/70">
                 <Link
-                  href="/columns/celebrity-sharing"
+                  href="/columns#celeb-section"
                   className="text-xs font-extrabold text-white hover:text-amber-400 transition inline-flex items-center gap-1"
                 >
                   前往閱讀完整專欄 →
                 </Link>
                 {isAdmin && (
                   <Link
-                    href="/columns/celebrity-sharing"
+                    href="/columns#celeb-section"
                     className="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 text-[11px] font-bold hover:bg-amber-500 hover:text-black transition"
                   >
                     ✍️ 進入專欄頁面編輯圖文
