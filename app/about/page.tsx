@@ -4,156 +4,126 @@ import React from "react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 
+const FOUNDING_INITIATORS = [
+  {
+    role: "創始總召集人 ／ 醫護鐵人暨全球百鐵認證創辦人",
+    name: "陳彥良 (Novem Chen)",
+    title: "全球醫鐵有限公司負責人・醫護鐵人創辦人・119場鐵人三項完賽",
+    desc: "創立「醫護鐵人 (IronMedic)」社會企業模式與「全球百鐵認證 (G100TC)」，結合企業流程管理顧問、ISO 27001 主任稽核員、EMT 與三鐵/自由車/游泳/田徑教練專業，推動賽道移動式安全守護與零收費百鐵認證榮耀體系。",
+    badge: "🚑 醫護鐵人創辦人",
+  },
+  {
+    role: "共同創辦人 ／ 總醫學顧問",
+    name: "洪緯欣 醫師 (Dr. Wei-Hsin Hung)",
+    title: "屏東榮民總醫院胸腔內科主治醫師・全球百鐵認證共同創辦人",
+    desc: "專精胸腔內科、急重症醫學與耐力運動生理學，合著《向前一步，就是解方：狂飆的18鐵人人生處方箋》，主導《單車誌》運動醫學專欄與耐力賽事心肺安全防護規範。",
+    badge: "🩺 運動醫學權威",
+  },
+  {
+    role: "創始倡議協辦單位",
+    name: "臺東縣城鄉生活運動協會 (TURAA)",
+    title: "臺東普悠瑪國際鐵人三項賽 主辦單位",
+    desc: "深耕臺灣鐵人三項搖籃臺東，每年舉辦指標性普悠瑪 226K/113K/51.5K 國際鐵人三項賽，與全球百鐵認證全面串聯歷年完賽成績資料庫。",
+    badge: "🏊‍♂️ 普悠瑪鐵人推手",
+  },
+  {
+    role: "創始倡議協辦單位",
+    name: "巴歌浪運動發展協會 (Pakelang)",
+    title: "臺東巴歌浪 113K 鐵人三項暨船屋馬拉松 主辦單位",
+    desc: "結合東海岸原住民文化與絕美山海賽道，打造最具人情味與榮耀感的東海岸鐵人三項盛事，並共同倡議百鐵完賽認證。",
+    badge: "🌊 東海岸經典賽事",
+  },
+  {
+    role: "創始倡議協辦單位",
+    name: "中華民國體適能健身運動協會 ＆ 全球百鐵認證協會",
+    title: "全民體適能推廣與賽事安全認證夥伴",
+    desc: "共同推動鐵人三項與 90km+ 公路單車百鐵馬雙軌認證制度，落實『安全完賽、榮耀百鐵』之終身運動理念。",
+    badge: "🏅 官方認證機構",
+  },
+];
+
 export default function AboutPage() {
-  const triAwards = [
-    "《初鐵賞》", "《三鐵賞》", "《五鐵賞》", "《十鐵賞》",
-    "《二十鐵賞》", "《三十鐵賞》", "《四十鐵賞》", "《五十鐵賞》",
-    "《六十鐵賞》", "《七十鐵賞》", "《八十鐵賞》", "《九十鐵賞》", "《百鐵賞》"
-  ];
-
-  const bikeAwards = [
-    "《初鐵馬賞》", "《三鐵馬賞》", "《五鐵馬賞》", "《十鐵馬賞》",
-    "《二十鐵馬賞》", "《三十鐵馬賞》", "《四十鐵馬賞》", "《五十鐵馬賞》",
-    "《六十鐵馬賞》", "《七十鐵馬賞》", "《八十鐵馬賞》", "《九十鐵馬賞》", "《百鐵馬賞》"
-  ];
-
   return (
-    <div className="min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
-      <main className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between overflow-x-hidden">
+      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-12">
         
-        {/* 頂部導言 */}
-        <section className="rounded-3xl bg-gradient-to-br from-zinc-950 via-[#100a0c] to-zinc-950 border border-zinc-800 p-8 sm:p-10 shadow-2xl space-y-5">
-          <div className="inline-block px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-extrabold tracking-widest uppercase">
-            ABOUT GLOBAL 100 TRIATHLON CERTIFICATION (G100TC)
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-            關於「全球百鐵認證 Global 100 Triathlon Certification」
+        {/* 頂部橫幅 */}
+        <section className="rounded-3xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border border-amber-500/40 p-6 sm:p-10 shadow-2xl space-y-4">
+          <span className="px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-extrabold uppercase">
+            FOUNDED BY IRONMEDIC・GLOBAL 100 TRIATHLON CERTIFICATION
+          </span>
+          <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight">
+            關於全球百鐵認證 ＆ 創始倡議人
           </h1>
-          <div className="space-y-4 text-sm sm:text-base text-zinc-300 leading-relaxed">
-            <p>
-              鐵人三項源自於夏威夷，而<strong className="text-amber-400">全球百鐵認證則創始自台灣</strong>。全球百鐵認證 <strong className="text-white">Global 100 Triathlon Certification (G100TC)</strong> 為全球首創鐵人三項賽事及鐵馬賽事完賽紀錄認證平台。這個源自台灣、全球首創的鐵人三項賽事、公路自由車賽與登山越野車賽完賽紀錄登錄及認證平台，為<strong className="text-amber-400">醫護鐵人</strong>主導統籌、國際知名<strong className="text-amber-400">美利達自行車</strong>及眾多品牌支持的認證單位。有鑒於馬拉松的百馬認證廣為人知，故百鐵認證採<strong className="text-emerald-400">線上零收費認證</strong>，結合實體賽事現場讓更多愛好者共同參與。
-            </p>
-            <p>
-              鐵人三項代表耐力和毅力，而鐵馬更是貼近大家日常生活，我們的目標是鼓勵熱愛耐力運動的鐵人與鐵馬愛好者挑戰「百鐵」。認證過程簡單，只要登錄本網會員，填寫入會申請表，註冊會員，登錄合格賽事，不需任何費用。
-            </p>
-          </div>
+          <p className="text-xs sm:text-base text-zinc-300 leading-relaxed max-w-4xl">
+            「全球百鐵認證（Global 100 Triathlon Certification）」由醫護鐵人創辦人陳彥良與洪緯欣醫師共同發起，串聯國內外指標性鐵人三項與長距離公路單車賽事，以「零報名費、實名查核、雙軌同日防呆」打造華人界最具公信力的耐力運動名人堂。
+          </p>
         </section>
 
-        {/* 三大認證標準 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* 鐵人三項認證標準 */}
-          <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-6 sm:p-7 space-y-4 shadow-xl">
-            <div className="flex items-center gap-2 text-amber-400 font-black text-lg">
-              🏊‍♂️ 【鐵人三項認證標準】
-            </div>
-            <ul className="space-y-3 text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              <li><strong className="text-white">原則一：</strong>僅開放登錄 51.5 公里以上距離之鐵人三項賽事（同時具備游泳項目 1.5 公里（含）或以上、自行車 40 公里（含）或以上、跑步 10 公里（含）或以上），且時間必須為連續性，且必須於大會規定的時間內完賽。</li>
-              <li><strong className="text-white">原則二：</strong>僅開放登錄政府單位主辦或經政府立案之民間團體所主辦，或由全球百鐵認證特別認可之 51.5km 以上鐵人三項賽事，私人舉辦的賽事恕不接受。</li>
-              <li><strong className="text-white">原則三：</strong>僅開放登錄國內外政府核准申辦（如：路權）的賽事。</li>
-              <li><strong className="text-white">原則四：</strong>僅開放登錄合格賽事必須設有晶片感應計時，且必須設有完整的補給及醫護措施。</li>
-            </ul>
-          </section>
-
-          {/* 公路單車認證標準 */}
-          <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-6 sm:p-7 space-y-4 shadow-xl">
-            <div className="flex items-center gap-2 text-red-400 font-black text-lg">
-              🚴‍♂️ 【公路單車認證標準】
-            </div>
-            <ul className="space-y-3 text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              <li><strong className="text-white">原則一：</strong>僅開放登錄 90km 以上距離之公路賽或 113km 以上鐵人三項參賽組別之完賽紀錄，越野單車賽不列入本登記範圍，未完賽者亦不能登錄，且時間必須為連續性，且必須於大會規定的時間內完賽。</li>
-              <li><strong className="text-white">原則二：</strong>僅開放登錄政府單位主辦或經政府立案之民間團體所主辦，或由全球百鐵認證特別認可之公路單車賽事及 113km 以上鐵人三項賽事，私人舉辦的賽事恕不接受。</li>
-              <li><strong className="text-white">原則三：</strong>為尊重其他已開放各式認證的賽事單位，類似賽事恕不開放登錄（如：北高、雙塔、三塔系列自我挑戰認證賽事）。</li>
-              <li><strong className="text-white">原則四：</strong>僅開放登錄國內外政府核准申辦（如：路權）的公路單車賽事。</li>
-              <li><strong className="text-white">原則五：</strong>僅開放登錄合格賽事必須設有晶片感應計時，且必須設有完整的補給及醫護措施。</li>
-            </ul>
-          </section>
-
-          {/* 越野單車認證標準 */}
-          <section className="rounded-3xl bg-zinc-950 border border-zinc-800/90 p-6 sm:p-7 space-y-4 shadow-xl">
-            <div className="flex items-center gap-2 text-emerald-400 font-black text-lg">
-              🚵‍♂️ 【越野單車認證標準】
-            </div>
-            <ul className="space-y-3 text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              <li><strong className="text-white">原則一：</strong>僅開放登錄 20km 以上距離之越野單車賽或 XTERRA 鐵人三項參賽組別之完賽紀錄，公路單車賽不列入本登記範圍，未完賽者亦不能登錄且時間必須為連續性，且必須於大會規定的時間內完賽。</li>
-              <li><strong className="text-white">原則二：</strong>僅開放登錄政府單位主辦或經政府立案之民間團體所主辦，或由全球百鐵認證特別認可之越野單車賽事，私人舉辦的賽事恕不接受。</li>
-              <li><strong className="text-white">原則三：</strong>為尊重其他已開放各式認證的賽事單位，類似賽事恕不開放登錄（如：北高、雙塔、三塔系列自我挑戰認證賽事）。</li>
-              <li><strong className="text-white">原則四：</strong>僅開放登錄政府核准申辦（如：路權）的越野單車賽事。</li>
-              <li><strong className="text-white">原則五：</strong>僅開放登錄合格賽事必須設有晶片感應計時，且必須設有完整的補給及醫護措施。</li>
-            </ul>
-          </section>
-        </div>
-
-        {/* 認證辦法與獎勵 */}
-        <section className="rounded-3xl bg-zinc-950 border border-zinc-800 p-8 space-y-6 shadow-xl">
-          <div className="space-y-3">
-            <h2 className="text-xl font-black text-amber-400">📋 【鐵人三項、公路單車及越野單車認證辦法】</h2>
-            <ol className="list-decimal list-inside space-y-2 text-sm text-zinc-300 leading-relaxed">
-              <li>上網填寫「全球百鐵認證」入會申請表並註冊登錄成為會員（免繳會費）。</li>
-              <li>登錄合格賽事名稱、舉辦時間、地點，並將完賽成績登錄於指定表單才算百鐵中的一鐵。基於對運動愛好者的榮譽信任，全球百鐵認證不另做審核，請申請「全球百鐵認證」的鐵人們務必詳閱相關規定。</li>
-            </ol>
+        {/* 創始倡議人與共同發起單位卡片專區 */}
+        <section className="space-y-6">
+          <div className="border-l-4 border-amber-500 pl-4">
+            <h2 className="text-xl sm:text-2xl font-black text-white">
+              👑 創始倡議人 ＆ 五大共同發起機構
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+              凝聚運動醫學、賽道安全守護與指標性賽事主辦協會力量，陪伴每位選手邁向百鐵里程碑。
+            </p>
           </div>
-
-          <div className="space-y-2 pt-2 border-t border-zinc-800/80">
-            <h2 className="text-xl font-black text-amber-400">🏅 【獎勵】</h2>
-            <p className="text-sm text-zinc-300">於全球百鐵認證的官網上列出姓名及榮耀英雄榜排名。</p>
-          </div>
-        </section>
-
-        {/* 獎項與領獎條件 */}
-        <section className="rounded-3xl bg-zinc-950 border border-zinc-800 p-8 space-y-6 shadow-xl">
-          <h2 className="text-2xl font-black text-white">🏆 【獎項與授證規範】</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="rounded-2xl bg-zinc-900/60 border border-amber-500/30 p-5 space-y-3">
-              <h3 className="text-base font-extrabold text-amber-400">1. 鐵人三項獎項設有：</h3>
-              <div className="flex flex-wrap gap-2">
-                {triAwards.map((aw) => (
-                  <span key={aw} className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
-                    {aw}
+            {FOUNDING_INITIATORS.map((person, idx) => (
+              <div
+                key={idx}
+                className="rounded-3xl bg-zinc-950 border border-zinc-800 hover:border-amber-500/50 p-6 space-y-3 shadow-xl transition"
+              >
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-amber-400">{person.role}</span>
+                  <span className="px-3 py-1 rounded-full bg-red-950/80 border border-red-700/50 text-red-300 text-[11px] font-extrabold">
+                    {person.badge}
                   </span>
-                ))}
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-white">{person.name}</h3>
+                <div className="text-xs font-bold text-emerald-400">{person.title}</div>
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed pt-1">
+                  {person.desc}
+                </p>
               </div>
-            </div>
-
-            <div className="rounded-2xl bg-zinc-900/60 border border-red-500/30 p-5 space-y-3">
-              <h3 className="text-base font-extrabold text-red-400">2. 公路單車及越野單車獎項設有：</h3>
-              <div className="flex flex-wrap gap-2">
-                {bikeAwards.map((aw) => (
-                  <span key={aw} className="px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-bold">
-                    {aw}
-                  </span>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
+        </section>
 
-          <div className="space-y-2.5 pt-4 border-t border-zinc-800">
-            <h3 className="text-base font-extrabold text-white">3. 頒獎時間及領獎條件：</h3>
-            <ul className="space-y-2 text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              <li><strong className="text-amber-400">3.1</strong> 得獎標準以登錄審核截止日（含）前於全球百鐵認證網站上所登錄的合格賽事數為標準。</li>
-              <li><strong className="text-amber-400">3.2</strong> 鐵人三項得獎者必須參加每年於台灣台東市超級鐵人三項或普悠瑪鐵人三項賽事聯名舉辦的全球百鐵英雄授證宴並購買獎牌與獎狀（約每年十月或三月）方得領獎。</li>
-              <li><strong className="text-amber-400">3.3</strong> 公路單車及越野單車得獎者則另行公告。</li>
-              <li><strong className="text-amber-400">3.4</strong> 每年各獎項不得重複領取，亦不能同時領取二種以上獎項。</li>
-            </ul>
+        {/* 核心認證鐵律說明 */}
+        <section className="rounded-3xl bg-zinc-950 border border-zinc-800 p-6 sm:p-8 space-y-4">
+          <h2 className="text-lg sm:text-xl font-black text-amber-400">
+            ⚖️ 全球百鐵認證 三大查核鐵律
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm text-zinc-300">
+            <div className="p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1.5">
+              <div className="font-black text-white">1. 嚴格同日防呆機制</div>
+              <p className="text-zinc-400">同一天（同日期）無論登錄幾場 51.5K、113K 或 90km+ 自行車賽，系統嚴格僅計入 1 場有效完賽，杜絕重複灌水。</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1.5">
+              <div className="font-black text-white">2. 超鐵雙軌自動認證</div>
+              <p className="text-zinc-400">完成 113K 或 226K 超級鐵人三項（單車段達 90km/180km），系統自動同步計入「公路單車百鐵馬」場次。</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-1.5">
+              <div className="font-black text-white">3. 階段賞別解鎖制</div>
+              <p className="text-zinc-400">從初鐵賞、三鐵賞、五鐵賞、十鐵賞至百鐵賞，唯有實際累積達標之選手方能解鎖對應階段電子證書與專屬加價購特權。</p>
+            </div>
           </div>
 
           <div className="pt-4 flex flex-wrap gap-3">
-            <Link
-              href="/profile/new-record"
-              className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm transition"
-            >
-              ✍️ 立即登錄完賽紀錄
+            <Link href="/rankings" className="px-5 py-2.5 rounded-xl bg-[#b91c1c] hover:bg-[#dc2626] text-white font-black text-xs sm:text-sm">
+              🏆 查看百鐵英雄榜 →
             </Link>
-            <Link
-              href="/shop"
-              className="px-6 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-bold text-sm transition"
-            >
-              🛍️ 前往榮耀商城查看獎牌與水晶證書
+            <Link href="/shop" className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm">
+              🛒 前往榮耀商城 ＆ 證書預覽 →
             </Link>
           </div>
         </section>
 
-      </main>
+      </div>
       <Footer />
     </div>
   );

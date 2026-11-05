@@ -169,6 +169,21 @@ export default function HomePage() {
         if (Object.keys(imgMap).length > 0) setCustomImages((prev) => ({ ...prev, ...imgMap }));
       }
     } catch (e) {}
+    
+    // 自動將 vercel.app 本地已編輯之專欄與圖片同步推上 Supabase 雲端，讓 www.global100triathlon.com 100% 顯示相同最新圖文！
+    try {
+      const localMedRaw = localStorage.getItem("g100_unified_col_MED") || localStorage.getItem("g100_col_v3_MED");
+      const localCelebRaw = localStorage.getItem("g100_unified_col_CELEB") || localStorage.getItem("g100_col_v3_CELEB");
+      if (localMedRaw) {
+        await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_COLUMN_SYNC__").eq("race_name", "COL_MED_JSON");
+        await supabase.from("race_details_full").insert([{ athlete_name: "__SYS_COLUMN_SYNC__", race_name: "COL_MED_JSON", race_date: "2026-11-05", category: "SYS", finish_time: "SYS", team: localMedRaw }]);
+      }
+      if (localCelebRaw) {
+        await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_COLUMN_SYNC__").eq("race_name", "COL_CELEB_JSON");
+        await supabase.from("race_details_full").insert([{ athlete_name: "__SYS_COLUMN_SYNC__", race_name: "COL_CELEB_JSON", race_date: "2026-11-05", category: "SYS", finish_time: "SYS", team: localCelebRaw }]);
+      }
+    } catch (e) {}
+
     const localImgs = localStorage.getItem("g100_custom_site_images_v3");
     if (localImgs) {
       try {
