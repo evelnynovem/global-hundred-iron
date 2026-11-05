@@ -138,19 +138,19 @@ export default function HomePage() {
 
   // 自動抓取兩個專欄頁面的最新文章摘要
   const [latestMedCol, setLatestMedCol] = useState({
-    title: "長距離耐力賽事的心肺評估、熱傷害預防與精準補給策略",
+    title: "賽前感冒喉嚨痛，到底能不能上場",
     author: "洪緯欣 醫師（屏東榮總胸腔內科）× 陳彥良（醫護鐵人創辦人）",
     date: "2026-11-01",
     coverUrl: "/images/cycling-140.jpeg",
-    summary: "深入解析 113K/226K 超鐵與百K單車挑戰中常見之抽筋、低血鈉與高溫脫水風險，如何透過科學化配速與電解質補給安全完賽。",
+    summary: "賽前感冒喉嚨痛能否上場，取決於你的症狀符合「脖子法則 (Neck Rule)」的哪一部分。真正的運動咖必須學會傾聽身體的聲音，以下為判斷是否退賽或調整策略的核心指標...",
   });
 
   const [latestCelebCol, setLatestCelebCol] = useState({
-    title: "向前一步，就是解方：狂飆的鐵人與跨界藝人破風故事",
+    title: "向前一步，就是解方：跨界藝人與搖滾鐵人破風經驗分享",
     author: "陳彥良、洪緯欣 × 跨界藝人與搖滾鐵人聯合專訪",
     date: "2026-11-02",
     coverUrl: "/images/cycling-140.jpeg",
-    summary: "從舞台聚光燈走向東海岸活水湖與 197 縣道，看跨界藝人與百鐵推手們如何透過游泳、單車與跑步療癒焦慮、突破中年危機！",
+    summary: "在《單車誌》專題〈從運動科學解析宋城希的 226K 超鐵修羅場〉深入探討了藝人宋城希如何透過科學化的訓練與身體管理，在被稱為終極魔王的 226 公里超級鐵人三項賽事中完賽...",
   });
 
   const supabase = createClient();
@@ -183,6 +183,22 @@ export default function HomePage() {
         await supabase.from("race_details_full").insert([{ athlete_name: "__SYS_COLUMN_SYNC__", race_name: "COL_CELEB_JSON", race_date: "2026-11-05", category: "SYS", finish_time: "SYS", team: localCelebRaw }]);
       }
     } catch (e) {}
+
+    
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const oauthCode = urlParams.get("code");
+      if (oauthCode) {
+        window.location.replace("/auth/callback?code=" + encodeURIComponent(oauthCode) + "&next=/profile");
+        return;
+      }
+      if (window.location.hostname.includes("vercel.app")) {
+        // 先把 vercel.app 瀏覽器內的專欄與海報同步上 Supabase，再自動跳轉至唯一正式官網 www.global100triathlon.com
+        setTimeout(() => {
+          window.location.replace("https://www.global100triathlon.com" + window.location.pathname + window.location.search);
+        }, 1200);
+      }
+    }
 
     const localImgs = localStorage.getItem("g100_custom_site_images_v3");
     if (localImgs) {
