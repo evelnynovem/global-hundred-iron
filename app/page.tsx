@@ -141,7 +141,7 @@ export default function HomePage() {
     title: "賽前感冒喉嚨痛，到底能不能上場",
     author: "洪緯欣 醫師（屏東榮總胸腔內科）× 陳彥良（醫護鐵人創辦人）",
     date: "2026-11-01",
-    coverUrl: "/images/cycling-140.jpeg",
+    coverUrl: (typeof window !== "undefined" && localStorage.getItem("g100_fast_col_cover")) || "/images/cycling-140.jpeg",
     summary: "賽前感冒喉嚨痛能否上場，取決於你的症狀符合「脖子法則 (Neck Rule)」的哪一部分。真正的運動咖必須學會傾聽身體的聲音，以下為判斷是否退賽或調整策略的核心指標...",
   });
 
@@ -149,7 +149,7 @@ export default function HomePage() {
     title: "向前一步，就是解方：跨界藝人與搖滾鐵人破風經驗分享",
     author: "陳彥良、洪緯欣 × 跨界藝人與搖滾鐵人聯合專訪",
     date: "2026-11-02",
-    coverUrl: "/images/cycling-140.jpeg",
+    coverUrl: (typeof window !== "undefined" && localStorage.getItem("g100_fast_col_cover")) || "/images/cycling-140.jpeg",
     summary: "在《單車誌》專題〈從運動科學解析宋城希的 226K 超鐵修羅場〉深入探討了藝人宋城希如何透過科學化的訓練與身體管理，在被稱為終極魔王的 226 公里超級鐵人三項賽事中完賽...",
   });
 

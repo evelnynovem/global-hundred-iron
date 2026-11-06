@@ -190,7 +190,7 @@ export default function MilestoneCertificateAndPerks({
   const [certDate, setCertDate] = useState(
     latestDate ? latestDate.replace(/-/g, ".") : "2026.1.1"
   );
-  const [templateBgUrl, setTemplateBgUrl] = useState<string>("");
+  const [templateBgUrl, setTemplateBgUrl] = useState<string>("/images/cert-official-bg.jpg");
   const [isPaidUnlocked, setIsPaidUnlocked] = useState(false);
   const [unlockInput, setUnlockInput] = useState("");
   const [showPayModal, setShowPayModal] = useState(false);
