@@ -26,7 +26,7 @@ export const DEFAULT_MED_LIST: ColumnArticle[] = [
     title: "長距離耐力賽事的心肺評估、熱傷害預防與精準補給策略",
     author: "洪緯欣 醫師（屏東榮總胸腔內科）× 陳彥良（醫護鐵人創辦人）",
     date: "2026-11-01",
-    coverUrl: "/images/cycling-140.jpeg",
+    coverUrl: "/images/col_med_default_clean.jpg",
     summary: "深入解析 113K/226K 超鐵與百K單車挑戰中常見之抽筋、低血鈉與高溫脫水風險，如何透過科學化配速與電解質補給安全完賽。",
     content: "在長達 6 至 17 小時的 113K 或 226K 超級鐵人三項與百K自行車挑戰賽中，運動員面臨最大的生理挑戰往往不是單純的肌肉疲勞，而是體溫調節失衡（熱衰竭、中暑）與電解質失衡（低血鈉症）。\n\n【一、賽前心肺與呼吸系統評估】\n針對有氣喘、過敏性鼻炎或曾有運動性胸悶病史的耐力選手，建議賽前進行完整肺功能與運動心肺評估，並在開放水域游泳段做好防寒與暖身適應。\n\n【二、高溫賽道的精準水份與電解質策略】\n單純大量飲用純水反而會稀釋血鈉濃度。建議每小時依照排汗率補充 500-750ml 水份，並搭配高生物利用率之電解質膠囊與 BCAA 能量膠，於抽筋發生前提前建立防護網。",
     contentImages: [],
@@ -55,7 +55,7 @@ export const DEFAULT_CELEB_LIST: ColumnArticle[] = [
     title: "最強賽事求婚＆單車婚禮：陳彥良的賽事求婚必勝攻略與鐵人故事",
     author: "單車誌 / 洪緯欣 醫師 × 陳彥良（醫護鐵人創辦人）",
     date: "2026-11-02",
-    coverUrl: "/images/cycling-140.jpeg",
+    coverUrl: "/images/col_celeb_default_clean.jpg",
     summary: "如果說自行車賽事是一場與自我的對話，那麼愛情便是兩人共譜的長征。當精準的瓦數與功率計，遇上無法計算的浪漫火花與粉紅泡泡，我們看見單車不僅是移動工具，更是承載一生的信物與紅線。",
     content: "在臺東普悠瑪 113K 鐵人三項的終點線上，經歷了游泳、單車與長跑的極限洗禮後，一場策劃已久的賽事求婚驚喜登場！\n\n為什麼越來越多年輕與中壯年騎士選擇以「單車婚禮」與「終點線求婚」作為人生最重要的里程碑？本篇專欄前半段先帶您直擊現場籌備秘辛……",
     contentImages: [],
@@ -274,7 +274,7 @@ export default function UnifiedCyclingColumnsPage() {
         : "單車誌 / 全球百鐵認證名人堂 × 跨界鐵人專訪"
     );
     setFormDate(new Date().toISOString().slice(0, 10));
-    setFormCover("/images/cycling-140.jpeg");
+    setFormCover("/images/col_med_default_clean.jpg");
     setFormSummary("");
     setFormContent("");
     setFormContentImages([]);
@@ -312,7 +312,7 @@ export default function UnifiedCyclingColumnsPage() {
       title: formTitle.trim(),
       author: formAuthor.trim(),
       date: formDate,
-      coverUrl: formCover || "/images/cycling-140.jpeg",
+      coverUrl: formCover || "/images/col_med_default_clean.jpg",
       summary: formSummary.trim() || formContent.trim().slice(0, 95) + "...",
       content: formContent.trim(),
       contentImages: formContentImages,

@@ -1,5 +1,5 @@
-import SixFoundingOrgsSection from "@/components/SixFoundingOrgsSection";
 "use client";
+import SixFoundingOrgsSection from "@/components/SixFoundingOrgsSection";
 import React from "react";
 import Link from "next/link";
 import Footer from "@/components/Footer";

@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import * as XLSX from "xlsx";
-import { UPCOMING_SERIES_RACES } from "@/components/AminoMaxPreOrderSection";
+
 
 export default function AdminDashboardPage() {
   const [allBookings, setAllBookings] = useState<any[]>([]);
@@ -13,7 +13,7 @@ export default function AdminDashboardPage() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const futureRaces = UPCOMING_SERIES_RACES.map((r) => {
+  const futureRaces = (([]) || []).map((r) => {
     const daysLeft = Math.ceil((new Date(r.date + "T00:00:00").getTime() - today.getTime()) / 86400000);
     return { ...r, daysLeft, isCutoffLocked: daysLeft <= 30 };
   }).filter((r) => r.daysLeft >= 0);
@@ -36,7 +36,7 @@ export default function AdminDashboardPage() {
   const rawRows: any[] = [];
   allBookings.forEach((b) => {
     (b.raceIds || []).forEach((rid: string) => {
-      const rObj = UPCOMING_SERIES_RACES.find((x) => x.id === rid);
+      const rObj = ([]).find((x) => x.id === rid);
       rawRows.push({
         "選手姓名": b.athleteName || "認證選手",
         "所屬團隊": b.sportTeam || "個人",

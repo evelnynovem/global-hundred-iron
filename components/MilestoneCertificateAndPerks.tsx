@@ -238,7 +238,7 @@ export default function MilestoneCertificateAndPerks({
         }
       }
 
-      const localBg = localStorage.getItem("g100_cert_bg_template");
+      const localBg = localStorage.getItem("g100_cert_bg_v15");
       if (localBg) setTemplateBgUrl(localBg);
       const localPerks = localStorage.getItem("g100_perks_v8");
       if (localPerks) setPerks(JSON.parse(localPerks));
@@ -253,7 +253,7 @@ export default function MilestoneCertificateAndPerks({
         const bgRow = rows.find((r: any) => r.athlete_name === "__SYS_CERT_BG__");
         if (bgRow?.team) {
           setTemplateBgUrl(bgRow.team);
-          localStorage.setItem("g100_cert_bg_template", bgRow.team);
+          localStorage.setItem("g100_cert_bg_v15", bgRow.team);
         }
         const perkRow = rows.find((r: any) => r.athlete_name === "__SYS_PERKS_JSON__");
         if (perkRow?.team) {
@@ -278,7 +278,7 @@ export default function MilestoneCertificateAndPerks({
     try {
       const dataUrl = await compressImg(file, 1100, 0.9);
       setTemplateBgUrl(dataUrl);
-      localStorage.setItem("g100_cert_bg_template", dataUrl);
+      localStorage.setItem("g100_cert_bg_v15", dataUrl);
       await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_CERT_BG__");
       await supabase.from("race_details_full").insert([{
         athlete_name: "__SYS_CERT_BG__",
@@ -308,28 +308,30 @@ export default function MilestoneCertificateAndPerks({
 
     const renderDynamicTextAndWatermark = (isUsingUploadedTemplate: boolean) => {
       if (isUsingUploadedTemplate) {
-        // 在原圖『全球百鐵認證水晶證書_2.jpeg』上，精準將原本的「陳彥良」、「初鐵賞」、「2026.1.1」三個區塊柔和覆蓋並印上新文字！
-        // 1. 覆蓋原圖「陳彥良」姓名區 (Y: 535 ~ 608)
-        ctx.fillStyle = "#fafafa";
-        ctx.fillRect(265, 536, 370, 72);
+        const isCleanOfficialBg = templateBgUrl.includes("cert-official-bg.jpg");
+        if (!isCleanOfficialBg) {
+          ctx.fillStyle = "#fafafa";
+          ctx.fillRect(265, 555, 370, 68);
+          ctx.fillStyle = "#f0f1f4";
+          ctx.fillRect(280, 895, 340, 76);
+          ctx.fillStyle = "#eceef1";
+          ctx.fillRect(320, 1182, 260, 42);
+        }
+        // 1. 選手姓名 (與圖二『陳彥良』原圖字體、大小、座標 100% 一致)
         ctx.fillStyle = "#18181b";
         ctx.font = "700 54px 'PingFang TC', 'Noto Sans TC', 'Heiti TC', sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText(customName.split("").join(" "), W / 2, 592);
+        ctx.fillText(customName.split("").join(" "), W / 2, 610);
 
-        // 2. 覆蓋原圖「初鐵賞」賞別區 (Y: 820 ~ 908)
-        ctx.fillStyle = "#f0f1f4";
-        ctx.fillRect(260, 822, 380, 86);
+        // 2. 階段賞別 (與圖二『初鐵賞』原圖正宗書法楷體大字、大小、座標 100% 一致)
         ctx.fillStyle = "#09090b";
-        ctx.font = "900 66px 'Kaiti TC', 'STKaiti', 'DFKai-SB', 'BiauKai', 'Noto Serif TC', serif";
-        ctx.fillText(selectedAward, W / 2, 888);
+        ctx.font = "900 72px 'Kaiti TC', 'STKaiti', 'DFKai-SB', 'BiauKai', 'Noto Serif TC', serif";
+        ctx.fillText(selectedAward, W / 2, 955);
 
-        // 3. 覆蓋原圖底部「2026.1.1」日期區 (Y: 1152 ~ 1210)
-        ctx.fillStyle = "#eceef1";
-        ctx.fillRect(320, 1154, 260, 52);
+        // 3. 發證日期 (與圖二『2026.1.1』原圖底部座標 100% 一致)
         ctx.fillStyle = "#27272a";
         ctx.font = "700 28px Arial, sans-serif";
-        ctx.fillText(certDate, W / 2, 1188);
+        ctx.fillText(certDate, W / 2, 1212);
       } else {
         // 預設向量擬真版（完全仿照全球百鐵認證水晶證書_2.jpeg 的字體與復古印章風格）
         const bgGrad = ctx.createLinearGradient(0, 0, 0, H);

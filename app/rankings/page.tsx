@@ -211,7 +211,8 @@ export default function RankingsPage() {
           } else {
             seenAthleteDateKey.set(uniqueDayKey, r.id);
           }
-          cur.dateSet.add(normDate);
+          const prevTeam = cur.team;
+       cur.dateSet.add(normDate); // 預設同日只記一次 (Set)
           if (normDate > cur.latestDate) cur.latestDate = normDate;
         } else {
           const rName = (r.race_name || "").trim();
