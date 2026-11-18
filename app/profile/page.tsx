@@ -467,53 +467,46 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
 
-        <section className="mb-6 rounded-3xl bg-gradient-to-r from-amber-500/20 via-red-950/40 to-zinc-950 border-2 border-amber-500/60 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-black text-xs font-black">⚡ 一鍵快速匯入</span>
-              <span className="text-xs font-bold text-amber-300">自動比對姓名與信箱・嚴格同日防呆去重</span>
-            </div>
-            <h2 className="text-base sm:text-lg font-black text-white">📥 一鍵匯入個人歷史賽事（自動認領歷年百鐵 ＆ 普悠瑪完賽成績 / CSV整批匯入）</h2>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <a href="/profile/claim" className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm shadow-lg transition">⚡ 一鍵認領個人歷史賽事 →</a>
-            <a href="/rankings" className="px-4 py-2.5 rounded-xl bg-[#b91c1c] hover:bg-[#dc2626] text-white font-black text-xs sm:text-sm shadow-lg transition">📊 上傳 Excel / CSV 整批匯入 →</a>
-          </div>
-        </section>
+<div id="g100-dual-import-banners" className="space-y-4 mb-6">
+  <section className="rounded-3xl bg-gradient-to-r from-amber-500/20 via-red-950/40 to-zinc-950 border-2 border-amber-500/60 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-black text-xs font-black">⚡ 鐵人三項匯入</span>
+        <span className="text-xs font-bold text-amber-300">自動比對姓名與信箱・嚴格同日防呆去重</span>
+      </div>
+      <h2 className="text-base sm:text-lg font-black text-white">📥 一鍵匯入個人歷史【鐵人三項】賽事（自動認領歷年百鐵 ＆ 普悠瑪完賽成績）</h2>
+    </div>
+    <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+      <a href="/profile/claim?type=triathlon" className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm shadow-lg transition">⚡ 一鍵認領鐵人三項賽事 →</a>
+      <a href="/admin/events?sport=triathlon" className="px-4 py-2.5 rounded-xl bg-[#b91c1c] hover:bg-[#dc2626] text-white font-black text-xs sm:text-sm shadow-lg transition">📊 管理員上傳鐵人 CSV / Excel →</a>
+    </div>
+  </section>
+
+  <section className="rounded-3xl bg-gradient-to-r from-blue-500/20 via-slate-900/40 to-zinc-950 border-2 border-blue-500/60 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <span className="px-2.5 py-0.5 rounded-full bg-blue-500 text-white text-xs font-black">🚴 鐵馬自行車匯入</span>
+        <span className="text-xs font-bold text-blue-300">自動比對姓名與信箱・支援同日防呆去重</span>
+      </div>
+      <h2 className="text-base sm:text-lg font-black text-white">📥 一鍵匯入個人歷史【鐵馬（自行車）】賽事（自動認領歷年 90km+ 百鐵馬完賽成績）</h2>
+    </div>
+    <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+      <a href="/profile/claim?type=cycling" className="px-4 py-2.5 rounded-xl bg-blue-500 hover:bg-blue-400 text-white font-black text-xs sm:text-sm shadow-lg transition">🚴 一鍵認領鐵馬自行車賽事 →</a>
+      <a href="/admin/events?sport=cycling" className="px-4 py-2.5 rounded-xl bg-[#b91c1c] hover:bg-[#dc2626] text-white font-black text-xs sm:text-sm shadow-lg transition">📊 管理員上傳鐵馬 CSV / Excel →</a>
+    </div>
+  </section>
+</div>
+
+
+
+
+
+
+
+        
 
         {/* ⚡ 一鍵匯入個人歷史賽事 ＆ 認領歷年百鐵/普悠瑪完賽紀錄 */}
-        <section className="rounded-3xl bg-gradient-to-r from-amber-500/20 via-red-950/40 to-zinc-950 border-2 border-amber-500/60 p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-black text-xs font-black">
-                ⚡ 一鍵快速匯入
-              </span>
-              <span className="text-xs font-bold text-amber-300">
-                自動比對姓名與信箱・支援同日防呆去重
-              </span>
-            </div>
-            <h2 className="text-lg sm:text-xl font-black text-white">
-              📥 一鍵匯入個人歷史賽事（自動認領歷年百鐵 ＆ 普悠瑪完賽成績）
-            </h2>
-            <p className="text-xs text-zinc-300">
-              點擊右側按鈕即可一鍵從官方歷史資料庫自動匯入您歷年的鐵人三項與 90km+ 公路單車完賽紀錄，或上傳您的個人成績表 (.csv / .xlsx)。
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <a
-              href="/profile/claim"
-              className="px-4 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm shadow-xl transition cursor-pointer"
-            >
-              ⚡ 一鍵匯入個人歷史賽事 →
-            </a>
-            <a
-              href="/rankings"
-              className="px-4 py-3 rounded-2xl bg-red-700 hover:bg-red-600 text-white font-black text-xs sm:text-sm shadow-xl transition cursor-pointer"
-            >
-              📊 前往英雄榜上傳更新 CSV →
-            </a>
-          </div>
-        </section>
+        
 
         
         {/* 頂部會員資訊與醫護鐵人徽章 */}
