@@ -146,11 +146,11 @@ export default function HomePage() {
   });
 
   const [latestCelebCol, setLatestCelebCol] = useState({
-    title: "向前一步，就是解方：跨界藝人與搖滾鐵人破風經驗分享",
-    author: "陳彥良、洪緯欣 × 跨界藝人與搖滾鐵人聯合專訪",
+    title: "最強賽事求婚＆單車婚禮：陳彥良的賽事求婚必勝攻略與鐵人故事",
+    author: "單車誌 / 洪緯欣 醫師 × 陳彥良（醫護鐵人創辦人）",
     date: "2026-11-02",
     coverUrl: "/images/col_med_default_clean.jpg",
-    summary: "在《單車誌》專題〈從運動科學解析宋城希的 226K 超鐵修羅場〉深入探討了藝人宋城希如何透過科學化的訓練與身體管理，在被稱為終極魔王的 226 公里超級鐵人三項賽事中完賽...",
+    summary: "如果說自行車賽事是一場與自我的對話，那麼愛情便是兩人共譜的長征。當精準的瓦數與功率計，遇上無法計算的浪漫火花與粉紅泡泡，我們看見單車不僅是移動工具，更是承載一生的信物與紅線。",
   });
 
   const supabase = createClient();

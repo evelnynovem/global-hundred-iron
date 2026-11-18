@@ -59,7 +59,7 @@ export default function AboutPage() {
 
   React.useEffect(() => {
     try {
-      const saved = localStorage.getItem("g100_initiators_v17");
+      const saved = localStorage.getItem("g100_initiators_v18");
       if (saved) setInitiators(JSON.parse(saved));
     } catch (e) {}
   }, []);
@@ -69,7 +69,7 @@ export default function AboutPage() {
     if (editingIdx === null) return;
     const next = initiators.map((item, i) => i === editingIdx ? { ...item, name: editName, title: editTitle, avatarUrl: editAvatar } : item);
     setInitiators(next);
-    try { localStorage.setItem("g100_initiators_v17", JSON.stringify(next)); } catch (err) {}
+    try { localStorage.setItem("g100_initiators_v18", JSON.stringify(next)); } catch (err) {}
     setEditingIdx(null);
   };
 
