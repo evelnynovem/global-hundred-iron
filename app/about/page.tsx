@@ -15,13 +15,45 @@ export interface Initiator {
 
 const CATEGORIES = ["全部", "運營團隊", "品牌代表", "媒體代表", "賽事主辦", "社團團長", "演藝影視", "KOL"];
 
+const TRI_AWARDS = [
+  { count: 1, name: "初鐵賞", badge: "1 場完賽", desc: "完成生涯第 1 場認證鐵人三項賽事，解鎖初鐵賞水晶證書與邁克仕 AminoMax 專屬加價購。" },
+  { count: 3, name: "三鐵賞", badge: "3 場完賽", desc: "累計 3 場有效認證鐵人三項完賽，解鎖三鐵賞水晶證書與 SAEKO 開放水域防霧泳鏡加價購。" },
+  { count: 5, name: "五鐵賞", badge: "5 場完賽", desc: "累計 5 場有效認證鐵人三項完賽，解鎖五鐵賞水晶證書與肌樂運動防護噴劑組加價購。" },
+  { count: 10, name: "十鐵賞", badge: "10 場完賽", desc: "正式晉升雙位數十鐵戰將！解鎖十鐵賞水晶證書與 ZIV 運動光學眼鏡榮耀半價加價購。" },
+  { count: 20, name: "廿鐵賞", badge: "20 場完賽", desc: "歷經二十場賽道洗禮，解鎖廿鐵賞水晶證書與專屬客製姓名雷雕水晶獎座加價購。" },
+  { count: 30, name: "卅鐵賞", badge: "30 場完賽", desc: "資深耐力鐵人代表，解鎖卅鐵賞水晶證書與 SYB 昇陽 × 全球百鐵頂級客製化三鐵戰袍。" },
+  { count: 40, name: "四十鐵賞", badge: "40 場完賽", desc: "四十場不惑之境的鋼鐵意志，解鎖四十鐵賞專屬榮耀水晶證書與合作品牌專案特權。" },
+  { count: 50, name: "五十鐵賞", badge: "50 場完賽", desc: "半百鐵人榮耀里程碑！解鎖五十鐵賞水晶證書與 NOVATEC 久裕碳纖維輪組專案升級特權。" },
+  { count: 60, name: "六十鐵賞", badge: "60 場完賽", desc: "六十場風雨無阻的自律與堅持，解鎖六十鐵賞專屬榮耀水晶證書與高階裝備優惠。" },
+  { count: 70, name: "七十鐵賞", badge: "70 場完賽", desc: "七十場跨越極限的耐力征途，解鎖七十鐵賞專屬榮耀水晶證書與榮耀商城專屬禮遇。" },
+  { count: 80, name: "八十鐵賞", badge: "80 場完賽", desc: "八十場傳奇鐵人風範，解鎖八十鐵賞專屬榮耀水晶證書與年度授證典禮尊榮表揚。" },
+  { count: 90, name: "九十鐵賞", badge: "90 場完賽", desc: "九十場準百鐵名人堂候選人，解鎖九十鐵賞專屬榮耀水晶證書與百鐵倒數榮耀禮遇。" },
+  { count: 100, name: "百鐵賞", badge: "100 場最高榮耀", desc: "登頂全球百鐵認證名人堂！解鎖百鐵賞最高榮譽水晶證書、終點客製大刀旗幟與頂級車架特權。" }
+];
+
+const CYC_AWARDS = [
+  { count: 1, name: "初鐵馬賞", badge: "1 場完賽", desc: "完成第 1 場 90km+ 公路單車、20km+ 越野單車或 113K/226K 超鐵單車段，解鎖初鐵馬賞證書。" },
+  { count: 3, name: "三鐵馬賞", badge: "3 場完賽", desc: "累計 3 場有效認證單車賽事完賽，解鎖三鐵馬賞水晶證書與專屬騎士補給加價購。" },
+  { count: 5, name: "五鐵馬賞", badge: "5 場完賽", desc: "累計 5 場有效認證單車賽事完賽，解鎖五鐵馬賞水晶證書與單車運動防護加價購。" },
+  { count: 10, name: "十鐵馬賞", badge: "10 場完賽", desc: "晉升十鐵馬破風騎士！解鎖十鐵馬賞水晶證書與 ZIV 專業騎行光學眼鏡專案加價購。" },
+  { count: 20, name: "廿鐵馬賞", badge: "20 場完賽", desc: "累計 20 場長距離單車挑戰，解鎖廿鐵馬賞水晶證書與客製化姓名雷雕獎座加價購。" },
+  { count: 30, name: "卅鐵馬賞", badge: "30 場完賽", desc: "累計 30 場長距離單車挑戰，解鎖卅鐵馬賞水晶證書與 SYB 昇陽聯名頂級車衣加價購。" },
+  { count: 40, name: "四十鐵馬賞", badge: "40 場完賽", desc: "累計 40 場長距離單車挑戰，解鎖四十鐵馬賞專屬榮耀水晶證書與騎士裝備特權。" },
+  { count: 50, name: "五十鐵馬賞", badge: "50 場完賽", desc: "半百鐵馬榮耀里程碑！解鎖五十鐵馬賞水晶證書與 NOVATEC 碳纖維輪組專案升級折價券。" },
+  { count: 60, name: "六十鐵馬賞", badge: "60 場完賽", desc: "累計 60 場長距離單車挑戰，解鎖六十鐵馬賞專屬榮耀水晶證書與合作品牌禮遇。" },
+  { count: 70, name: "七十鐵馬賞", badge: "70 場完賽", desc: "累計 70 場長距離單車挑戰，解鎖七十鐵馬賞專屬榮耀水晶證書與高階騎行裝備優惠。" },
+  { count: 80, name: "八十鐵馬賞", badge: "80 場完賽", desc: "累計 80 場長距離單車挑戰，解鎖八十鐵馬賞專屬榮耀水晶證書與年度授證尊榮表揚。" },
+  { count: 90, name: "九十鐵馬賞", badge: "90 場完賽", desc: "累計 90 場長距離單車挑戰，準百鐵馬名人堂騎士，解鎖九十鐵馬賞專屬榮耀水晶證書。" },
+  { count: 100, name: "百鐵馬賞", badge: "100 場最高榮耀", desc: "登頂全球百鐵馬最高榮耀殿堂！解鎖百鐵馬賞最高榮譽水晶證書、專屬大刀旗與頂級車架專案特權。" }
+];
+
 const SIX_FOUNDING_ORGS = [
-  { name: "醫護鐵人 (IronMedic)", role: "主辦發起機構", desc: "全球百鐵認證創立統籌機構，推動賽道移動式安全守護與零收費百鐵認證榮耀體系。" },
-  { name: "臺東縣城鄉生活運動協會", role: "共同發起機構", desc: "臺東普悠瑪國際鐵人三項賽主辦單位，串聯歷年完賽成績資料庫。" },
-  { name: "活動咖 (EventPal)", role: "共同發起機構", desc: "指標性運動賽事報名與成績數據平台，協力推動百鐵實名認證。" },
-  { name: "臺東縣超級鐵人三項協會", role: "共同發起機構", desc: "東海岸巴歌浪超級鐵人三項賽主辦單位，共同倡議百鐵完賽榮耀。" },
-  { name: "輪動台灣運動協會", role: "共同發起機構", desc: "推廣全台經典百K與長距離自行車挑戰賽，建構公路單車百鐵馬認證。" },
-  { name: "昇陽自行車 (SYB)", role: "共同發起機構", desc: "國際頂級自行車與三鐵運動品牌代理，全力支持百鐵英雄榮耀裝備。" }
+  { name: "醫護鐵人 (IronMedic)", role: "主辦發起機構", desc: "全球百鐵認證創立統籌機構，推動賽道移動式安全守護與零收費百鐵認證榮耀體系。", logo: "/images/logo.png" },
+  { name: "臺東縣城鄉生活運動協會", role: "共同發起機構", desc: "臺東普悠瑪國際鐵人三項賽主辦單位，深耕台灣鐵人搖籃並串聯歷年完賽成績資料庫。", logo: "/images/turaa-logo.png" },
+  { name: "活動咖 (EventPal)", role: "共同發起機構", desc: "指標性運動賽事報名與成績數據平台，協力推動百鐵實名認證與數位整合。", logo: "/images/logo.png" },
+  { name: "臺東縣超級鐵人三項協會", role: "共同發起機構", desc: "東海岸巴歌浪超級鐵人三項賽與戀戀197主辦協辦單位，共同倡議百鐵完賽榮耀。", logo: "/images/pakelangTSTA.jpeg" },
+  { name: "輪動台灣運動協會", role: "共同發起機構", desc: "推廣全台經典百K與長距離自行車挑戰賽，建構公路單車百鐵馬認證標準。", logo: "/images/tainan.png" },
+  { name: "昇陽自行車 (SYB)", role: "共同發起機構", desc: "國際頂級自行車與三鐵運動品牌代理，全力支持百鐵英雄榮耀裝備與供應鏈對接。", logo: "/images/sponsors/syb.png" }
 ];
 
 const DEFAULT_INITIATORS: Initiator[] = [
@@ -829,11 +861,12 @@ export default function AboutPage() {
   const supabase = createClient();
   const [initiators, setInitiators] = useState<Initiator[]>(DEFAULT_INITIATORS);
   const [activeCategory, setActiveCategory] = useState<string>("全部");
+  const [awardTab, setAwardTab] = useState<"triathlon" | "cycling">("triathlon");
   const [editingPerson, setEditingPerson] = useState<Initiator | null>(null);
 
   const loadCustomInitiators = useCallback(async () => {
     try {
-      const saved = localStorage.getItem("g100_initiators_v19");
+      const saved = localStorage.getItem("g100_initiators_v20");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 100) setInitiators(parsed);
@@ -841,13 +874,13 @@ export default function AboutPage() {
       const { data: rows } = await supabase
         .from("race_details_full")
         .select("team")
-        .eq("athlete_name", "__SYS_INITIATORS_V19__")
+        .eq("athlete_name", "__SYS_INITIATORS_V20__")
         .order("id", { ascending: false });
       if (rows && rows.length > 0 && rows[0].team) {
         const cloudList = JSON.parse(rows[0].team);
         if (Array.isArray(cloudList) && cloudList.length >= 100) {
           setInitiators(cloudList);
-          localStorage.setItem("g100_initiators_v19", rows[0].team);
+          localStorage.setItem("g100_initiators_v20", rows[0].team);
         }
       }
     } catch (e) {}
@@ -869,11 +902,11 @@ export default function AboutPage() {
     });
     setInitiators(nextList);
     const str = JSON.stringify(nextList);
-    localStorage.setItem("g100_initiators_v19", str);
+    localStorage.setItem("g100_initiators_v20", str);
     try {
-      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_INITIATORS_V19__");
+      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_INITIATORS_V20__");
       await supabase.from("race_details_full").insert([{
-        athlete_name: "__SYS_INITIATORS_V19__",
+        athlete_name: "__SYS_INITIATORS_V20__",
         race_name: "INITIATORS_CONFIG",
         race_date: "2026-01-01",
         category: "SYS",
@@ -916,27 +949,176 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between overflow-x-hidden">
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-12">
-        <section className="rounded-3xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border border-amber-500/40 p-6 sm:p-10 shadow-2xl space-y-4">
-          <span className="px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-extrabold uppercase">
-            ABOUT GLOBAL 100 TRIATHLON CERTIFICATION (G100TC)
-          </span>
-          <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-            關於「全球百鐵認證 Global 100 Triathlon Certification」
+
+        {/* 1. 頂部主視覺區（100% 還原昨天版本的橘底高亮標題與雙段品牌介紹） */}
+        <section className="rounded-3xl bg-[#12100e] border border-amber-500/25 p-6 sm:p-10 shadow-2xl space-y-6">
+          <div>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-extrabold tracking-widest uppercase">
+              ABOUT GLOBAL 100 TRIATHLON CERTIFICATION (G100TC)
+            </span>
+          </div>
+
+          <h1 className="text-2xl sm:text-4xl font-black leading-snug">
+            <span className="bg-amber-500 text-black px-2.5 py-1 box-decoration-clone">
+              關於「全球百鐵認證 Global 100 Triathlon Certification」
+            </span>
           </h1>
-          <p className="text-xs sm:text-base text-zinc-300 leading-relaxed max-w-4xl">
-            鐵人三項源自於夏威夷，而全球百鐵認證則創始自台灣。全球百鐵認證 Global 100 Triathlon Certification (G100TC) 為全球首創鐵人三項賽事及鐵馬賽事完賽紀錄認證平台，為醫護鐵人主導統籌、國際知名美利達自行車及眾多品牌支持的認證單位。採線上零收費認證，結合實體賽事現場讓更多愛好者共同參與。
-          </p>
+
+          <div className="space-y-4 text-sm sm:text-base text-zinc-300 leading-relaxed">
+            <p>
+              鐵人三項源自於夏威夷，而<span className="text-amber-400 font-bold">全球百鐵認證則創始自台灣</span>。全球百鐵認證 <span className="text-white font-bold">Global 100 Triathlon Certification (G100TC)</span> 為全球首創鐵人三項賽事及鐵馬賽事完賽紀錄認證平台。這個源自台灣、全球首創的鐵人三項賽事、公路自由車賽與登山越野車賽完賽紀錄登錄及認證平台，為<span className="text-amber-400 font-bold">醫護鐵人</span>主導統籌、國際知名<span className="text-amber-400 font-bold">美利達自行車</span>及眾多品牌支持的認證單位。有鑒於馬拉松的百馬認證廣為人知，故百鐵認證採<span className="text-emerald-400 font-bold">線上零收費認證</span>，結合實體賽事現場讓更多愛好者共同參與。
+            </p>
+            <p>
+              鐵人三項代表耐力和毅力，而鐵馬更是貼近大家日常生活，我們的目標是鼓勵熱愛耐力運動的鐵人與鐵馬愛好者挑戰「百鐵」。認證過程簡單，只要登錄本網會員，填寫入會申請表，註冊會員，登錄合格賽事，不需任何費用。
+            </p>
+          </div>
         </section>
 
+        {/* 2. 三大運動認證標準卡片區（100% 還原昨天版本的三欄標準卡片） */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="rounded-3xl bg-[#111113] border border-zinc-800/90 hover:border-amber-500/50 p-6 sm:p-7 space-y-4 shadow-xl transition">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">🏊‍♂️</span>
+              <h2 className="text-lg sm:text-xl font-black text-amber-400">【鐵人三項認證標準】</h2>
+            </div>
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              凡完成國內外正式舉辦之<span className="text-white font-bold">標準距離鐵人三項（51.5公里以上）</span>、<span className="text-amber-300 font-bold">半程超級鐵人三項（113公里）</span>、<span className="text-amber-300 font-bold">全程超級鐵人三項（226公里）</span>或 <span className="text-white font-bold">XTERRA 越野鐵人三項賽</span>，並具備大會官方完賽成績證明或完賽證書者，即可免費登錄計入百鐵場次。
+            </p>
+            <div className="pt-2 border-t border-zinc-800/80 text-xs text-zinc-400 space-y-1.5">
+              <div>• <span className="text-amber-400 font-bold">嚴格同日防呆：</span>同一日期無論登錄幾場賽事，系統嚴格僅採計 1 場有效完賽。</div>
+              <div>• <span className="text-emerald-400 font-bold">超鐵雙軌認證：</span>完成 113K 或 226K 超鐵（單車段達 90km/180km），自動同步計入「公路單車百鐵馬」1 場！</div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-[#111113] border border-zinc-800/90 hover:border-amber-500/50 p-6 sm:p-7 space-y-4 shadow-xl transition">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">🚴‍♂️</span>
+              <h2 className="text-lg sm:text-xl font-black text-amber-400">【公路單車認證標準】</h2>
+            </div>
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              凡完成國內外正式舉辦、具備政府核可路權或官方晶片計時之<span className="text-amber-300 font-bold">單日單場 90 公里以上（90km+）公路自由車挑戰賽或競賽</span>（如蘭陽百K、高雄百K、戀戀197、輪躍台南、梅山36彎、一日北高、雙塔520等），即可免費登錄計入「百鐵馬」場次。
+            </p>
+            <div className="pt-2 border-t border-zinc-800/80 text-xs text-zinc-400 space-y-1.5">
+              <div>• <span className="text-amber-400 font-bold">超鐵單車段併計：</span>完成 113K（單車90K）或 226K（單車180K）鐵人賽，其單車段自動納入百鐵馬累計。</div>
+              <div>• <span className="text-emerald-400 font-bold">同日去重原則：</span>同一日期之多筆單車或超鐵紀錄僅採計 1 場。</div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl bg-[#111113] border border-zinc-800/90 hover:border-amber-500/50 p-6 sm:p-7 space-y-4 shadow-xl transition">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">🚵‍♂️</span>
+              <h2 className="text-lg sm:text-xl font-black text-amber-400">【越野單車認證標準】</h2>
+            </div>
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              凡完成國內外正式舉辦之<span className="text-amber-300 font-bold">單日單場 20 公里以上（20km+）登山越野單車賽（MTB / Gravel 礫石車賽 / XTERRA 越野單車賽）</span>，具備主辦單位核發之完賽成績證明或完賽證書者，即可登錄納入百鐵馬榮耀累計。
+            </p>
+            <div className="pt-2 border-t border-zinc-800/80 text-xs text-zinc-400 space-y-1.5">
+              <div>• <span className="text-amber-400 font-bold">多元騎行認證：</span>鼓勵騎士跨足公路與山林越野，全面拓展台灣自行車運動文化。</div>
+              <div>• <span className="text-emerald-400 font-bold">實名查核制度：</span>所有完賽紀錄皆經官方資料庫與人工雙重查核。</div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. 鐵人賞 ＆ 鐵馬賞（1、3、5、10、20、30、40、50、60、70、80、90、100 階段賞別榮耀體系） */}
+        <section className="rounded-3xl bg-gradient-to-b from-zinc-900/90 via-zinc-950 to-black border border-amber-500/30 p-6 sm:p-10 shadow-2xl space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
+            <div className="space-y-2">
+              <span className="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-black uppercase">
+                MILESTONE HONORS・1 / 3 / 5 / 10 ... 100 AWARDS
+              </span>
+              <h2 className="text-xl sm:text-3xl font-black text-white">
+                🏆 全球百鐵認證 階段賞別榮耀體系（鐵人賞 ＆ 鐵馬賞）
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400 max-w-3xl">
+                無須苦等第 100 場！從您完成第 1 場開始，每達成 <span className="text-amber-400 font-bold">1、3、5、10、20、30、40、50、60、70、80、90、100 場</span> 里程碑，系統即自動解鎖對應階段之「專屬水晶證書」、「樟木雷雕獎牌申購」與「合作品牌點數換好康加價購特權」！
+              </p>
+            </div>
+
+            <div className="flex gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setAwardTab("triathlon")}
+                className={"px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer " + (awardTab === "triathlon" ? "bg-amber-500 text-black shadow-lg" : "bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800")}
+              >
+                🏊‍♂️ 鐵人賞（1～100鐵賞）
+              </button>
+              <button
+                type="button"
+                onClick={() => setAwardTab("cycling")}
+                className={"px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer " + (awardTab === "cycling" ? "bg-blue-500 text-white shadow-lg" : "bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800")}
+              >
+                🚴‍♂️ 鐵馬賞（1～100鐵馬賞）
+              </button>
+            </div>
+          </div>
+
+          {/* 13 階段快速徽章進度條 */}
+          <div className="grid grid-cols-4 sm:grid-cols-7 lg:grid-cols-13 gap-2">
+            {(awardTab === "triathlon" ? TRI_AWARDS : CYC_AWARDS).map((t) => (
+              <div
+                key={t.count}
+                className={"rounded-2xl p-2.5 text-center border flex flex-col items-center justify-center gap-1 transition " + (t.count === 100 ? "bg-gradient-to-b from-amber-500/30 to-red-950/60 border-amber-400 shadow-lg" : "bg-zinc-900/80 border-zinc-800")}
+              >
+                <span className={"text-xs font-mono font-black px-2 py-0.5 rounded-full " + (t.count === 100 ? "bg-amber-400 text-black" : awardTab === "triathlon" ? "bg-amber-500/20 text-amber-300" : "bg-blue-500/20 text-blue-300")}>
+                  {t.count}場
+                </span>
+                <span className="text-xs sm:text-sm font-black text-white">{t.name}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* 13 階段詳細卡片列表 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {(awardTab === "triathlon" ? TRI_AWARDS : CYC_AWARDS).map((item) => (
+              <div
+                key={item.name}
+                className={"rounded-2xl p-5 border flex flex-col justify-between gap-3 transition " + (item.count === 100 ? "bg-gradient-to-br from-amber-500/20 via-red-950/40 to-zinc-950 border-2 border-amber-400 shadow-2xl sm:col-span-2 lg:col-span-3" : "bg-zinc-950/90 border-zinc-800/90 hover:border-amber-500/40")}
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={"px-3 py-1 rounded-full text-xs font-black " + (item.count === 100 ? "bg-amber-400 text-black" : awardTab === "triathlon" ? "bg-amber-500/15 border border-amber-500/40 text-amber-400" : "bg-blue-500/15 border border-blue-500/40 text-blue-400")}>
+                      {item.badge}
+                    </span>
+                    <span className="text-[11px] font-bold text-emerald-400">✓ 解鎖專屬水晶證書</span>
+                  </div>
+                  <h3 className={"font-black text-white " + (item.count === 100 ? "text-xl sm:text-2xl text-amber-300" : "text-base sm:text-lg")}>
+                    🏅 【{item.name}】— 累計 {item.count} 場有效認證完賽
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-2 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-800/80">
+            <div className="text-xs sm:text-sm text-zinc-400">
+              💡 登入會員中心後，系統將自動統計您的有效完賽場次並解鎖對應階段賞別證書與加價購商品！
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/profile" className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm shadow-lg transition">
+                👤 前往會員中心查看我的賞別證書 →
+              </Link>
+              <Link href="/shop" className="px-5 py-2.5 rounded-xl bg-[#b91c1c] hover:bg-[#dc2626] text-white font-black text-xs sm:text-sm shadow-lg transition">
+                🛒 前往榮耀商城預覽獎牌與加價購 →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. 六大共同發起機構專區 */}
         <section className="space-y-6">
           <div className="border-l-4 border-amber-500 pl-4">
             <h2 className="text-xl sm:text-2xl font-black text-white">🏛️ 六大共同發起機構</h2>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">凝聚運動醫學、賽道安全守護與指標性賽事主辦單位力量</p>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">凝聚運動醫學、賽道安全守護、數位報名平台與指標性賽事主辦單位力量</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {SIX_FOUNDING_ORGS.map((org, i) => (
               <div key={i} className="rounded-3xl bg-zinc-950 border border-zinc-800 hover:border-amber-500/50 p-6 space-y-3 shadow-xl transition">
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-black">{org.role}</span>
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-black">{org.role}</span>
+                </div>
                 <h3 className="text-lg font-black text-white">{org.name}</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">{org.desc}</p>
               </div>
@@ -944,11 +1126,12 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* 5. 100% 還原《百鐵認證創始倡議人.docx》完整名單與七大分類篩選按鈕 */}
         <section className="space-y-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-l-4 border-amber-500 pl-4">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-white">👑 全球百鐵認證 百位創始倡議人</h2>
-              <p className="text-xs sm:text-sm text-zinc-400 mt-1">匯聚品牌代表、媒體代表、賽事主辦、運營團隊、社團團長、演藝影視與運動 KOL 共同倡議</p>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1">匯聚品牌代表、媒體代表、賽事主辦、運營團隊、社團團長、演藝影視與運動 KOL 共同倡議（共 {displayedList.length} 位）</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map(cat => (
