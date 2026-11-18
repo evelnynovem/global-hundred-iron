@@ -385,7 +385,6 @@ export default function UnifiedRecordSubmissionPage() {
   return (
     <div translate="no" className="notranslate min-h-screen bg-[#070709] text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-6 py-12 space-y-8">
-
 <div id="g100-dual-import-banners" className="space-y-4 mb-6">
   <section className="rounded-3xl bg-gradient-to-r from-amber-500/20 via-red-950/40 to-zinc-950 border-2 border-amber-500/60 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
     <div className="space-y-1">
@@ -400,7 +399,6 @@ export default function UnifiedRecordSubmissionPage() {
       <a href="/admin/events?sport=triathlon" className="px-4 py-2.5 rounded-xl bg-[#b91c1c] hover:bg-[#dc2626] text-white font-black text-xs sm:text-sm shadow-lg transition">📊 管理員上傳鐵人 CSV / Excel →</a>
     </div>
   </section>
-
   <section className="rounded-3xl bg-gradient-to-r from-blue-500/20 via-slate-900/40 to-zinc-950 border-2 border-blue-500/60 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
     <div className="space-y-1">
       <div className="flex items-center gap-2">
@@ -415,6 +413,8 @@ export default function UnifiedRecordSubmissionPage() {
     </div>
   </section>
 </div>
+
+
 
 
 
