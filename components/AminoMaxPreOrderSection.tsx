@@ -1,5 +1,7 @@
 "use client";
 
+
+import { loadCloudAsset, saveCloudAsset } from "@/utils/cloudAssetSync";
 import React, { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
@@ -92,6 +94,16 @@ export default function AminoMaxPreOrderSection() {
         .in("athlete_name", ["__SYS_AMINOMAX_EVENTS__", "__SYS_AMINOMAX_HEADER__"])
         .order("id", { ascending: false });
 
+      const _cloud_amEvents = await loadCloudAsset(supabase, "aminomax_events", "__SYS_AMINOMAX_EVENTS__");
+      if (_cloud_amEvents) {
+        try { const _p = JSON.parse(_cloud_amEvents); if (Array.isArray(_p) && _p.length > 0) { setEvents(_p); localStorage.setItem("g100_aminomax_events_v15", _cloud_amEvents); } } catch {}
+      }
+
+      const _cloud_amHeader = await loadCloudAsset(supabase, "aminomax_header", "__SYS_AMINOMAX_HEADER__");
+      if (_cloud_amHeader) {
+        try { const _h = JSON.parse(_cloud_amHeader); if (_h.img) setHeaderImg(_h.img); if (_h.title) setHeaderTitle(_h.title); if (_h.desc) setHeaderDesc(_h.desc); localStorage.setItem("g100_aminomax_header_v15", _cloud_amHeader); } catch {}
+      }
+
       if (rows && rows.length > 0) {
         const evRow = rows.find((r: any) => r.athlete_name === "__SYS_AMINOMAX_EVENTS__");
         if (evRow?.team) {
@@ -134,15 +146,10 @@ export default function AminoMaxPreOrderSection() {
     const str = JSON.stringify(nextList);
     localStorage.setItem("g100_aminomax_events_v15", str);
     try {
-      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_AMINOMAX_EVENTS__");
-      await supabase.from("race_details_full").insert([{
-        athlete_name: "__SYS_AMINOMAX_EVENTS__",
-        race_name: "AMINOMAX_CONFIG",
-        race_date: "2026-11-08",
-        category: "SYS",
-        finish_time: "SYS",
-        team: str,
-      }]);
+      const _syncRes = await saveCloudAsset(supabase, "aminomax_events", str, "__SYS_AMINOMAX_EVENTS__");
+      if (!_syncRes.ok) {
+        alert("⚠️ 本機已更新，但雲端同步失敗（手機暫不會顯示）：" + (_syncRes.error || "請先登入並在 Supabase 執行 v4 同步 SQL"));
+      }
     } catch (err) {}
     setEditingEvent(null);
     alert("✅ 邁克仕預先勾選賽事場次與日期已更新並同步至全站！");
@@ -155,15 +162,10 @@ export default function AminoMaxPreOrderSection() {
     const str = JSON.stringify(nextList);
     localStorage.setItem("g100_aminomax_events_v15", str);
     try {
-      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_AMINOMAX_EVENTS__");
-      await supabase.from("race_details_full").insert([{
-        athlete_name: "__SYS_AMINOMAX_EVENTS__",
-        race_name: "AMINOMAX_CONFIG",
-        race_date: "2026-11-08",
-        category: "SYS",
-        finish_time: "SYS",
-        team: str,
-      }]);
+      const _syncRes = await saveCloudAsset(supabase, "aminomax_events", str, "__SYS_AMINOMAX_EVENTS__");
+      if (!_syncRes.ok) {
+        alert("⚠️ 本機已更新，但雲端同步失敗（手機暫不會顯示）：" + (_syncRes.error || "請先登入並在 Supabase 執行 v4 同步 SQL"));
+      }
     } catch (err) {}
   };
 
@@ -172,15 +174,10 @@ export default function AminoMaxPreOrderSection() {
     const payload = JSON.stringify({ img: headerImg, title: headerTitle, desc: headerDesc });
     localStorage.setItem("g100_aminomax_header_v15", payload);
     try {
-      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_AMINOMAX_HEADER__");
-      await supabase.from("race_details_full").insert([{
-        athlete_name: "__SYS_AMINOMAX_HEADER__",
-        race_name: "HEADER_CONFIG",
-        race_date: "2026-11-08",
-        category: "SYS",
-        finish_time: "SYS",
-        team: payload,
-      }]);
+      const _syncRes = await saveCloudAsset(supabase, "aminomax_header", payload, "__SYS_AMINOMAX_HEADER__");
+      if (!_syncRes.ok) {
+        alert("⚠️ 本機已更新，但雲端同步失敗（手機暫不會顯示）：" + (_syncRes.error || "請先登入並在 Supabase 執行 v4 同步 SQL"));
+      }
     } catch (err) {}
     setEditingHeader(false);
     alert("✅ 邁克仕海報與主標題文案已更新並同步至電腦與手機！");

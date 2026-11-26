@@ -128,6 +128,19 @@ const DEFAULT_SPONSORS = [
 ];
 
 export default function HomePage() {
+
+  useEffect(() => {
+    try {
+      ["g100_fast_col_cover", "g100_celeb_col_cover"].forEach((k) => localStorage.removeItem(k));
+      ["g100_col_v3_CELEB", "g100_unified_col_CELEB", "g100_celeb_col_v1", "g100_columns_celeb_v1"].forEach((k) => {
+        const raw = localStorage.getItem(k);
+        if (raw && (raw.includes("向前一步") || raw.includes("col_med") || raw.includes("賽前感冒"))) {
+          localStorage.removeItem(k);
+        }
+      });
+    } catch (e) {}
+  }, []);
+  
   const [siteMode, setSiteMode] = useState<"g100" | "turaa">("g100");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);

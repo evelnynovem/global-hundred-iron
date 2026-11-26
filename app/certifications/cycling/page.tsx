@@ -1,5 +1,7 @@
 "use client";
 
+
+import CertificationRulesSection from "@/components/CertificationRulesSection";
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
@@ -97,6 +99,29 @@ function formatTimestamp(raw?: string): string {
   const mm = String(d.getMinutes()).padStart(2, "0");
   const ss = String(d.getSeconds()).padStart(2, "0");
   return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
+}
+
+
+function getTodayLocalStr() {
+  const now = new Date();
+  const tzOffset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - tzOffset).toISOString().slice(0, 10);
+}
+function normalizeDateStr(d: any) {
+  return String(d || "").trim().split("/").join("-");
+}
+function isFutureDateStr(d: any) {
+  const norm = normalizeDateStr(d);
+  if (!norm) return false;
+  // 支援 YYYY-MM-DD 格式直接字串比對；若為其他格式則轉 Date 比較
+  const today = getTodayLocalStr();
+  if (/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(norm)) {
+    return norm > today;
+  }
+  const parsed = new Date(norm.replace(/-/g, "/"));
+  if (isNaN(parsed.getTime())) return false;
+  const endOfToday = new Date(today.replace(/-/g, "/") + " 23:59:59");
+  return parsed.getTime() > endOfToday.getTime();
 }
 
 export default function UnifiedRecordSubmissionPage() {
@@ -296,7 +321,14 @@ export default function UnifiedRecordSubmissionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalDate = `${selYear}-${selMonth.padStart(2, "0")}-${selDay.padStart(2, "0")}`;
+    
+    const _checkRaceDateVal = typeof newRaceDate !== "undefined" ? newRaceDate : (typeof raceDate !== "undefined" ? raceDate : "");
+    if (isFutureDateStr(_checkRaceDateVal)) {
+      alert("⚠️ 日期防呆攔截：完賽賽事日期不能超過當日（" + getTodayLocalStr() + "）的未來日期，請重新確認！");
+      if (typeof setSubmitting === "function") setSubmitting(false);
+      return;
+    }
+  const finalDate = `${selYear}-${selMonth.padStart(2, "0")}-${selDay.padStart(2, "0")}`;
     const exactNowStr = formatTimestamp();
 
     if (!eventName.trim()) {
@@ -758,6 +790,9 @@ export default function UnifiedRecordSubmissionPage() {
           </div>
         </div>
 
+      </div>
+      <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 pb-12">
+        <CertificationRulesSection defaultTab="cycling" compact />
       </div>
       <Footer />
     </div>

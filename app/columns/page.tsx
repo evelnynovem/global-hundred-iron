@@ -65,7 +65,7 @@ export const DEFAULT_CELEB_LIST: ColumnArticle[] = [
   {
     id: "celeb-2",
     category: "CELEB",
-    title: "向前一步，就是解方：跨界藝人與搖滾鐵人破風經驗分享",
+    title: "最強賽事求婚＆單車婚禮：陳彥良的賽事求婚必勝攻略與鐵人故事",
     author: "全球百鐵認證名人堂 × 跨界藝人聯合專訪",
     date: "2026-10-22",
     coverUrl: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80",
@@ -115,6 +115,19 @@ export function compressImageHighClarity(file: File, maxDim = 1100, quality = 0.
 }
 
 export default function UnifiedCyclingColumnsPage() {
+
+  useEffect(() => {
+    try {
+      ["g100_fast_col_cover", "g100_celeb_col_cover"].forEach((k) => localStorage.removeItem(k));
+      ["g100_col_v3_CELEB", "g100_unified_col_CELEB", "g100_celeb_col_v1", "g100_columns_celeb_v1"].forEach((k) => {
+        const raw = localStorage.getItem(k);
+        if (raw && (raw.includes("向前一步") || raw.includes("col_med") || raw.includes("賽前感冒"))) {
+          localStorage.removeItem(k);
+        }
+      });
+    } catch (e) {}
+  }, []);
+  
   const [medArticles, setMedArticles] = useState<ColumnArticle[]>(DEFAULT_MED_LIST);
   const [celebArticles, setCelebArticles] = useState<ColumnArticle[]>(DEFAULT_CELEB_LIST);
   const [activeView, setActiveView] = useState<"ALL" | "MED" | "CELEB">("ALL");

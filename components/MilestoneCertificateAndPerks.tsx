@@ -1,5 +1,7 @@
 "use client";
 
+
+import { loadCloudAsset, saveCloudAsset } from "@/utils/cloudAssetSync";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -249,6 +251,16 @@ export default function MilestoneCertificateAndPerks({
         .in("athlete_name", ["__SYS_CERT_BG__", "__SYS_PERKS_JSON__"])
         .order("id", { ascending: false });
 
+      const _cloud_certBg = await loadCloudAsset(supabase, "cert_official_bg", "__SYS_CERT_BG__");
+      if (_cloud_certBg) {
+        setTemplateBgUrl(_cloud_certBg); localStorage.setItem("g100_cert_bg_v15", _cloud_certBg);
+      }
+
+      const _cloud_perksJson = await loadCloudAsset(supabase, "milestone_perks_json", "__SYS_PERKS_JSON__");
+      if (_cloud_perksJson) {
+        try { const _pk = JSON.parse(_cloud_perksJson); if (Array.isArray(_pk) && _pk.length > 0) { setPerks(_pk); localStorage.setItem("g100_perks_v8", _cloud_perksJson); } } catch {}
+      }
+
       if (rows && rows.length > 0) {
         const bgRow = rows.find((r: any) => r.athlete_name === "__SYS_CERT_BG__");
         if (bgRow?.team) {
@@ -279,15 +291,10 @@ export default function MilestoneCertificateAndPerks({
       const dataUrl = await compressImg(file, 1100, 0.9);
       setTemplateBgUrl(dataUrl);
       localStorage.setItem("g100_cert_bg_v15", dataUrl);
-      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_CERT_BG__");
-      await supabase.from("race_details_full").insert([{
-        athlete_name: "__SYS_CERT_BG__",
-        race_name: "CERT_TEMPLATE",
-        race_date: new Date().toISOString().slice(0, 10),
-        category: "SYS",
-        finish_time: "SYS",
-        team: dataUrl,
-      }]);
+      const _syncRes = await saveCloudAsset(supabase, "cert_official_bg", dataUrl, "__SYS_CERT_BG__");
+      if (!_syncRes.ok) {
+        alert("⚠️ 本機已更新，但雲端同步失敗（手機暫不會顯示）：" + (_syncRes.error || "請先登入並在 Supabase 執行 v4 同步 SQL"));
+      }
       alert("✅ 水晶證書官方原圖底板已上傳並同步至全站！現在姓名、賞別與日期都會直接精準印在您的原圖上！");
     } catch (err) {
       alert("底圖上傳失敗");
@@ -607,15 +614,10 @@ export default function MilestoneCertificateAndPerks({
     const jsonStr = JSON.stringify(nextList);
     localStorage.setItem("g100_perks_v8", jsonStr);
     try {
-      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_PERKS_JSON__");
-      await supabase.from("race_details_full").insert([{
-        athlete_name: "__SYS_PERKS_JSON__",
-        race_name: "PERKS_CONFIG",
-        race_date: new Date().toISOString().slice(0, 10),
-        category: "SYS",
-        finish_time: "SYS",
-        team: jsonStr,
-      }]);
+      const _syncRes = await saveCloudAsset(supabase, "milestone_perks_json", jsonStr, "__SYS_PERKS_JSON__");
+      if (!_syncRes.ok) {
+        alert("⚠️ 本機已更新，但雲端同步失敗（手機暫不會顯示）：" + (_syncRes.error || "請先登入並在 Supabase 執行 v4 同步 SQL"));
+      }
     } catch (err) {}
     setEditingPerk(null);
     alert("✅ 加價購商品圖文與購買連結已儲存並同步至全站！");

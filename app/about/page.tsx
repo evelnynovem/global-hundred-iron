@@ -1,5 +1,9 @@
 "use client";
 
+
+
+import { loadCloudAsset, saveCloudAsset } from "@/utils/cloudAssetSync";
+import CertificationRulesSection from "@/components/CertificationRulesSection";
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
@@ -876,6 +880,8 @@ export default function AboutPage() {
         .select("team")
         .eq("athlete_name", "__SYS_INITIATORS_V20__")
         .order("id", { ascending: false });
+      const _cloudInit = await loadCloudAsset(supabase, "about_initiators_v20", "__SYS_INITIATORS_V20__");
+      if (_cloudInit) { const _cl = JSON.parse(_cloudInit); if (Array.isArray(_cl) && _cl.length >= 100) { setInitiators(_cl); localStorage.setItem("g100_initiators_v20", _cloudInit); return; } }
       if (rows && rows.length > 0 && rows[0].team) {
         const cloudList = JSON.parse(rows[0].team);
         if (Array.isArray(cloudList) && cloudList.length >= 100) {
@@ -904,15 +910,8 @@ export default function AboutPage() {
     const str = JSON.stringify(nextList);
     localStorage.setItem("g100_initiators_v20", str);
     try {
-      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_INITIATORS_V20__");
-      await supabase.from("race_details_full").insert([{
-        athlete_name: "__SYS_INITIATORS_V20__",
-        race_name: "INITIATORS_CONFIG",
-        race_date: "2026-01-01",
-        category: "SYS",
-        finish_time: "SYS",
-        team: str
-      }]);
+      const _initSync = await saveCloudAsset(supabase, "about_initiators_v20", str, "__SYS_INITIATORS_V20__");
+      if (!_initSync.ok) alert("⚠️ 本機已更新，但雲端同步失敗：" + (_initSync.error || "請先登入並執行 v4 SQL"));
     } catch (err) {}
     setEditingPerson(null);
   };
@@ -966,7 +965,7 @@ export default function AboutPage() {
 
           <div className="space-y-4 text-sm sm:text-base text-zinc-300 leading-relaxed">
             <p>
-              鐵人三項源自於夏威夷，而<span className="text-amber-400 font-bold">全球百鐵認證則創始自台灣</span>。全球百鐵認證 <span className="text-white font-bold">Global 100 Triathlon Certification (G100TC)</span> 為全球首創鐵人三項賽事及鐵馬賽事完賽紀錄認證平台。這個源自台灣、全球首創的鐵人三項賽事、公路自由車賽與登山越野車賽完賽紀錄登錄及認證平台，為<span className="text-amber-400 font-bold">醫護鐵人</span>主導統籌、國際知名<span className="text-amber-400 font-bold">美利達自行車</span>及眾多品牌支持的認證單位。有鑒於馬拉松的百馬認證廣為人知，故百鐵認證採<span className="text-emerald-400 font-bold">線上零收費認證</span>，結合實體賽事現場讓更多愛好者共同參與。
+              鐵人三項源自於夏威夷，而<span className="text-amber-400 font-bold">全球百鐵認證則創始自台灣</span>。全球百鐵認證 <span className="text-white font-bold">Global 100 Triathlon Certification (G100TC)</span> 為全球首創鐵人三項賽事及鐵馬賽事完賽紀錄認證平台。這個源自台灣、全球首創的鐵人三項賽事與公路自由車賽完賽紀錄登錄及認證平台，為<span className="text-amber-400 font-bold">醫護鐵人</span>主導統籌、國際知名<span className="text-amber-400 font-bold">美利達自行車</span>及眾多品牌支持的認證單位。有鑒於馬拉松的百馬認證廣為人知，故百鐵認證採<span className="text-emerald-400 font-bold">線上零收費認證</span>，結合實體賽事現場讓更多愛好者共同參與。
             </p>
             <p>
               鐵人三項代表耐力和毅力，而鐵馬更是貼近大家日常生活，我們的目標是鼓勵熱愛耐力運動的鐵人與鐵馬愛好者挑戰「百鐵」。認證過程簡單，只要登錄本網會員，填寫入會申請表，註冊會員，登錄合格賽事，不需任何費用。
@@ -974,50 +973,8 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* 2. 三大運動認證標準卡片區（100% 還原昨天版本的三欄標準卡片） */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-3xl bg-[#111113] border border-zinc-800/90 hover:border-amber-500/50 p-6 sm:p-7 space-y-4 shadow-xl transition">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl">🏊‍♂️</span>
-              <h2 className="text-lg sm:text-xl font-black text-amber-400">【鐵人三項認證標準】</h2>
-            </div>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              凡完成國內外正式舉辦之<span className="text-white font-bold">標準距離鐵人三項（51.5公里以上）</span>、<span className="text-amber-300 font-bold">半程超級鐵人三項（113公里）</span>、<span className="text-amber-300 font-bold">全程超級鐵人三項（226公里）</span>或 <span className="text-white font-bold">XTERRA 越野鐵人三項賽</span>，並具備大會官方完賽成績證明或完賽證書者，即可免費登錄計入百鐵場次。
-            </p>
-            <div className="pt-2 border-t border-zinc-800/80 text-xs text-zinc-400 space-y-1.5">
-              <div>• <span className="text-amber-400 font-bold">嚴格同日防呆：</span>同一日期無論登錄幾場賽事，系統嚴格僅採計 1 場有效完賽。</div>
-              <div>• <span className="text-emerald-400 font-bold">超鐵雙軌認證：</span>完成 113K 或 226K 超鐵（單車段達 90km/180km），自動同步計入「公路單車百鐵馬」1 場！</div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-[#111113] border border-zinc-800/90 hover:border-amber-500/50 p-6 sm:p-7 space-y-4 shadow-xl transition">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl">🚴‍♂️</span>
-              <h2 className="text-lg sm:text-xl font-black text-amber-400">【公路單車認證標準】</h2>
-            </div>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              凡完成國內外正式舉辦、具備政府核可路權或官方晶片計時之<span className="text-amber-300 font-bold">單日單場 90 公里以上（90km+）公路自由車挑戰賽或競賽</span>（如蘭陽百K、高雄百K、戀戀197、輪躍台南、梅山36彎、一日北高、雙塔520等），即可免費登錄計入「百鐵馬」場次。
-            </p>
-            <div className="pt-2 border-t border-zinc-800/80 text-xs text-zinc-400 space-y-1.5">
-              <div>• <span className="text-amber-400 font-bold">超鐵單車段併計：</span>完成 113K（單車90K）或 226K（單車180K）鐵人賽，其單車段自動納入百鐵馬累計。</div>
-              <div>• <span className="text-emerald-400 font-bold">同日去重原則：</span>同一日期之多筆單車或超鐵紀錄僅採計 1 場。</div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-[#111113] border border-zinc-800/90 hover:border-amber-500/50 p-6 sm:p-7 space-y-4 shadow-xl transition">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl">🚵‍♂️</span>
-              <h2 className="text-lg sm:text-xl font-black text-amber-400">【越野單車認證標準】</h2>
-            </div>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              凡完成國內外正式舉辦之<span className="text-amber-300 font-bold">單日單場 20 公里以上（20km+）登山越野單車賽（MTB / Gravel 礫石車賽 / XTERRA 越野單車賽）</span>，具備主辦單位核發之完賽成績證明或完賽證書者，即可登錄納入百鐵馬榮耀累計。
-            </p>
-            <div className="pt-2 border-t border-zinc-800/80 text-xs text-zinc-400 space-y-1.5">
-              <div>• <span className="text-amber-400 font-bold">多元騎行認證：</span>鼓勵騎士跨足公路與山林越野，全面拓展台灣自行車運動文化。</div>
-              <div>• <span className="text-emerald-400 font-bold">實名查核制度：</span>所有完賽紀錄皆經官方資料庫與人工雙重查核。</div>
-            </div>
-          </div>
-        </section>
+        {/* 2. 官方認證登錄原則、檢舉查核與防同名機制 */}
+        <CertificationRulesSection defaultTab="all" />
 
         {/* 3. 鐵人賞 ＆ 鐵馬賞（1、3、5、10、20、30、40、50、60、70、80、90、100 階段賞別榮耀體系） */}
         <section className="rounded-3xl bg-gradient-to-b from-zinc-900/90 via-zinc-950 to-black border border-amber-500/30 p-6 sm:p-10 shadow-2xl space-y-8">

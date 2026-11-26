@@ -48,6 +48,13 @@ const YEARS = Array.from({ length: 35 }, (_, i) => String(2028 - i));
 const MONTHS = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
 const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
 
+
+function getTodayLocalStr(): string {
+  const now = new Date();
+  const tzOffset = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - tzOffset).toISOString().slice(0, 10);
+}
+
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [myRecords, setMyRecords] = useState<UnifiedRecord[]>([]);
@@ -642,7 +649,7 @@ export default function ProfilePage() {
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-300">出生年月日</label>
                   <input
-                    type="date"
+                    type="date" max={getTodayLocalStr()}
                     value={profileForm.birthDate}
                     onChange={(e) => setProfileForm({ ...profileForm, birthDate: e.target.value })}
                     className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3.5 py-2.5 text-sm text-amber-400 font-bold"
@@ -783,7 +790,7 @@ export default function ProfilePage() {
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-zinc-300">證照有效期限</label>
                       <input
-                        type="date"
+                        type="date" max={getTodayLocalStr()}
                         value={profileForm.licenseExpiry}
                         onChange={(e) => setProfileForm({ ...profileForm, licenseExpiry: e.target.value })}
                         className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-3 py-2.5 text-xs text-amber-400 font-bold"

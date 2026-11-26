@@ -1,5 +1,7 @@
 "use client";
 
+
+import { loadCloudAsset, saveCloudAsset } from "@/utils/cloudAssetSync";
 import React, { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
@@ -121,6 +123,11 @@ export default function ShopPage() {
         .eq("athlete_name", "__SYS_SHOP_JSON__")
         .order("id", { ascending: false });
 
+      const _cloud_shopJson = await loadCloudAsset(supabase, "shop_products_json", "__SYS_SHOP_JSON__");
+      if (_cloud_shopJson) {
+        try { const _sp = JSON.parse(_cloud_shopJson); if (Array.isArray(_sp) && _sp.length > 0) { setProducts(_sp); localStorage.setItem("g100_shop_products_v8", _cloud_shopJson); } } catch {}
+      }
+
       if (sysRows && sysRows.length > 0 && sysRows[0].team) {
         const parsed = JSON.parse(sysRows[0].team);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -166,15 +173,10 @@ export default function ShopPage() {
     const jsonStr = JSON.stringify(nextList);
     localStorage.setItem("g100_shop_products_v8", jsonStr);
     try {
-      await supabase.from("race_details_full").delete().eq("athlete_name", "__SYS_SHOP_JSON__");
-      await supabase.from("race_details_full").insert([{
-        athlete_name: "__SYS_SHOP_JSON__",
-        race_name: "SHOP_CONFIG",
-        race_date: new Date().toISOString().slice(0, 10),
-        category: "SYS",
-        finish_time: "SYS",
-        team: jsonStr,
-      }]);
+      const _syncRes = await saveCloudAsset(supabase, "shop_products_json", jsonStr, "__SYS_SHOP_JSON__");
+      if (!_syncRes.ok) {
+        alert("⚠️ 本機已更新，但雲端同步失敗（手機暫不會顯示）：" + (_syncRes.error || "請先登入並在 Supabase 執行 v4 同步 SQL"));
+      }
     } catch (err) {}
     setEditingProd(null);
     alert("✅ 榮耀商城商品圖文與購買連結已儲存並跨裝置同步！");
