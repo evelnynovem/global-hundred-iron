@@ -14,7 +14,7 @@ const DEFAULT_SLIDES = [
     desc: "2026/12/06 & 2027/12/05｜臺東縣城鄉生活運動協會主辦，挑戰東海岸與197縣道最美縱谷。",
     link: "/taitung-assoc",
     poster: "/images/love197.jpg",
-    fallbackPoster: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1200&q=85",
+    fallbackPoster: "/images/col_med_default_clean.jpg",
     isTuraa: true,
   },
   {
@@ -25,7 +25,7 @@ const DEFAULT_SLIDES = [
     desc: "2026/03/28 & 2027/03/27｜臺東縣城鄉生活運動協會主辦，活水湖經典賽道年度盛事。",
     link: "/taitung-assoc",
     poster: "/images/puyuma.jpg",
-    fallbackPoster: "https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=1200&q=85",
+    fallbackPoster: "/images/col_med_default_clean.jpg",
     isTuraa: true,
   },
   {
@@ -36,7 +36,7 @@ const DEFAULT_SLIDES = [
     desc: "2026/10/17-18 & 2027/10/16-17｜馳騁東海岸壯闊山海，體驗純粹而熱血的鐵人意志。",
     link: "/series",
     poster: "/images/pakelangTSTA.jpeg",
-    fallbackPoster: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=85",
+    fallbackPoster: "/images/col_med_default_clean.jpg",
     isTuraa: false,
   },
   {
@@ -47,7 +47,7 @@ const DEFAULT_SLIDES = [
     desc: "2026/12/06 & 2027/12/12｜穿梭古都山海美景，年度最熱鬧的單車盛會。",
     link: "/series",
     poster: "/images/tainan.png",
-    fallbackPoster: "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?auto=format&fit=crop&w=1200&q=85",
+    fallbackPoster: "/images/col_med_default_clean.jpg",
     isTuraa: false,
   },
 ];
@@ -129,6 +129,14 @@ const DEFAULT_SPONSORS = [
 
 export default function HomePage() {
 
+  // [v35] 首頁專欄卡片零閃爍閘門：等待雲端或安全快取確認後一次呈現，杜絕閃現舊海報
+  const [_g100HomeColsReady, _setG100HomeColsReady] = useState(false);
+  useEffect(() => {
+    const _t = setTimeout(() => _setG100HomeColsReady(true), 1800);
+    return () => clearTimeout(_t);
+  }, []);
+
+
   useEffect(() => {
     try {
       ["g100_fast_col_cover", "g100_celeb_col_cover"].forEach((k) => localStorage.removeItem(k));
@@ -174,7 +182,8 @@ export default function HomePage() {
       const { data: sysSyncRows } = await supabase.from("race_details_full").select("*").in("athlete_name", ["__SYS_COLUMN_SYNC__", "__SYS_IMAGE_SYNC__"]).order("id", { ascending: false });
       if (sysSyncRows && sysSyncRows.length > 0) {
         const medRow = sysSyncRows.find((r: any) => r.athlete_name === "__SYS_COLUMN_SYNC__" && r.race_name === "COL_MED_JSON");
-        if (medRow?.team) { try { const arr = JSON.parse(medRow.team); if (arr.length > 0) setLatestMedCol(arr[0]); } catch (e) {} }
+        if (medRow?.team) { try { const arr = JSON.parse(medRow.team); if (arr.length > 0) setLatestMedCol(arr[0]); } catch (e) {}
+      _setG100HomeColsReady(true); }
         const celebRow = sysSyncRows.find((r: any) => r.athlete_name === "__SYS_COLUMN_SYNC__" && r.race_name === "COL_CELEB_JSON");
         if (celebRow?.team) { try { const arr = JSON.parse(celebRow.team); if (arr.length > 0) setLatestCelebCol(arr[0]); } catch (e) {} }
         const imgMap: Record<string, string> = {};
@@ -774,7 +783,22 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+          {!_g100HomeColsReady && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6" aria-label="載入最新單車誌專欄">
+            <div className="rounded-3xl bg-zinc-900/90 border border-zinc-800 p-5 space-y-4 animate-pulse">
+              <div className="h-60 w-full rounded-2xl bg-zinc-800/80" />
+              <div className="h-5 w-3/4 rounded bg-zinc-800/80" />
+              <div className="h-4 w-full rounded bg-zinc-800/60" />
+            </div>
+            <div className="rounded-3xl bg-zinc-900/90 border border-zinc-800 p-5 space-y-4 animate-pulse">
+              <div className="h-60 w-full rounded-2xl bg-zinc-800/80" />
+              <div className="h-5 w-3/4 rounded bg-zinc-800/80" />
+              <div className="h-4 w-full rounded bg-zinc-800/60" />
+            </div>
+          </div>
+        )}
+        <div className={_g100HomeColsReady ? "opacity-100 transition-opacity duration-200" : "hidden"}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
             
             {/* 專欄卡片 1：自動抓取「單車誌醫護鐵人運動醫學專欄」最新一篇文章與配圖 */}
             <div className="rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-emerald-500/50 overflow-hidden flex flex-col justify-between transition group">
@@ -863,6 +887,7 @@ export default function HomePage() {
             </div>
 
           </div>
+        </div>
         </section>
 
       </main>

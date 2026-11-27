@@ -1,9 +1,74 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+const CACHE_PREFIX = "g100_v35_cache_";
+const MAX_SINGLE_CACHE_CHARS = 1200000; // 單一快取上限 1.2MB，防止瀏覽器 localStorage 塞爆當機
+
 /**
- * 跨裝置雲端資源讀取（手機與電腦 100% 同步）：
- * 1. 優先讀取專屬雲端表 public.site_assets_sync（開放公開唯讀，無 RLS 寫入衝突）
- * 2. 若新表尚無資料，自動降級讀取舊版 race_details_full (__SYS_*) 保持向後相容
+ * 清除早期版本遺留的龐大過期快取（解決電腦版比手機版慢、偶發記憶體不足當機的問題）
+ */
+export function purgeStaleLocalCache(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const legacyKeys = [
+      "g100_fast_col_cover",
+      "g100_celeb_col_cover",
+      "g100_initiators_v17",
+      "g100_initiators_v18",
+      "g100_initiators_v19",
+      "g100_col_v3_CELEB",
+      "g100_col_v3_MED",
+    ];
+    legacyKeys.forEach((k) => {
+      try {
+        localStorage.removeItem(k);
+      } catch (e) {}
+    });
+  } catch (e) {}
+}
+
+/**
+ * 毫秒級讀取安全本機快取（自動過濾無效或舊版污染圖檔連結）
+ */
+export function getCachedCloudAsset(assetKey: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + assetKey);
+    if (!raw) return null;
+    if (raw.includes("images.unsplash.com") || raw.includes("cycling-140.jpeg")) {
+      localStorage.removeItem(CACHE_PREFIX + assetKey);
+      return null;
+    }
+    return raw;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * 寫入安全本機快取（遇到容量配額滿時自動淘汰最舊快取，絕不報錯或卡死瀏覽器）
+ */
+export function setCachedCloudAsset(assetKey: string, payload: string): void {
+  if (typeof window === "undefined" || !payload) return;
+  if (payload.length > MAX_SINGLE_CACHE_CHARS) return;
+  try {
+    localStorage.setItem(CACHE_PREFIX + assetKey, payload);
+  } catch (e) {
+    try {
+      // 容量不足時清除舊版快取後重試一次
+      purgeStaleLocalCache();
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith(CACHE_PREFIX) && k !== CACHE_PREFIX + assetKey) {
+          localStorage.removeItem(k);
+        }
+      }
+      localStorage.setItem(CACHE_PREFIX + assetKey, payload);
+    } catch (e2) {}
+  }
+}
+
+/**
+ * 跨裝置雲端資源讀取（支援 Stale-While-Revalidate 本機快取同步更新）
  */
 export async function loadCloudAsset(
   supabase: SupabaseClient,
@@ -18,6 +83,7 @@ export async function loadCloudAsset(
       .maybeSingle();
 
     if (!error && data && typeof data.payload === "string" && data.payload.length > 0) {
+      setCachedCloudAsset(assetKey, data.payload);
       return data.payload;
     }
   } catch (e) {}
@@ -32,17 +98,17 @@ export async function loadCloudAsset(
         .limit(1);
 
       if (legacyRows && legacyRows.length > 0 && typeof legacyRows[0].team === "string" && legacyRows[0].team.length > 0) {
+        setCachedCloudAsset(assetKey, legacyRows[0].team);
         return legacyRows[0].team;
       }
     } catch (e) {}
   }
 
-  return null;
+  return getCachedCloudAsset(assetKey);
 }
 
 /**
- * 跨裝置雲端資源儲存（透過零信任 SECURITY DEFINER RPC 寫入 site_assets_sync）：
- * 徹底根除舊版寫入 race_details_full 被 RLS 靜默擋掉、導致「電腦看得到、手機看不到」的問題。
+ * 跨裝置雲端資源儲存（同步更新雲端與本機快取）
  */
 export async function saveCloudAsset(
   supabase: SupabaseClient,
@@ -50,6 +116,7 @@ export async function saveCloudAsset(
   payload: string,
   legacySysAthleteName?: string
 ): Promise<{ ok: boolean; error?: string }> {
+  setCachedCloudAsset(assetKey, payload);
   try {
     const { error: rpcErr } = await supabase.rpc("upsert_site_asset", {
       p_key: assetKey,
@@ -59,7 +126,6 @@ export async function saveCloudAsset(
       return { ok: true };
     }
 
-    // 降級容錯：若管理員尚未執行 v4 SQL，嘗試寫入舊表並真實檢查 error（絕不靜默吞錯）
     if (legacySysAthleteName) {
       await supabase.from("race_details_full").delete().eq("athlete_name", legacySysAthleteName);
       const { error: insErr } = await supabase.from("race_details_full").insert([
@@ -82,9 +148,6 @@ export async function saveCloudAsset(
   }
 }
 
-/**
- * 判斷賽事名稱或組別是否屬於 113K / 226K / 70.3 / 140.6 超級鐵人三項（單車段達 90K+）
- */
 export function isUltraTriathlon90K(raceName?: string, category?: string): boolean {
   const combined = `${raceName || ""} ${category || ""}`.toUpperCase();
   return (

@@ -1,3 +1,4 @@
+import GlobalImageOptimizer from "@/components/GlobalImageOptimizer";
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="zh-TW">
       <body className="bg-[#070709] text-white antialiased selection:bg-amber-500 selection:text-black">
+        <GlobalImageOptimizer />
         <StorageOverflowGuard />
         <Navbar />
         {children}
