@@ -18,7 +18,38 @@ interface Props {
   defaultSport?: "triathlon" | "cycling";
 }
 
+interface AwardTier {
+  id: string;
+  prefix: string;
+  min: number;
+  max: number | null; // exclusive upper bound (e.g. min=1, max=3 means 1~2)
+  rangeText: string;
+}
+
 const PAGE_SIZE = 50;
+
+const AWARD_TIERS: AwardTier[] = [
+  { id: "all", prefix: "全部賞別", min: 1, max: null, rangeText: "不限場次" },
+  { id: "t1", prefix: "初", min: 1, max: 3, rangeText: "1–2 場" },
+  { id: "t3", prefix: "三", min: 3, max: 5, rangeText: "3–4 場" },
+  { id: "t5", prefix: "五", min: 5, max: 10, rangeText: "5–9 場" },
+  { id: "t10", prefix: "十", min: 10, max: 20, rangeText: "10–19 場" },
+  { id: "t20", prefix: "廿", min: 20, max: 30, rangeText: "20–29 場" },
+  { id: "t30", prefix: "卅", min: 30, max: 40, rangeText: "30–39 場" },
+  { id: "t40", prefix: "四十", min: 40, max: 50, rangeText: "40–49 場" },
+  { id: "t50", prefix: "五十", min: 50, max: 60, rangeText: "50–59 場" },
+  { id: "t60", prefix: "六十", min: 60, max: 70, rangeText: "60–69 場" },
+  { id: "t70", prefix: "七十", min: 70, max: 80, rangeText: "70–79 場" },
+  { id: "t80", prefix: "八十", min: 80, max: 90, rangeText: "80–89 場" },
+  { id: "t90", prefix: "九十", min: 90, max: 100, rangeText: "90–99 場" },
+  { id: "t100", prefix: "百", min: 100, max: null, rangeText: "100+ 場" },
+];
+
+function getTierLabel(tier: AwardTier, sport: "triathlon" | "cycling"): string {
+  if (tier.id === "all") return "全部賞別";
+  const unit = sport === "triathlon" ? "鐵賞" : "鐵馬賞";
+  return `${tier.prefix}${unit}`;
+}
 
 function getMilestoneBadge(count: number, sport: "triathlon" | "cycling") {
   const unit = sport === "triathlon" ? "鐵賞" : "鐵馬賞";
@@ -37,7 +68,6 @@ function getMilestoneBadge(count: number, sport: "triathlon" | "cycling") {
   return { label: `初${unit}`, style: "bg-zinc-900 text-zinc-400 border-zinc-800" };
 }
 
-// 資安過濾：移除會干擾 PostgREST 查詢語法之萬用字元與保留符號
 function sanitizeSearchTerm(input: string): string {
   return String(input || "")
     .trim()
@@ -49,6 +79,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
   const supabase = createClient();
 
   const [sport, setSport] = useState<"triathlon" | "cycling">(defaultSport);
+  const [selectedTierId, setSelectedTierId] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "verified" | "unclaimed">("all");
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -59,20 +90,22 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // 單一選手歷年完賽明細抽屜（點擊才惰性載入，避免全表拉取造成電腦版當機）
   const [selectedAthlete, setSelectedAthlete] = useState<RankingRow | null>(null);
   const [detailRecords, setDetailRecords] = useState<any[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
 
   const reqSeqRef = useRef(0);
 
-  // 支援網址參數 ?sport=cycling 或 ?q=姓名
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const sp = params.get("sport");
     if (sp === "cycling") setSport("cycling");
     else if (sp === "triathlon") setSport("triathlon");
+    const tierParam = params.get("tier");
+    if (tierParam && AWARD_TIERS.some((t) => t.id === tierParam)) {
+      setSelectedTierId(tierParam);
+    }
     const q = params.get("q");
     if (q) {
       setSearchInput(q);
@@ -80,7 +113,6 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
     }
   }, []);
 
-  // 350ms 防抖搜尋，避免連續打字造成資料庫請求風暴
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(sanitizeSearchTerm(searchInput));
@@ -88,6 +120,8 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
     }, 350);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const activeTier = AWARD_TIERS.find((t) => t.id === selectedTierId) || AWARD_TIERS[0];
 
   const fetchRankings = useCallback(async () => {
     const currentSeq = ++reqSeqRef.current;
@@ -106,6 +140,14 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
           { count: "exact" }
         );
 
+      // 賞別分類區間伺服器端精準篩選（毫秒級效能）
+      if (activeTier.id !== "all") {
+        query = query.gte("finish_count", activeTier.min);
+        if (activeTier.max !== null) {
+          query = query.lt("finish_count", activeTier.max);
+        }
+      }
+
       if (debouncedSearch) {
         query = query.ilike("athlete_name", `%${debouncedSearch}%`);
       }
@@ -123,10 +165,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
         .range(from, to);
 
       if (currentSeq !== reqSeqRef.current) return;
-
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw new Error(error.message);
 
       setRows((data as RankingRow[]) || []);
       setTotalCount(count || 0);
@@ -134,13 +173,13 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
       if (currentSeq !== reqSeqRef.current) return;
       setRows([]);
       setTotalCount(0);
-      setErrorMsg("排行榜資料暫時無法讀取，請確認資料庫高速 View 已建立或稍後再試。");
+      setErrorMsg("排行榜資料暫時無法讀取，請確認網路連線或稍後再試。");
     } finally {
       if (currentSeq === reqSeqRef.current) {
         setLoading(false);
       }
     }
-  }, [supabase, sport, page, debouncedSearch, statusFilter]);
+  }, [supabase, sport, page, debouncedSearch, statusFilter, activeTier]);
 
   useEffect(() => {
     fetchRankings();
@@ -171,7 +210,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
             .from("race_details_full")
             .select("*")
             .eq("athlete_name", athlete.athlete_name)
-            .or("category.ilike.%113%,category.ilike.%226%,race_name.ilike.%113%,race_name.ilike.%226%")
+            .or("category.ilike.%113%,category.ilike.%226%,category.ilike.%70.3%,race_name.ilike.%113%,race_name.ilike.%226%,race_name.ilike.%70.3%")
             .order("race_date", { ascending: false })
             .limit(150),
         ]);
@@ -188,23 +227,33 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
     }
   };
 
+  // 統計明細抽屜中是否有同日多筆紀錄（讓查閱者一目瞭然「同日僅計 1 場」）
+  const detailDateCounts = React.useMemo(() => {
+    const map = new Map<string, number>();
+    detailRecords.forEach((r) => {
+      const d = String(r.race_date || "").trim().split("/").join("-").slice(0, 10);
+      if (d) map.set(d, (map.get(d) || 0) + 1);
+    });
+    return map;
+  }, [detailRecords]);
+
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
     <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between overflow-x-hidden">
-      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-        {/* 頂部權威標題區 */}
+      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
+        {/* 1. 頂部權威標題與雙軌切換區 */}
         <section className="rounded-3xl bg-gradient-to-br from-zinc-900 via-zinc-950 to-black border border-amber-500/35 p-6 sm:p-9 shadow-2xl space-y-5">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
             <div className="space-y-2">
               <span className="inline-block px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-[11px] font-black tracking-widest uppercase">
-                OFFICIAL HALL OF FAME・SERVER-SIDE VERIFIED RANKINGS
+                OFFICIAL HALL OF FAME・13-TIER MILESTONE RANKINGS
               </span>
               <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
                 {sport === "triathlon" ? "🏆 全球百鐵認證・百鐵英雄榜" : "🚴 全球百鐵認證・百鐵馬英雄榜"}
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-3xl">
-                採用資料庫伺服器端高速聚合與嚴格同日防呆去重（每頁顯示 {PAGE_SIZE} 位，秒開不卡頓）。官方收錄選手點擊「待認領」即可免費綁定個人帳號，解鎖階段賞別水晶證書與品牌加價購特權。
+                採用資料庫伺服器端高速分頁聚合（每頁 {PAGE_SIZE} 位，秒開不當機），並<strong className="text-amber-300">嚴格執行同日去重（同一日期無論登錄幾場僅計 1 筆完賽）</strong>。可點擊下方賞別快速切換查閱各階段英雄名單。
               </p>
             </div>
 
@@ -219,7 +268,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                     : "bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800")
                 }
               >
-                🏊‍♂️ 百鐵英雄榜（鐵人三項）
+                🏊‍♂️ 百鐵英雄榜（初鐵賞～百鐵賞）
               </button>
               <button
                 type="button"
@@ -231,16 +280,15 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                     : "bg-zinc-900 text-zinc-300 border border-zinc-800 hover:bg-zinc-800")
                 }
               >
-                🚴 百鐵馬英雄榜（單車＋超鐵雙軌）
+                🚴 百鐵馬英雄榜（初鐵馬賞～百鐵馬賞）
               </button>
             </div>
           </div>
 
-          {/* 快捷認領與登錄導引列 */}
           <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3 text-xs">
               <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold">
-                目前總收錄選手：<span className="text-amber-400 font-mono font-black text-sm">{totalCount.toLocaleString()}</span> 位
+                {getTierLabel(activeTier, sport)}符合人數：<span className="text-amber-400 font-mono font-black text-sm">{totalCount.toLocaleString()}</span> 位
               </span>
               <span className="inline-flex items-center gap-1.5 text-zinc-400">
                 <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
@@ -248,7 +296,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
               </span>
               <span className="inline-flex items-center gap-1.5 text-zinc-400">
                 <span className="inline-block w-2 h-2 rounded-full bg-zinc-500" />
-                官方收錄待認領：點選直接認領賽事
+                官方收錄待認領：點選直接認領
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -268,7 +316,74 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
           </div>
         </section>
 
-        {/* 搜尋與篩選控制列 */}
+        {/* 2. 完整恢復：13 階賞別分類按鈕區（初鐵賞、三鐵賞、五鐵賞...百鐵賞 ／ 初鐵馬賞...百鐵馬賞） */}
+        <section className="rounded-2xl bg-zinc-950 border border-amber-500/25 p-4 sm:p-5 space-y-3 shadow-xl">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black text-amber-400">
+                🏅 {sport === "triathlon" ? "百鐵英雄榜・階段賞別分類篩選" : "百鐵馬英雄榜・階段賞別分類篩選"}
+              </span>
+              <span className="text-[11px] text-zinc-400 font-bold">
+                （點選任一賞別立即篩選該級距完賽英雄）
+              </span>
+            </div>
+            {selectedTierId !== "all" && (
+              <button
+                type="button"
+                onClick={() => { setSelectedTierId("all"); setPage(1); }}
+                className="text-xs font-bold text-amber-300 hover:text-amber-200 underline cursor-pointer"
+              >
+                重置為全部賞別
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {AWARD_TIERS.map((tier) => {
+              const isSelected = selectedTierId === tier.id;
+              const isTop = tier.id === "t100";
+              const label = getTierLabel(tier, sport);
+              return (
+                <button
+                  key={tier.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTierId(tier.id);
+                    setPage(1);
+                  }}
+                  className={
+                    "px-3 py-1.5 rounded-xl text-xs font-black transition cursor-pointer border flex items-center gap-1.5 " +
+                    (isSelected
+                      ? sport === "triathlon"
+                        ? "bg-amber-500 text-black border-amber-400 shadow-lg scale-[1.02]"
+                        : "bg-blue-500 text-white border-blue-400 shadow-lg scale-[1.02]"
+                      : isTop
+                      ? "bg-gradient-to-r from-amber-950/60 to-red-950/60 text-amber-300 border-amber-500/50 hover:border-amber-400"
+                      : "bg-zinc-900/90 text-zinc-300 border-zinc-800 hover:border-amber-500/40 hover:text-white")
+                  }
+                >
+                  <span>{label}</span>
+                  {tier.id !== "all" && (
+                    <span
+                      className={
+                        "text-[10px] font-mono " +
+                        (isSelected
+                          ? sport === "triathlon"
+                            ? "text-black/80"
+                            : "text-white/90"
+                          : "text-zinc-500")
+                      }
+                    >
+                      ({tier.rangeText})
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 3. 搜尋與認領狀態篩選列 */}
         <section className="rounded-2xl bg-zinc-950 border border-zinc-800 p-4 sm:p-5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1">
             <input
@@ -330,14 +445,13 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
           </div>
         </section>
 
-        {/* 錯誤提示 */}
         {errorMsg && (
           <div className="rounded-2xl bg-red-950/50 border border-red-700/60 p-4 text-xs sm:text-sm text-red-200 font-bold">
             ⚠️ {errorMsg}
           </div>
         )}
 
-        {/* 排行榜主表 */}
+        {/* 4. 排行榜主表 */}
         <section className="rounded-3xl bg-zinc-950 border border-zinc-800 overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -346,7 +460,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                   <th className="py-3.5 px-4 w-16 text-center">排名</th>
                   <th className="py-3.5 px-4">選手姓名 ＆ 認證狀態</th>
                   <th className="py-3.5 px-4 hidden md:table-cell">代表團隊 / 車隊</th>
-                  <th className="py-3.5 px-4 text-center">有效場次</th>
+                  <th className="py-3.5 px-4 text-center">有效場次（同日計1）</th>
                   <th className="py-3.5 px-4 hidden sm:table-cell text-center">達成賞別</th>
                   <th className="py-3.5 px-4 hidden lg:table-cell text-center">最近完賽日</th>
                   <th className="py-3.5 px-4 text-right">操作</th>
@@ -368,7 +482,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                 ) : rows.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-14 text-center text-zinc-500 font-bold">
-                      找不到符合條件的選手紀錄。您可以嘗試清除搜尋字詞，或直接前往「完賽登錄」新增紀錄。
+                      目前在「{getTierLabel(activeTier, sport)}」分類下查無符合條件的選手紀錄。
                     </td>
                   </tr>
                 ) : (
@@ -378,11 +492,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                     const claimUrl = `/profile/claim?type=${sport}&name=${encodeURIComponent(row.athlete_name)}`;
 
                     return (
-                      <tr
-                        key={`${row.athlete_name}-${globalRank}`}
-                        className="hover:bg-zinc-900/60 transition"
-                      >
-                        {/* 排名 */}
+                      <tr key={`${row.athlete_name}-${globalRank}`} className="hover:bg-zinc-900/60 transition">
                         <td className="py-3.5 px-4 text-center font-mono font-black">
                           {globalRank === 1 ? (
                             <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-black text-xs">1</span>
@@ -395,7 +505,6 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                           )}
                         </td>
 
-                        {/* 姓名 + 雙徽章 + 同名提示 */}
                         <td className="py-3.5 px-4">
                           <div className="flex flex-wrap items-center gap-2">
                             <button
@@ -429,18 +538,15 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                               </span>
                             )}
                           </div>
-                          {/* 手機版副資訊 */}
                           <div className="md:hidden text-[11px] text-zinc-500 mt-1">
-                            {row.primary_team || "個人"} · 最近：{row.latest_race_date || "—"}
+                            {row.primary_team || "個人"} · {award.label} · 最近：{row.latest_race_date || "—"}
                           </div>
                         </td>
 
-                        {/* 團隊 */}
                         <td className="py-3.5 px-4 hidden md:table-cell text-zinc-300 text-xs max-w-[200px] truncate">
                           {row.primary_team || "個人"}
                         </td>
 
-                        {/* 場次 */}
                         <td className="py-3.5 px-4 text-center">
                           <span className={"font-mono font-black text-base sm:text-lg " + (sport === "triathlon" ? "text-amber-400" : "text-blue-400")}>
                             {row.finish_count}
@@ -448,19 +554,16 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                           <span className="text-[11px] text-zinc-500 ml-1">場</span>
                         </td>
 
-                        {/* 達成賞別 */}
                         <td className="py-3.5 px-4 hidden sm:table-cell text-center">
                           <span className={`inline-block px-2.5 py-0.5 rounded-full border text-[11px] font-black ${award.style}`}>
                             {award.label}
                           </span>
                         </td>
 
-                        {/* 最近完賽日 */}
                         <td className="py-3.5 px-4 hidden lg:table-cell text-center font-mono text-xs text-zinc-400">
                           {row.latest_race_date || "—"}
                         </td>
 
-                        {/* 操作 */}
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
                           <div className="inline-flex items-center gap-1.5">
                             <button
@@ -488,42 +591,21 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
             </table>
           </div>
 
-          {/* 伺服器端分頁導航列 */}
           <div className="bg-zinc-900/70 border-t border-zinc-800 px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div className="text-zinc-400 font-bold">
-              第 <span className="text-white font-mono">{page}</span> / <span className="text-white font-mono">{totalPages}</span> 頁（共 <span className="text-amber-400 font-mono">{totalCount.toLocaleString()}</span> 位選手）
+              第 <span className="text-white font-mono">{page}</span> / <span className="text-white font-mono">{totalPages}</span> 頁（{getTierLabel(activeTier, sport)}共 <span className="text-amber-400 font-mono">{totalCount.toLocaleString()}</span> 位選手）
             </div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={page <= 1 || loading}
-                onClick={() => setPage(1)}
-                className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 disabled:opacity-40 hover:bg-zinc-800 font-bold cursor-pointer"
-              >
+              <button type="button" disabled={page <= 1 || loading} onClick={() => setPage(1)} className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 disabled:opacity-40 hover:bg-zinc-800 font-bold cursor-pointer">
                 « 首頁
               </button>
-              <button
-                type="button"
-                disabled={page <= 1 || loading}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="px-3.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white disabled:opacity-40 hover:bg-zinc-800 font-bold cursor-pointer"
-              >
+              <button type="button" disabled={page <= 1 || loading} onClick={() => setPage((p) => Math.max(1, p - 1))} className="px-3.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white disabled:opacity-40 hover:bg-zinc-800 font-bold cursor-pointer">
                 ← 上一頁
               </button>
-              <button
-                type="button"
-                disabled={page >= totalPages || loading}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="px-3.5 py-1.5 rounded-lg bg-amber-500 text-black disabled:opacity-40 hover:bg-amber-400 font-black cursor-pointer"
-              >
+              <button type="button" disabled={page >= totalPages || loading} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="px-3.5 py-1.5 rounded-lg bg-amber-500 text-black disabled:opacity-40 hover:bg-amber-400 font-black cursor-pointer">
                 下一頁 →
               </button>
-              <button
-                type="button"
-                disabled={page >= totalPages || loading}
-                onClick={() => setPage(totalPages)}
-                className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 disabled:opacity-40 hover:bg-zinc-800 font-bold cursor-pointer"
-              >
+              <button type="button" disabled={page >= totalPages || loading} onClick={() => setPage(totalPages)} className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 disabled:opacity-40 hover:bg-zinc-800 font-bold cursor-pointer">
                 末頁 »
               </button>
             </div>
@@ -531,7 +613,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
         </section>
       </div>
 
-      {/* 單一選手完賽明細 Modal（惰性載入，極速不卡頓） */}
+      {/* 單一選手歷年明細 Modal（含同日多筆標註提示） */}
       {selectedAthlete && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center px-4 z-50">
           <div className="bg-zinc-950 border border-amber-500/50 rounded-3xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
@@ -548,8 +630,8 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                   )}
                 </div>
                 <p className="text-xs text-zinc-400">
-                  有效採計場次（同日去重）：<span className="text-amber-400 font-mono font-black">{selectedAthlete.finish_count}</span> 場
-                  {selectedAthlete.has_homonym_warning && " · ⚠️ 偵測到可能含同名不同人紀錄，請點選右下方按鈕進入勾選本人賽事認領"}
+                  英雄榜有效採計場次（同一日期僅計 1 筆）：<span className="text-amber-400 font-mono font-black">{selectedAthlete.finish_count}</span> 場
+                  {selectedAthlete.has_homonym_warning && " · ⚠️ 含同名不同人紀錄，建議本人登入勾選認領分流"}
                 </p>
               </div>
               <button
@@ -567,41 +649,55 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
               ) : detailRecords.length === 0 ? (
                 <div className="py-12 text-center text-zinc-500 text-sm">尚無詳細明細</div>
               ) : (
-                detailRecords.map((rec, i) => (
-                  <div
-                    key={rec.id || i}
-                    className="p-3.5 rounded-2xl bg-zinc-900/70 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono font-black text-amber-400">{String(rec.race_date || "").slice(0, 10)}</span>
-                        <span className="font-black text-white text-sm">{rec.race_name}</span>
-                        {rec.__source && (
-                          <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold">{rec.__source}</span>
+                detailRecords.map((rec, i) => {
+                  const normD = String(rec.race_date || "").trim().split("/").join("-").slice(0, 10);
+                  const isSameDayDup = (detailDateCounts.get(normD) || 0) > 1;
+                  return (
+                    <div
+                      key={rec.id || i}
+                      className={
+                        "p-3.5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs " +
+                        (isSameDayDup
+                          ? "bg-orange-950/30 border-orange-500/50"
+                          : "bg-zinc-900/70 border-zinc-800")
+                      }
+                    >
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono font-black text-amber-400">{normD}</span>
+                          <span className="font-black text-white text-sm">{rec.race_name}</span>
+                          {isSameDayDup && (
+                            <span className="px-2 py-0.5 rounded bg-orange-500/20 border border-orange-500/50 text-orange-300 text-[10px] font-black">
+                              ⚠️ 同日多筆（英雄榜僅計1場）
+                            </span>
+                          )}
+                          {rec.__source && (
+                            <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 text-[10px] font-bold">{rec.__source}</span>
+                          )}
+                        </div>
+                        <div className="text-zinc-400 flex flex-wrap gap-x-3 gap-y-1">
+                          <span>組別：{rec.category || rec.participating_categories || "—"}</span>
+                          {rec.age_group && <span>分齡：{rec.age_group}</span>}
+                          {rec.birth_year_min && rec.birth_year_max && (
+                            <span>推算出生年：{rec.birth_year_min}–{rec.birth_year_max}</span>
+                          )}
+                          <span>團隊：{rec.team || "個人"}</span>
+                          {rec.bib_number && <span>編號：{rec.bib_number}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="px-3 py-1 rounded-lg bg-zinc-950 border border-zinc-800 font-mono font-black text-emerald-400">
+                          {rec.finish_time || "完賽"}
+                        </span>
+                        {(rec.claimed_user_id || rec.login_email) ? (
+                          <span className="px-2 py-1 rounded-lg bg-amber-500/15 text-amber-300 text-[10px] font-bold">已認領</span>
+                        ) : (
+                          <span className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-400 text-[10px] font-bold">待認領</span>
                         )}
                       </div>
-                      <div className="text-zinc-400 flex flex-wrap gap-x-3 gap-y-1">
-                        <span>組別：{rec.category || rec.participating_categories || "—"}</span>
-                        {rec.age_group && <span>分齡：{rec.age_group}</span>}
-                        {rec.birth_year_min && rec.birth_year_max && (
-                          <span>推算出生年：{rec.birth_year_min}–{rec.birth_year_max}</span>
-                        )}
-                        <span>團隊：{rec.team || "個人"}</span>
-                        {rec.bib_number && <span>編號：{rec.bib_number}</span>}
-                      </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="px-3 py-1 rounded-lg bg-zinc-950 border border-zinc-800 font-mono font-black text-emerald-400">
-                        {rec.finish_time || "完賽"}
-                      </span>
-                      {(rec.claimed_user_id || rec.login_email) ? (
-                        <span className="px-2 py-1 rounded-lg bg-amber-500/15 text-amber-300 text-[10px] font-bold">已認領</span>
-                      ) : (
-                        <span className="px-2 py-1 rounded-lg bg-zinc-800 text-zinc-400 text-[10px] font-bold">待認領</span>
-                      )}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 

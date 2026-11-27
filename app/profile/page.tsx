@@ -1,5 +1,7 @@
 "use client";
 
+
+import SameDayAuditPanel from "@/components/SameDayAuditPanel";
 import React, { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
@@ -473,7 +475,8 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-[#070709] overflow-x-hidden text-white flex flex-col justify-between">
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
-<div id="g100-dual-import-banners" className="space-y-4 mb-6">
+<SameDayAuditPanel />
+        <div id="g100-dual-import-banners" className="space-y-4 mb-6">
   <section className="rounded-3xl bg-gradient-to-r from-amber-500/20 via-red-950/40 to-zinc-950 border-2 border-amber-500/60 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
     <div className="space-y-1">
       <div className="flex items-center gap-2">
