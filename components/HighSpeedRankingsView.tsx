@@ -22,27 +22,27 @@ interface AwardTier {
   id: string;
   prefix: string;
   min: number;
-  max: number | null; // exclusive upper bound (e.g. min=1, max=3 means 1~2)
+  max: number | null;
   rangeText: string;
 }
 
 const PAGE_SIZE = 50;
 
 const AWARD_TIERS: AwardTier[] = [
-  { id: "all", prefix: "全部賞別", min: 1, max: null, rangeText: "不限場次" },
-  { id: "t1", prefix: "初", min: 1, max: 3, rangeText: "1–2 場" },
-  { id: "t3", prefix: "三", min: 3, max: 5, rangeText: "3–4 場" },
-  { id: "t5", prefix: "五", min: 5, max: 10, rangeText: "5–9 場" },
-  { id: "t10", prefix: "十", min: 10, max: 20, rangeText: "10–19 場" },
-  { id: "t20", prefix: "廿", min: 20, max: 30, rangeText: "20–29 場" },
-  { id: "t30", prefix: "卅", min: 30, max: 40, rangeText: "30–39 場" },
-  { id: "t40", prefix: "四十", min: 40, max: 50, rangeText: "40–49 場" },
-  { id: "t50", prefix: "五十", min: 50, max: 60, rangeText: "50–59 場" },
-  { id: "t60", prefix: "六十", min: 60, max: 70, rangeText: "60–69 場" },
-  { id: "t70", prefix: "七十", min: 70, max: 80, rangeText: "70–79 場" },
-  { id: "t80", prefix: "八十", min: 80, max: 90, rangeText: "80–89 場" },
-  { id: "t90", prefix: "九十", min: 90, max: 100, rangeText: "90–99 場" },
-  { id: "t100", prefix: "百", min: 100, max: null, rangeText: "100+ 場" },
+  { id: "all", prefix: "全部賞別", min: 1, max: null, rangeText: "全部完賽選手" },
+  { id: "t1", prefix: "初", min: 1, max: 3, rangeText: "1–2 場有效完賽" },
+  { id: "t3", prefix: "三", min: 3, max: 5, rangeText: "3–4 場有效完賽" },
+  { id: "t5", prefix: "五", min: 5, max: 10, rangeText: "5–9 場有效完賽" },
+  { id: "t10", prefix: "十", min: 10, max: 20, rangeText: "10–19 場有效完賽" },
+  { id: "t20", prefix: "廿", min: 20, max: 30, rangeText: "20–29 場有效完賽" },
+  { id: "t30", prefix: "卅", min: 30, max: 40, rangeText: "30–39 場有效完賽" },
+  { id: "t40", prefix: "四十", min: 40, max: 50, rangeText: "40–49 場有效完賽" },
+  { id: "t50", prefix: "五十", min: 50, max: 60, rangeText: "50–59 場有效完賽" },
+  { id: "t60", prefix: "六十", min: 60, max: 70, rangeText: "60–69 場有效完賽" },
+  { id: "t70", prefix: "七十", min: 70, max: 80, rangeText: "70–79 場有效完賽" },
+  { id: "t80", prefix: "八十", min: 80, max: 90, rangeText: "80–89 場有效完賽" },
+  { id: "t90", prefix: "九十", min: 90, max: 100, rangeText: "90–99 場有效完賽" },
+  { id: "t100", prefix: "百", min: 100, max: null, rangeText: "100 場以上最高榮耀" },
 ];
 
 function getTierLabel(tier: AwardTier, sport: "triathlon" | "cycling"): string {
@@ -87,6 +87,8 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
 
   const [rows, setRows] = useState<RankingRow[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [tierCounts, setTierCounts] = useState<Record<string, number>>({});
+  const [tierCountsLoading, setTierCountsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -95,6 +97,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
   const [detailLoading, setDetailLoading] = useState(false);
 
   const reqSeqRef = useRef(0);
+  const countSeqRef = useRef(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -123,6 +126,67 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
 
   const activeTier = AWARD_TIERS.find((t) => t.id === selectedTierId) || AWARD_TIERS[0];
 
+  // 高速計算 13 階賞別＋全部賞別的「實際統計人數」
+  // 優先呼叫單次 RPC (get_ranking_tier_counts)；若尚未建立 RPC 則自動降級為分批 head:true 計數（零資料傳輸、絕不卡頓）
+  const fetchTierCounts = useCallback(async () => {
+    const currentSeq = ++countSeqRef.current;
+    setTierCountsLoading(true);
+    try {
+      const { data: rpcData, error: rpcErr } = await supabase.rpc("get_ranking_tier_counts", {
+        p_sport: sport,
+        p_status: statusFilter,
+        p_search: debouncedSearch,
+      });
+
+      if (currentSeq !== countSeqRef.current) return;
+
+      if (!rpcErr && rpcData && typeof rpcData === "object") {
+        const mapped: Record<string, number> = {};
+        for (const t of AWARD_TIERS) {
+          mapped[t.id] = Number((rpcData as any)[t.id] || 0);
+        }
+        setTierCounts(mapped);
+        setTierCountsLoading(false);
+        return;
+      }
+
+      // 降級方案：分兩批執行輕量 head:true 計數查詢（僅回傳標頭筆數、不傳輸任何選手資料）
+      const viewName = sport === "triathlon" ? "v_triathlon_rankings" : "v_cycling_rankings";
+      const resultMap: Record<string, number> = {};
+
+      const queryOneTier = async (tier: AwardTier) => {
+        let q = supabase.from(viewName).select("athlete_name", { count: "exact", head: true });
+        if (tier.id !== "all") {
+          q = q.gte("finish_count", tier.min);
+          if (tier.max !== null) q = q.lt("finish_count", tier.max);
+        }
+        if (debouncedSearch) q = q.ilike("athlete_name", `%${debouncedSearch}%`);
+        if (statusFilter === "verified") q = q.eq("is_verified_member", true);
+        else if (statusFilter === "unclaimed") q = q.eq("is_verified_member", false);
+        const { count } = await q;
+        resultMap[tier.id] = count || 0;
+      };
+
+      const batchSize = 5;
+      for (let i = 0; i < AWARD_TIERS.length; i += batchSize) {
+        await Promise.all(AWARD_TIERS.slice(i, i + batchSize).map(queryOneTier));
+        if (currentSeq !== countSeqRef.current) return;
+      }
+
+      setTierCounts(resultMap);
+    } catch (e) {
+      // 優雅降級
+    } finally {
+      if (currentSeq === countSeqRef.current) {
+        setTierCountsLoading(false);
+      }
+    }
+  }, [supabase, sport, statusFilter, debouncedSearch]);
+
+  useEffect(() => {
+    fetchTierCounts();
+  }, [fetchTierCounts]);
+
   const fetchRankings = useCallback(async () => {
     const currentSeq = ++reqSeqRef.current;
     setLoading(true);
@@ -140,7 +204,6 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
           { count: "exact" }
         );
 
-      // 賞別分類區間伺服器端精準篩選（毫秒級效能）
       if (activeTier.id !== "all") {
         query = query.gte("finish_count", activeTier.min);
         if (activeTier.max !== null) {
@@ -227,7 +290,6 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
     }
   };
 
-  // 統計明細抽屜中是否有同日多筆紀錄（讓查閱者一目瞭然「同日僅計 1 場」）
   const detailDateCounts = React.useMemo(() => {
     const map = new Map<string, number>();
     detailRecords.forEach((r) => {
@@ -253,7 +315,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                 {sport === "triathlon" ? "🏆 全球百鐵認證・百鐵英雄榜" : "🚴 全球百鐵認證・百鐵馬英雄榜"}
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-3xl">
-                採用資料庫伺服器端高速分頁聚合（每頁 {PAGE_SIZE} 位，秒開不當機），並<strong className="text-amber-300">嚴格執行同日去重（同一日期無論登錄幾場僅計 1 筆完賽）</strong>。可點擊下方賞別快速切換查閱各階段英雄名單。
+                採用資料庫伺服器端高速分頁聚合（每頁 {PAGE_SIZE} 位，秒開不當機），並<strong className="text-amber-300">嚴格執行同日去重（同一日期無論登錄幾場僅計 1 筆完賽）</strong>。下方各賞別按鈕即時統計該級距人數，點擊即可切換查閱。
               </p>
             </div>
 
@@ -288,7 +350,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
           <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3 text-xs">
               <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold">
-                {getTierLabel(activeTier, sport)}符合人數：<span className="text-amber-400 font-mono font-black text-sm">{totalCount.toLocaleString()}</span> 位
+                {getTierLabel(activeTier, sport)}統計人數：<span className="text-amber-400 font-mono font-black text-sm">{totalCount.toLocaleString()}</span> 人
               </span>
               <span className="inline-flex items-center gap-1.5 text-zinc-400">
                 <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
@@ -316,15 +378,15 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
           </div>
         </section>
 
-        {/* 2. 完整恢復：13 階賞別分類按鈕區（初鐵賞、三鐵賞、五鐵賞...百鐵賞 ／ 初鐵馬賞...百鐵馬賞） */}
+        {/* 2. 13 階賞別分類按鈕區：完整顯示「各賞別實際統計人數」 */}
         <section className="rounded-2xl bg-zinc-950 border border-amber-500/25 p-4 sm:p-5 space-y-3 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-sm font-black text-amber-400">
-                🏅 {sport === "triathlon" ? "百鐵英雄榜・階段賞別分類篩選" : "百鐵馬英雄榜・階段賞別分類篩選"}
+                🏅 {sport === "triathlon" ? "百鐵英雄榜・各賞別統計人數與分類篩選" : "百鐵馬英雄榜・各賞別統計人數與分類篩選"}
               </span>
               <span className="text-[11px] text-zinc-400 font-bold">
-                （點選任一賞別立即篩選該級距完賽英雄）
+                （括號內為該賞別實際統計人數，滑鼠移上可檢視場次門檻）
               </span>
             </div>
             {selectedTierId !== "all" && (
@@ -343,10 +405,19 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
               const isSelected = selectedTierId === tier.id;
               const isTop = tier.id === "t100";
               const label = getTierLabel(tier, sport);
+              const countVal = tierCounts[tier.id];
+              const countText =
+                typeof countVal === "number"
+                  ? `${countVal.toLocaleString()} 人`
+                  : tierCountsLoading
+                  ? "統計中..."
+                  : "0 人";
+
               return (
                 <button
                   key={tier.id}
                   type="button"
+                  title={`${label}（${tier.rangeText}）`}
                   onClick={() => {
                     setSelectedTierId(tier.id);
                     setPage(1);
@@ -363,20 +434,18 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                   }
                 >
                   <span>{label}</span>
-                  {tier.id !== "all" && (
-                    <span
-                      className={
-                        "text-[10px] font-mono " +
-                        (isSelected
-                          ? sport === "triathlon"
-                            ? "text-black/80"
-                            : "text-white/90"
-                          : "text-zinc-500")
-                      }
-                    >
-                      ({tier.rangeText})
-                    </span>
-                  )}
+                  <span
+                    className={
+                      "text-[11px] font-mono font-bold " +
+                      (isSelected
+                        ? sport === "triathlon"
+                          ? "text-black/85"
+                          : "text-white/95"
+                        : "text-amber-400/90")
+                    }
+                  >
+                    ({countText})
+                  </span>
                 </button>
               );
             })}
@@ -593,7 +662,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
 
           <div className="bg-zinc-900/70 border-t border-zinc-800 px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div className="text-zinc-400 font-bold">
-              第 <span className="text-white font-mono">{page}</span> / <span className="text-white font-mono">{totalPages}</span> 頁（{getTierLabel(activeTier, sport)}共 <span className="text-amber-400 font-mono">{totalCount.toLocaleString()}</span> 位選手）
+              第 <span className="text-white font-mono">{page}</span> / <span className="text-white font-mono">{totalPages}</span> 頁（{getTierLabel(activeTier, sport)}共 <span className="text-amber-400 font-mono">{totalCount.toLocaleString()}</span> 人）
             </div>
             <div className="flex items-center gap-2">
               <button type="button" disabled={page <= 1 || loading} onClick={() => setPage(1)} className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-300 disabled:opacity-40 hover:bg-zinc-800 font-bold cursor-pointer">

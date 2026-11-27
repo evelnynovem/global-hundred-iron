@@ -39,7 +39,7 @@ export const DEFAULT_MED_LIST: ColumnArticle[] = [
     title: "開放水域游泳（OWS）恐慌症候群與吸入性肺水腫之臨床防護",
     author: "洪緯欣 醫師 × 醫護鐵人賽道安全組",
     date: "2026-10-18",
-    coverUrl: "https://images.unsplash.com/photo-1519315901367-f34ff9154487?auto=format&fit=crop&w=900&q=80",
+    coverUrl: "/images/col_med_default_clean.jpg",
     summary: "為什麼在泳池游得很好，一下活水湖或大海卻喘不過氣？胸腔內科醫師帶您剖析開放水域換氣節奏與游泳誘發性肺水腫（SIPE）。",
     content: "開放水域（Open Water）沒有池底黑線與池壁可扶，加上開賽時百人同時下水的肢體碰撞與水溫刺激，極易引發交感神經瞬間亢奮，導致過度換氣與恐慌。\n\n醫護鐵人團隊建議選手於下水前務必先潑水適應水溫，開賽前 200 公尺採取 80% 巡航配速，若感呼吸急促可立即改為蛙式或仰漂舉手示意，切勿硬撐。",
     contentImages: [],
@@ -68,7 +68,7 @@ export const DEFAULT_CELEB_LIST: ColumnArticle[] = [
     title: "最強賽事求婚＆單車婚禮：陳彥良的賽事求婚必勝攻略與鐵人故事",
     author: "全球百鐵認證名人堂 × 跨界藝人聯合專訪",
     date: "2026-10-22",
-    coverUrl: "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80",
+    coverUrl: "/images/col_med_default_clean.jpg",
     summary: "從舞台聚光燈走向東海岸活水湖與 197 縣道，看跨界藝人與百鐵推手們如何透過單車與鐵人運動突破自我！",
     content: "許多跨界藝人第一次參加百K挑戰賽最深刻的體會，就是學會與逆風共處，穩定維持輸出並定時補充能量，微笑通過終點線。",
     contentImages: [],
@@ -115,6 +115,14 @@ export function compressImageHighClarity(file: File, maxDim = 1100, quality = 0.
 }
 
 export default function UnifiedCyclingColumnsPage() {
+
+  // [v34] 零閃爍閘門：等待雲端專欄資料載入完成才顯示卡片，杜絕前 1.5 秒閃現舊圖與舊文章
+  const [_g100ColsCloudReady, _setG100ColsCloudReady] = useState(false);
+  useEffect(() => {
+    const _fallbackTimer = setTimeout(() => _setG100ColsCloudReady(true), 2500);
+    return () => clearTimeout(_fallbackTimer);
+  }, []);
+
 
   useEffect(() => {
     try {
@@ -180,6 +188,7 @@ export default function UnifiedCyclingColumnsPage() {
             loadedMed = JSON.parse(medRow.team);
             localStorage.setItem("g100_unified_col_MED", medRow.team);
           } catch (e) {}
+      _setG100ColsCloudReady(true);
         }
         const celebRow = sysRows.find((r: any) => r.race_name === "COL_CELEB_JSON");
         if (celebRow?.team) {
@@ -485,6 +494,24 @@ export default function UnifiedCyclingColumnsPage() {
   return (
     <div className="min-h-screen bg-[#070709] text-white flex flex-col justify-between overflow-x-hidden">
       <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+        {!_g100ColsCloudReady && (
+          <div className="space-y-6 py-4" aria-label="載入最新雲端專欄中">
+            <div className="h-8 w-64 rounded-xl bg-zinc-800/80 animate-pulse" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded-3xl bg-zinc-900/90 border border-zinc-800 p-5 space-y-4 animate-pulse">
+                <div className="h-64 w-full rounded-2xl bg-zinc-800/80" />
+                <div className="h-5 w-3/4 rounded bg-zinc-800/80" />
+                <div className="h-4 w-full rounded bg-zinc-800/60" />
+              </div>
+              <div className="rounded-3xl bg-zinc-900/90 border border-zinc-800 p-5 space-y-4 animate-pulse">
+                <div className="h-64 w-full rounded-2xl bg-zinc-800/80" />
+                <div className="h-5 w-3/4 rounded bg-zinc-800/80" />
+                <div className="h-4 w-full rounded bg-zinc-800/60" />
+              </div>
+            </div>
+          </div>
+        )}
+        <div className={_g100ColsCloudReady ? "opacity-100 transition-opacity duration-200 space-y-10" : "hidden"}>
         
         {/* 頂部總標題與快速分類切換 */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 border-b border-zinc-800 pb-6">
@@ -611,6 +638,8 @@ export default function UnifiedCyclingColumnsPage() {
           </section>
         )}
 
+      
+        </div>
       </div>
 
       {/* 管理員圖文編輯器 Modal（支援試閱內文插入多張高清晰壓縮圖片） */}
