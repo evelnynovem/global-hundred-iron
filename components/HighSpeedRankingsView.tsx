@@ -1,5 +1,7 @@
 "use client";
 
+
+import RankingRulesBanner from "@/components/RankingRulesBanner";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Footer from "@/components/Footer";
@@ -377,6 +379,8 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
             </div>
           </div>
         </section>
+
+        <RankingRulesBanner />
 
         {/* 2. 13 階賞別分類按鈕區：完整顯示「各賞別實際統計人數」 */}
         <section className="rounded-2xl bg-zinc-950 border border-amber-500/25 p-4 sm:p-5 space-y-3 shadow-xl">
