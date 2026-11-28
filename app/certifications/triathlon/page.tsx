@@ -331,6 +331,11 @@ export default function UnifiedRecordSubmissionPage() {
   const finalDate = `${selYear}-${selMonth.padStart(2, "0")}-${selDay.padStart(2, "0")}`;
     const exactNowStr = formatTimestamp();
 
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (finalDate > todayStr) {
+      setErrorMsg("⚠️ 完賽日期不可大於今日，不得登錄未來日期！");
+      return;
+    }
     if (!eventName.trim()) {
       setErrorMsg("⚠️ 請輸入或選擇賽事名稱。");
       return;
