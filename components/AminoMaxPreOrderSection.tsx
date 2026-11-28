@@ -71,7 +71,7 @@ export default function AminoMaxPreOrderSection() {
   const [isAdmin, setIsAdmin] = useState(true);
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
-  const [headerImg, setHeaderImg] = useState("/images/aminomax-poster.png");
+  const [headerImg, setHeaderImg] = useState("/images/aminomax-poster.jpg?v=20261128");
   const [headerTitle, setHeaderTitle] = useState("邁克仕 AminoMax × 全球百鐵認證 未來參賽場次預先勾選系統");
   const [headerDesc, setHeaderDesc] = useState("請於下方勾選您從今日起預計報名參加之全球百鐵認證系列賽事（已結束之歷史賽事自動隱藏）。系統將於各場賽事開賽前 1 個月（30 天）截止統計數量，並將邁克仕產品精準配發至該場次主辦單位手上。");
   const [editingHeader, setEditingHeader] = useState(false);
