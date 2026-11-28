@@ -37,6 +37,9 @@ export default function ClaimHistoryPage() {
 
   const [sport, setSport] = useState<"triathlon" | "cycling">("triathlon");
   const [searchName, setSearchName] = useState("");
+  const [lockedMemberName, setLockedMemberName] = useState("");
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [profileMissingName, setProfileMissingName] = useState(false);
   const [birthYearFilter, setBirthYearFilter] = useState("");
   const [onlyUnclaimed, setOnlyUnclaimed] = useState(false);
   const [records, setRecords] = useState<ClaimRecord[]>([]);
@@ -434,8 +437,9 @@ export default function ClaimHistoryPage() {
             <input
               type="text"
               required
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
+              value={isAdminUser ? searchName : (lockedMemberName || searchName)}
+                  readOnly={!isAdminUser}
+                  onChange={(e) => { if (isAdminUser) setSearchName(e.target.value); }}
               placeholder="請輸入參賽姓名，例如：陳彥良"
               className="w-full rounded-xl bg-zinc-900 border border-zinc-700 focus:border-amber-500 focus:outline-none px-4 py-2.5 text-sm text-white font-bold"
             />

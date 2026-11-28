@@ -782,7 +782,7 @@ export default function HighSpeedRankingsView({ defaultSport = "triathlon" }: Pr
                 href={`/profile/claim?type=${sport}&name=${encodeURIComponent(selectedAthlete.athlete_name)}`}
                 className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs shadow transition"
               >
-                ⚡ 我是 {selectedAthlete.athlete_name}，前往勾選認領 →
+                ⚡ 登入本人會員中心核對認領 →
               </Link>
             </div>
           </div>
